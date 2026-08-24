@@ -11,7 +11,7 @@ describe('Phase 1: Project + Git + MongoDB Foundation Tests', () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await connectDB(uri);
-  });
+  }, 60000);
 
   afterAll(async () => {
     await disconnectDB();
