@@ -18,8 +18,10 @@ const connectDB = async (customUri) => {
       autoIndex: true
     });
 
+    const host = conn?.connection?.host || conn?.host || 'localhost';
+    const name = conn?.connection?.name || conn?.name || 'recoverx';
     isConnected = true;
-    logger.info(`MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
+    logger.info(`MongoDB Connected: ${host}/${name}`);
 
     mongoose.connection.on('error', (err) => {
       logger.error(`MongoDB connection error: ${err.message}`);
