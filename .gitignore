@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# OS & IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Extra large data files (>10MB)
+fraud_detection_credit_card_small.csv

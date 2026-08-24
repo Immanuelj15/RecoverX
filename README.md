@@ -1,0 +1,88 @@
+# RecoverX — AI Revenue Recovery Control Plane
+
+> **Razorpay Buildathon 2026 Submission** | Track 03 — AI Revenue Recovery
+> *"Don't just detect lost revenue. Recover it."*
+
+---
+
+## 📌 Data Honesty Notice
+**All development and evaluation data is synthetic. Razorpay Test Mode APIs are used for payment workflow demonstrations. No real customer or production payment data is used.**
+
+---
+
+## 🚀 Overview
+RecoverX is an enterprise-grade AI-powered revenue recovery control plane. It detects payment failures and subscription drop-offs at risk, diagnoses root causes using ML predictive models, recommends bounded recovery interventions via LLM context reasoning, and enforces strict deterministic policy guardrails before executing permitted interventions.
+
+---
+
+## 🏗 System Architecture
+
+```
+                    RAZORPAY TEST MODE
+                           │
+                    Payments / Events
+                           │
+                           ▼
+                  Node.js + Express
+                           │
+                    Webhook Receiver
+                           │
+                           ▼
+                       MongoDB
+                           │
+                           ▼
+                Revenue Risk Detector
+                           │
+                           ▼
+                Recovery Probability ML
+                           │
+                           ▼
+                  AI Recovery Agent
+                           │
+                           ▼
+                  Policy/Guardrail Engine
+                           │
+             ┌─────────────┼─────────────┐
+             ▼             ▼             ▼
+          Smart Retry   Recovery      Human
+                        Nudge         Escalation
+             │             │             │
+             └─────────────┼─────────────┘
+                           ▼
+                     Outcome Tracker
+                           │
+                           ▼
+                    Audit Trail
+                           │
+                           ▼
+                    React Dashboard
+```
+
+---
+
+## 🛠 Tech Stack
+* **Frontend:** React, Vite, Tailwind CSS, Recharts, Lucide React
+* **Backend:** Node.js, Express.js, MongoDB, Mongoose
+* **AI/ML Service:** Python, FastAPI, Pandas, Scikit-Learn, Joblib
+* **LLM Engine:** OpenAI-compatible Provider Abstraction
+* **Payments:** Razorpay Test Mode & Webhooks
+* **Containerization:** Docker & Docker Compose
+
+---
+
+## 🚦 Current Implementation Status
+- [x] **Phase 1:** Project + Git + MongoDB Foundation Setup
+
+---
+
+## 💻 Local Setup (Phase 1)
+```bash
+# Clone repository
+git clone https://github.com/Immanuelj15/RecoverX.git
+cd RecoverX
+
+# Setup backend environment & dependencies
+cd backend
+npm install
+npm test
+```
