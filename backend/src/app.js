@@ -6,10 +6,14 @@ const { getConnectionStatus } = require('./config/db');
 
 const app = express();
 
+const webhookRoutes = require('./routes/webhookRoutes');
+
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+app.use('/api/v1/webhooks', webhookRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
