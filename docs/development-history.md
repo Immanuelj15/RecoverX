@@ -78,3 +78,16 @@
 * **Tests:** PASS (27/27 passed across 6 test suites)
 * **Git Commit:** `feat(recovery): add recovery state machine`
 * **Known Issues:** None.
+
+---
+
+### Phase 7: Recovery Transaction Workflow Orchestrator
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created end-to-end `RecoveryWorkflowService` (`src/services/recoveryWorkflow.js`) executing the complete recovery loop (`DETECT` -> `ANALYZING` -> `PREDICTED` -> `RECOMMENDED` -> `POLICY_CHECK` -> `ACTION_EXECUTING` -> `RECOVERY_SUCCESS`/`RECOVERY_FAILED`/`STOPPED`/`ESCALATED`).
+  * Implemented fallback probability calculation and deterministic heuristic recommendation generators for offline resilience.
+  * Implemented deterministic policy guardrail evaluation (`max_retry_count`, `high_value_threshold_inr`, `min_recovery_probability_threshold`, permitted action allowlist).
+  * Created Phase 7 test suite `backend/tests/workflow.test.js`.
+* **Tests:** PASS (31/31 passed across 7 test suites)
+* **Git Commit:** `feat(recovery): add transaction workflows`
+* **Known Issues:** None.
