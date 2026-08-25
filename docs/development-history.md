@@ -91,3 +91,15 @@
 * **Tests:** PASS (31/31 passed across 7 test suites)
 * **Git Commit:** `feat(recovery): add transaction workflows`
 * **Known Issues:** None.
+
+---
+
+### Phase 8: Compliance Audit Logging + Webhook Idempotency
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `AuditService` (`src/services/auditService.js`) formatting structured audit records with correlation IDs, model versions, agent versions, and financial recovery amounts.
+  * Created `IdempotencyService` (`src/services/idempotencyService.js`) featuring in-memory locking and database webhook event deduplication.
+  * Added Phase 8 test suite `backend/tests/audit_idempotency.test.js`.
+* **Tests:** PASS (36/36 passed across 8 test suites)
+* **Git Commit:** `feat(audit): add audit logging`
+* **Known Issues:** None.
