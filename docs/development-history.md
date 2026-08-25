@@ -128,3 +128,17 @@
 * **Git Commit:** `test(db): add database test suite`
 * **Git Tag:** `v0.1.0`
 * **Known Issues:** None.
+
+---
+
+### Phase 11: Recovery Probability ML Model
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Built Scikit-Learn preprocessing pipeline (`ml-service/app/preprocessing/pipeline.py`) using `ColumnTransformer`, `StandardScaler`, and `OneHotEncoder(handle_unknown='ignore')` with zero target leakage.
+  * Built training and evaluation pipeline (`ml-service/app/models/train.py`) split 80/20 stratified on 10,000 synthetic records, comparing Logistic Regression and Random Forest models.
+  * Generated evaluation documentation (`docs/ml-evaluation.md`) and serialized model artifact `ml-service/app/models_store/recovery_model.joblib`.
+  * Built inference predictor (`ml-service/app/prediction/predictor.py`) and FastAPI service (`ml-service/app/main.py`) exposing `POST /predict-recovery`, `GET /model-info`, and `GET /health`.
+  * Added Pytest suite (`ml-service/tests/test_ml_service.py`).
+* **Tests:** PASS (3/3 Pytest + 41/41 Jest test suites passing)
+* **Git Commit:** `feat(ml): add recovery prediction pipeline`
+* **Known Issues:** None.

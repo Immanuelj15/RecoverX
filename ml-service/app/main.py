@@ -1,0 +1,65 @@
+import os
+import sys
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any
+
+# Relative imports setup
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from prediction.predictor import get_predictor
+
+app = FastAPI(
+    title="RecoverX ML Service",
+    description="FastAPI Revenue Recovery Probability Prediction Service",
+    version="1.0.0"
+)
+
+class PredictRecoveryRequest(BaseModel):
+    amount_inr: float = Field(..., gt=0, description="Transaction amount in INR")
+    payment_method: str = Field(..., description="Payment method: upi, card, netbanking, wallet")
+    failure_reason: str = Field(..., description="Failure reason code")
+    previous_successes: int = Field(0, ge=0, description="Customer past successful payment count")
+    previous_failures: int = Field(0, ge=0, description="Customer past failed payment count")
+    retry_count: int = Field(0, ge=0, description="Current transaction retry count")
+    customer_ltv_inr: float = Field(0.0, ge=0, description="Customer Lifetime Value in INR")
+    subscription_status: str = Field("none", description="Subscription status: active, pending, none, halted")
+
+class PredictRecoveryResponse(BaseModel):
+    recovery_probability: float
+    risk_band: str
+    model_name: str
+    model_version: str
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "UP",
+        "service": "recoverx-ml-service",
+        "model_loaded": True
+    }
+
+@app.get("/model-info")
+def get_model_info():
+    try:
+        predictor = get_predictor()
+        return {
+            "model_name": predictor.model_name,
+            "model_version": predictor.model_version,
+            "metrics": predictor.metrics
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/predict-recovery", response_model=PredictRecoveryResponse)
+def predict_recovery(payload: PredictRecoveryRequest):
+    try:
+        predictor = get_predictor()
+        input_data = payload.model_dump()
+        result = predictor.predict(input_data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
