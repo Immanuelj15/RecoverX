@@ -156,3 +156,19 @@
 * **Tests:** PASS (44/44 passed across 11 test suites)
 * **Git Commit:** `feat(agent): add AI recommendation agent`
 * **Known Issues:** None.
+
+---
+
+### Phase 13: Policy / Guardrail Engine
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `PolicyEngine` (`backend/src/services/policyEngine.js`) evaluating financial guardrails and business rules:
+    - Max retry limit check (`max_retry_count` limit 3 -> forces `STOP`)
+    - High-value transaction check (`high_value_threshold_inr` ₹50,000 -> requires human approval & forces `HUMAN_ESCALATION`)
+    - Minimum recovery probability threshold (`min_recovery_probability_threshold` 0.30 -> forces `STOP`)
+    - Unrecoverable failure reason protection (`card_expired`, `invalid_account` -> forces `STOP`)
+    - Permitted action allowlist check
+  * Added Phase 13 test suite `backend/tests/policy_engine.test.js`.
+* **Tests:** PASS (49/49 passed across 12 test suites)
+* **Git Commit:** `feat(policy): add policy engine`
+* **Known Issues:** None.
