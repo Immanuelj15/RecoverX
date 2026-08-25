@@ -66,3 +66,15 @@
 * **Tests:** PASS (23/23 passed across 5 test suites)
 * **Git Commit:** `feat(db): add repositories`
 * **Known Issues:** None.
+
+---
+
+### Phase 6: Recovery State Machine
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created deterministic state machine (`src/services/recoveryStateMachine.js`) enforcing explicit transitions (`DETECTED` -> `ANALYZING` -> `PREDICTED` -> `RECOMMENDED` -> `POLICY_CHECK` -> `ACTION_APPROVED` -> `ACTION_EXECUTING` -> `RECOVERY_SUCCESS` / `RECOVERY_FAILED` / `STOPPED` / `ESCALATED`).
+  * Implemented `InvalidStateTransitionError` and automated audit logging for allowed transitions and blocked transition attempts.
+  * Created Phase 6 test suite `backend/tests/stateMachine.test.js`.
+* **Tests:** PASS (27/27 passed across 6 test suites)
+* **Git Commit:** `feat(recovery): add recovery state machine`
+* **Known Issues:** None.
