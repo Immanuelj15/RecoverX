@@ -56,6 +56,9 @@ const auditLogSchema = new mongoose.Schema({
   timestamps: false
 });
 
+auditLogSchema.index({ payment_id: 1, timestamp: -1 });
+auditLogSchema.index({ event_type: 1, timestamp: -1 });
+
 const AuditLog = mongoose.model('AuditLog', auditLogSchema);
 
 module.exports = AuditLog;

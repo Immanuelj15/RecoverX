@@ -134,6 +134,12 @@ const transactionSchema = new mongoose.Schema({
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
 
+// Compound Indexes for fast retrieval & query optimization
+transactionSchema.index({ customer_id: 1, created_at: -1 });
+transactionSchema.index({ recovery_state: 1, recovery_probability: -1 });
+transactionSchema.index({ failure_reason: 1, payment_method: 1 });
+transactionSchema.index({ recovered: 1, amount_inr: -1 });
+
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 module.exports = Transaction;

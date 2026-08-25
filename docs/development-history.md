@@ -19,10 +19,23 @@
 * **Implemented:**
   * Created `Transaction` schema (`src/models/Transaction.js`) with complete field validation for payment/customer metadata, state machine stages, ML probabilities, AI recommendation objects, policy decisions, and outcome metrics.
   * Created `AuditLog` schema (`src/models/AuditLog.js`) for compliance tracking, correlation IDs, decision rationales, model/agent versions, and financial recovery audit logs.
-  * Created `WebhookEvent` schema (`src/models/WebhookEvent.js`) for idempotency enforcement and event replay.
+  * Created `WebhookEvent` schema (`src/models/WebhookEvent.js`) for idempotency enforcement and event deduplication.
   * Created `PolicyConfig` schema (`src/models/PolicyConfig.js`) storing configurable guardrail rules (max retries, high value threshold, min recovery probability).
   * Created export hub `src/models/index.js`.
   * Added `backend/tests/schemas.test.js` validating schema constraints, default states, and enum rules.
 * **Tests:** PASS (9/9 passed across all suites)
 * **Git Commit:** `feat(db): add Mongoose schemas`
+* **Known Issues:** None.
+
+---
+
+### Phase 3: Validation + Indexes
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Added compound database indexes to `Transaction` (`{ customer_id: 1, created_at: -1 }`, `{ recovery_state: 1, recovery_probability: -1 }`, `{ failure_reason: 1, payment_method: 1 }`, `{ recovered: 1, amount_inr: -1 }`).
+  * Added compound database indexes to `AuditLog` (`{ payment_id: 1, timestamp: -1 }`, `{ event_type: 1, timestamp: -1 }`).
+  * Created payload and recommendation validation utility (`src/utils/validators.js`) enforcing permitted action set restrictions and strict domain value schemas.
+  * Added Phase 3 test suite `backend/tests/validation_indexes.test.js`.
+* **Tests:** PASS (15/15 passed across 3 test suites)
+* **Git Commit:** `feat(db): add validation and indexes`
 * **Known Issues:** None.
