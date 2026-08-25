@@ -142,3 +142,17 @@
 * **Tests:** PASS (3/3 Pytest + 41/41 Jest test suites passing)
 * **Git Commit:** `feat(ml): add recovery prediction pipeline`
 * **Known Issues:** None.
+
+---
+
+### Phase 12: AI Recovery Recommendation Agent
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `LlmProvider` (`backend/src/agents/llmProvider.js`) providing OpenAI-compatible REST API integration with timeout and error resilience.
+  * Created `RecoveryAgent` (`backend/src/agents/recoveryAgent.js`) formatting structured system and user prompts combining payment metadata, ML probabilities, customer LTV, and risk bands.
+  * Integrated schema validation enforcing permitted action constraints (`SMART_RETRY`, `DELAYED_RETRY`, `PAYMENT_RECOVERY_NUDGE`, `HUMAN_ESCALATION`, `STOP`).
+  * Implemented zero-downtime deterministic fallback execution if LLM fails, times out, or returns unpermitted actions.
+  * Added Phase 12 test suite `backend/tests/ai_agent.test.js`.
+* **Tests:** PASS (44/44 passed across 11 test suites)
+* **Git Commit:** `feat(agent): add AI recommendation agent`
+* **Known Issues:** None.
