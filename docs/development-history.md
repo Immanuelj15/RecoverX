@@ -103,3 +103,15 @@
 * **Tests:** PASS (36/36 passed across 8 test suites)
 * **Git Commit:** `feat(audit): add audit logging`
 * **Known Issues:** None.
+
+---
+
+### Phase 9: Real-Time Analytics Aggregation
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `AnalyticsService` (`src/services/analyticsService.js`) with MongoDB aggregation pipelines for dashboard metrics: total analyzed transactions, revenue at risk, revenue recovered, recovery rate %, risk band distribution (HIGH/MEDIUM/LOW), recovery attempts, human escalations, and stopped actions.
+  * Added aggregation pipelines for recovery by failure reason, recovery by payment method, and recovery by intervention type.
+  * Created Phase 9 test suite `backend/tests/analytics.test.js`.
+* **Tests:** PASS (39/39 passed across 9 test suites)
+* **Git Commit:** `feat(analytics): add recovery metrics`
+* **Known Issues:** None.
