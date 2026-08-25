@@ -52,3 +52,17 @@
 * **Tests:** PASS (18/18 passed across 4 test suites)
 * **Git Commit:** `feat(db): add seed and CSV import`
 * **Known Issues:** None.
+
+---
+
+### Phase 5: Repositories + Database Services
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `TransactionRepository` (`src/repositories/TransactionRepository.js`) providing clean data abstraction methods for paginated search, state transitions, outcome updates, and filter queries.
+  * Created `AuditLogRepository` (`src/repositories/AuditLogRepository.js`) for logging audit events and payment timelines.
+  * Created `PolicyRepository` (`src/repositories/PolicyRepository.js`) for fetching and updating global policy guardrail rules.
+  * Created `WebhookRepository` (`src/repositories/WebhookRepository.js`) for webhook event persistence and processing status tracking.
+  * Created Phase 5 test suite `backend/tests/repositories.test.js`.
+* **Tests:** PASS (23/23 passed across 5 test suites)
+* **Git Commit:** `feat(db): add repositories`
+* **Known Issues:** None.
