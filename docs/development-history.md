@@ -39,3 +39,16 @@
 * **Tests:** PASS (15/15 passed across 3 test suites)
 * **Git Commit:** `feat(db): add validation and indexes`
 * **Known Issues:** None.
+
+---
+
+### Phase 4: Seed Data + 10K CSV Importer
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Built high-performance CSV stream parser and data transformer utility (`src/utils/csvImporter.js`).
+  * Created database seed script (`src/scripts/seed.js`) parsing `data/raw/recoverx_revenue_recovery_dataset_10000.csv`, initializing default `PolicyConfig`, and bulk-inserting 10,000 synthetic transaction documents in 1,000-record batches.
+  * Added `npm run seed` command to `backend/package.json`.
+  * Created Phase 4 test suite `backend/tests/seed.test.js`.
+* **Tests:** PASS (18/18 passed across 4 test suites)
+* **Git Commit:** `feat(db): add seed and CSV import`
+* **Known Issues:** None.
