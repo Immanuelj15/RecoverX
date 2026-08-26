@@ -43,6 +43,17 @@ export default function Navbar({ activeTab, setActiveTab, onRefresh, isRefreshin
               <span>Control Plane</span>
             </button>
             <button
+              onClick={() => setActiveTab('audit')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'audit'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Compliance Trail</span>
+            </button>
+            <button
               onClick={() => setActiveTab('policy')}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === 'policy'

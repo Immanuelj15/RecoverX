@@ -5,6 +5,7 @@ import AnalyticsCharts from './components/AnalyticsCharts';
 import TransactionTable from './components/TransactionTable';
 import PolicyModal from './components/PolicyModal';
 import TimelineModal from './components/TimelineModal';
+import AuditTimelineView from './components/AuditTimelineView';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -170,6 +171,8 @@ export default function App() {
               isLoading={isLoading}
             />
           </>
+        ) : activeTab === 'audit' ? (
+          <AuditTimelineView />
         ) : (
           <PolicyModal
             policy={policy}

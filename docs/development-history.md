@@ -240,3 +240,18 @@
 * **Tests:** PASS (Vite Production Bundle Built + 67/67 Backend tests passing)
 * **Git Commit:** `feat(frontend): add recovery dashboard UI`
 * **Known Issues:** None.
+
+---
+
+### Phase 18: Audit Timeline UI & Deep Inspection View
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Created `AuditTimelineView` (`frontend/src/components/AuditTimelineView.jsx`) providing a dedicated compliance inspection interface.
+  * Added event type filter (`ACTION_EXECUTED`, `POLICY_BLOCKED`, `ESCALATED`, `RECOVERY_STOPPED`) and Payment ID search box.
+  * Added paginated audit timeline table showing timestamps, payment IDs, event badges, operator badges, and previous/new recovery state transitions.
+  * Implemented an interactive, expandable JSON payload inspector drawer for deep event debugging.
+  * Added "Compliance Trail" tab to `Navbar.jsx` and mounted view in `App.jsx`.
+  * Verified Vite production build (`dist/assets/index.js`).
+* **Tests:** PASS (Vite Production Bundle Built + 67/67 Backend tests passing)
+* **Git Commit:** `feat(frontend): add audit timeline UI`
+* **Known Issues:** None.
