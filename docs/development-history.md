@@ -286,3 +286,18 @@
 * **Tests:** PASS (68/68 passed across 16 test suites)
 * **Git Commit:** `feat(security): add rate limiting, helmet, and input sanitization`
 * **Known Issues:** None.
+
+---
+
+### Phase 21: Final README & Architecture Documentation
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Updated `README.md` with comprehensive documentation for Razorpay Buildathon 2026.
+  * Added Mermaid sequence diagram illustrating webhook ingestion, ML prediction, AI agent recommendation, policy check, and audit logging.
+  * Documented the 5 core recovery actions (`SMART_RETRY`, `DELAYED_RETRY`, `PAYMENT_RECOVERY_NUDGE`, `HUMAN_ESCALATION`, `STOP`) and their trigger conditions.
+  * Added REST API reference table covering all endpoints.
+  * Added quickstart guide for seeding 10,000 synthetic transactions (`npm run seed`), running backend (`npm run dev`), frontend (`cd frontend && npm run dev`), and test suites (`npm test`).
+  * Updated development history to mark Phase 21 completed.
+* **Tests:** PASS (Documentation update verified)
+* **Git Commit:** `docs(readme): add comprehensive architecture and user guide`
+* **Known Issues:** None.
