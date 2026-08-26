@@ -2,7 +2,7 @@ import os
 import sys
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 # Relative imports setup
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -29,6 +29,7 @@ class PredictRecoveryRequest(BaseModel):
 class PredictRecoveryResponse(BaseModel):
     recovery_probability: float
     risk_band: str
+    top_factors: Optional[List[Dict[str, Any]]] = None
     model_name: str
     model_version: str
 

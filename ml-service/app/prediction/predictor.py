@@ -7,6 +7,7 @@ from typing import Dict, Any
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from preprocessing.pipeline import extract_and_clean_features
+from prediction.explainer import compute_top_feature_contributions
 
 class ModelPredictor:
     def __init__(self, model_path: str = None):
@@ -43,9 +44,13 @@ class ModelPredictor:
         else:
             risk_band = 'LOW'
 
+        # Compute top contributing feature factors for explainability
+        top_factors = compute_top_feature_contributions(data, self.pipeline)
+
         return {
             'recovery_probability': round(raw_prob, 4),
             'risk_band': risk_band,
+            'top_factors': top_factors,
             'model_name': self.model_name,
             'model_version': self.model_version
         }

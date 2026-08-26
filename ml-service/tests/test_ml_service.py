@@ -41,3 +41,6 @@ def test_predict_recovery_endpoint():
     assert "risk_band" in data
     assert data["risk_band"] in ["HIGH", "MEDIUM", "LOW"]
     assert 0.0 <= data["recovery_probability"] <= 1.0
+    assert "top_factors" in data
+    assert isinstance(data["top_factors"], list)
+    assert len(data["top_factors"]) > 0
