@@ -5,14 +5,12 @@ const transactionSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Payment ID is required'],
     unique: true,
-    trim: true,
-    index: true
+    trim: true
   },
   customer_id: {
     type: String,
     required: [true, 'Customer ID is required'],
-    trim: true,
-    index: true
+    trim: true
   },
   amount_inr: {
     type: Number,

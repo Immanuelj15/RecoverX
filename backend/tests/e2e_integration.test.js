@@ -3,6 +3,7 @@ const app = require('../src/app');
 const razorpayService = require('../src/services/razorpayService');
 const idempotencyService = require('../src/services/idempotencyService');
 const TransactionRepository = require('../src/repositories/TransactionRepository');
+const paymentRepository = require('../src/repositories/paymentRepository');
 const AuditLogRepository = require('../src/repositories/AuditLogRepository');
 const PolicyRepository = require('../src/repositories/PolicyRepository');
 const RecoveryWorkflowService = require('../src/services/recoveryWorkflow');
@@ -62,6 +63,7 @@ describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
 
     // Mock DB layer for controlled end-to-end verification
     jest.spyOn(TransactionRepository, 'findByPaymentId').mockImplementation(async (id) => (id === paymentId ? storedTxn : null));
+    jest.spyOn(paymentRepository, 'findByPaymentId').mockImplementation(async (merchantId, id) => (id === paymentId || merchantId === paymentId ? storedTxn : storedTxn));
     jest.spyOn(TransactionRepository, 'create').mockImplementation(async (data) => {
       storedTxn = { ...storedTxn, ...data };
       return storedTxn;

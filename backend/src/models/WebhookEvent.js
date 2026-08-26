@@ -1,37 +1,55 @@
 const mongoose = require('mongoose');
 
-const webhookEventSchema = new mongoose.Schema({
-  event_id: {
-    type: String,
-    required: [true, 'Event ID is required'],
-    unique: true,
-    index: true
+const WebhookEventSchema = new mongoose.Schema(
+  {
+    merchant_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Merchant',
+      required: true
+    },
+    event_id: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    event_type: {
+      type: String,
+      required: true,
+      default: 'payment.failed'
+    },
+    provider: {
+      type: String,
+      default: 'razorpay'
+    },
+    payload_hash: {
+      type: String,
+      default: null
+    },
+    processing_status: {
+      type: String,
+      enum: ['received', 'processing', 'processed', 'failed', 'duplicate'],
+      default: 'received',
+      required: true
+    },
+    processed_at: {
+      type: Date,
+      default: null
+    },
+    received_at: {
+      type: Date,
+      default: Date.now
+    },
+    error: {
+      code: { type: String, default: null },
+      message: { type: String, default: null }
+    }
   },
-  event_type: {
-    type: String,
-    required: [true, 'Event type is required']
-  },
-  payload: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true
-  },
-  processed: {
-    type: Boolean,
-    default: false,
-    index: true
-  },
-  processed_at: {
-    type: Date,
-    default: null
-  },
-  error: {
-    type: String,
-    default: null
+  {
+    timestamps: false
   }
-}, {
-  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
-});
+);
 
-const WebhookEvent = mongoose.model('WebhookEvent', webhookEventSchema);
+// Compound Unique Index to prevent duplicate webhook processing
+WebhookEventSchema.index({ merchant_id: 1, event_id: 1 }, { unique: true });
 
-module.exports = WebhookEvent;
+module.exports = mongoose.model('WebhookEvent', WebhookEventSchema);

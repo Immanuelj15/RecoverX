@@ -1,64 +1,74 @@
 const mongoose = require('mongoose');
 
-const auditLogSchema = new mongoose.Schema({
-  payment_id: {
-    type: String,
-    required: [true, 'Payment ID is required'],
-    index: true
+const AuditLogSchema = new mongoose.Schema(
+  {
+    merchant_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Merchant',
+      required: true
+    },
+    recovery_case_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RecoveryCase'
+    },
+    payment_id: {
+      type: String,
+      trim: true
+    },
+    event_type: {
+      type: String,
+      enum: [
+        'PAYMENT_FAILED',
+        'CASE_CREATED',
+        'ML_PREDICTION',
+        'AI_RECOMMENDATION',
+        'POLICY_CHECK',
+        'ACTION_APPROVED',
+        'ACTION_BLOCKED',
+        'ACTION_EXECUTED',
+        'RECOVERY_SUCCESS',
+        'RECOVERY_FAILED',
+        'HUMAN_ESCALATION',
+        'WEBHOOK_RECEIVED',
+        'DUPLICATE_WEBHOOK',
+        'LLM_FAILURE',
+        'ML_FAILURE',
+        'POLICY_FAILURE'
+      ],
+      required: true
+    },
+    actor: {
+      type: {
+        type: String,
+        enum: ['SYSTEM', 'ML_MODEL', 'AI_AGENT', 'POLICY_ENGINE', 'RAZORPAY', 'USER'],
+        default: 'SYSTEM'
+      },
+      id: { type: String, default: 'sys_recoverx' }
+    },
+    event: {
+      action: { type: String, default: null },
+      decision: { type: String, default: null },
+      reason: { type: String, default: null },
+      metadata: { type: mongoose.Schema.Types.Mixed, default: {} }
+    },
+    correlation_id: {
+      type: String,
+      required: true
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
   },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-    index: true
-  },
-  correlation_id: {
-    type: String,
-    index: true
-  },
-  event_type: {
-    type: String,
-    required: [true, 'Event type is required']
-  },
-  failure_reason: {
-    type: String
-  },
-  recovery_probability: {
-    type: Number
-  },
-  ai_recommendation: {
-    type: String
-  },
-  policy_decision: {
-    type: String
-  },
-  action: {
-    type: String
-  },
-  result: {
-    type: String
-  },
-  amount_recovered: {
-    type: Number,
-    default: 0
-  },
-  model_version: {
-    type: String,
-    default: 'v1.0.0'
-  },
-  agent_version: {
-    type: String,
-    default: 'v1.0.0'
-  },
-  details: {
-    type: mongoose.Schema.Types.Mixed
+  {
+    timestamps: false // Manual timestamp field for immutable audit log
   }
-}, {
-  timestamps: false
-});
+);
 
-auditLogSchema.index({ payment_id: 1, timestamp: -1 });
-auditLogSchema.index({ event_type: 1, timestamp: -1 });
+AuditLogSchema.index({ recovery_case_id: 1, timestamp: -1 });
+AuditLogSchema.index({ payment_id: 1, timestamp: -1 });
+AuditLogSchema.index({ merchant_id: 1, timestamp: -1 });
+AuditLogSchema.index({ correlation_id: 1, timestamp: -1 });
+AuditLogSchema.index({ event_type: 1, timestamp: -1 });
 
-const AuditLog = mongoose.model('AuditLog', auditLogSchema);
-
-module.exports = AuditLog;
+module.exports = mongoose.model('AuditLog', AuditLogSchema);
