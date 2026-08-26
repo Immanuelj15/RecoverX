@@ -15,13 +15,15 @@ app = FastAPI(
 )
 
 class PredictRecoveryRequest(BaseModel):
-    amount_inr: float = Field(..., gt=0, description="Transaction amount in INR")
-    payment_method: str = Field(..., description="Payment method: upi, card, netbanking, wallet")
-    failure_reason: str = Field(..., description="Failure reason code")
+    amount_inr: Optional[float] = Field(None, description="Transaction amount in INR")
+    amount_paise: Optional[int] = Field(None, description="Transaction amount in integer paise")
+    payment_method: str = Field("upi", description="Payment method: upi, card, netbanking, wallet")
+    failure_reason: str = Field("insufficient_balance", description="Failure reason code")
     previous_successes: int = Field(0, ge=0, description="Customer past successful payment count")
     previous_failures: int = Field(0, ge=0, description="Customer past failed payment count")
     retry_count: int = Field(0, ge=0, description="Current transaction retry count")
-    customer_ltv_inr: float = Field(0.0, ge=0, description="Customer Lifetime Value in INR")
+    customer_ltv_inr: Optional[float] = Field(0.0, ge=0, description="Customer Lifetime Value in INR")
+    customer_ltv_paise: Optional[int] = Field(None, ge=0, description="Customer Lifetime Value in integer paise")
     subscription_status: str = Field("none", description="Subscription status: active, pending, none, halted")
 
 class PredictRecoveryResponse(BaseModel):
