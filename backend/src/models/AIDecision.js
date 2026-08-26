@@ -46,9 +46,13 @@ const AIDecisionSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    prompt_version: {
+      type: String,
+      default: 'recovery-agent-v1'
+    },
     llm_provider: {
       type: String,
-      default: 'heuristic_fallback'
+      default: 'groq'
     },
     status: {
       type: String,
