@@ -87,6 +87,7 @@ RecoverX is an enterprise-grade AI-powered revenue recovery control plane. It de
 - [x] **Phase 14:** Razorpay Test Mode Integration & Webhooks (HMAC SHA256 Verification & Idempotency)
 - [x] **Phase 15:** Recovery Execution Workflow Engine (Smart Retry, Nudges, Escalations, Scheduling)
 - [x] **Phase 16:** Backend REST API Router (Transactions, Analytics, Policies, Audit Logs, Recovery Triggers)
+- [x] **Phase 17:** Frontend Recovery Dashboard (React, Vite, Tailwind, Recharts, Real-Time Controls & Modals)
 
 ---
 

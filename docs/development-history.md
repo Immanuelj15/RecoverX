@@ -222,3 +222,21 @@
 * **Tests:** PASS (67/67 passed across 15 test suites)
 * **Git Commit:** `feat(api): add backend REST API endpoints`
 * **Known Issues:** None.
+
+---
+
+### Phase 17: Frontend Recovery Dashboard
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Initialized React / Vite / Tailwind CSS frontend application in `frontend/`.
+  * Created modern glassmorphism design system (`index.css`) with custom dark mode theme, glowing risk band accents, and JetBrains Mono / Inter typography.
+  * Created `Navbar` component with live status badges and tab navigation.
+  * Created `KPISummary` card grid (Revenue at Risk, Recovered, Recovery Rate %, Escalation Counts).
+  * Created `AnalyticsCharts` using Recharts for interactive visualization of failure reasons, payment method performance, and intervention strategies.
+  * Created `TransactionTable` control table with live filters (State, Risk Band, Search), ML probability indicators, and "Trigger AI Recovery" action buttons.
+  * Created `PolicyModal` for updating deterministic guardrail parameters (`max_retry_count`, `high_value_threshold_inr`, `min_recovery_probability_threshold`).
+  * Created `TimelineModal` displaying step-by-step audit log history for individual payments.
+  * Verified Vite production build (`dist/assets/index.js`).
+* **Tests:** PASS (Vite Production Bundle Built + 67/67 Backend tests passing)
+* **Git Commit:** `feat(frontend): add recovery dashboard UI`
+* **Known Issues:** None.
