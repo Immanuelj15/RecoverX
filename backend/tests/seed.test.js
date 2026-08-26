@@ -13,8 +13,24 @@ describe('Phase 4: Seed Data + 10K CSV Importer Tests', () => {
       return mongoose.connection;
     });
 
-    jest.spyOn(Transaction, 'deleteMany').mockImplementation(async () => ({ deletedCount: 0 }));
-    jest.spyOn(Transaction, 'insertMany').mockImplementation(async (docs) => docs);
+    const { Merchant, Customer, Payment, RecoveryCase, MLPrediction, AIDecision, PolicyDecision, RecoveryAction, RecoveryOutcome, AuditLog, WebhookEvent } = require('../src/models');
+
+    jest.spyOn(Merchant, 'findOne').mockImplementation(async () => ({
+      _id: 'merchant_demo_id',
+      merchant_code: 'MERCHANT_DEMO_001',
+      settings: { max_retry_count: 3 }
+    }));
+    jest.spyOn(Merchant, 'create').mockImplementation(async (doc) => ({
+      _id: 'merchant_demo_id',
+      ...doc
+    }));
+
+    [Customer, Payment, RecoveryCase, MLPrediction, AIDecision, PolicyDecision, RecoveryAction, RecoveryOutcome, AuditLog, WebhookEvent, Transaction].forEach((model) => {
+      if (model && model.deleteMany) jest.spyOn(model, 'deleteMany').mockImplementation(async () => ({ deletedCount: 0 }));
+      if (model && model.insertMany) jest.spyOn(model, 'insertMany').mockImplementation(async (docs) => docs);
+      if (model && model.bulkWrite) jest.spyOn(model, 'bulkWrite').mockImplementation(async (docs) => ({ insertedCount: docs.length }));
+    });
+
     jest.spyOn(PolicyConfig, 'findOne').mockImplementation(async () => null);
     jest.spyOn(PolicyConfig, 'create').mockImplementation(async (doc) => doc);
   });

@@ -14,12 +14,15 @@ const WebhookEventSchema = new mongoose.Schema(
     },
     event_type: {
       type: String,
-      required: true,
-      default: 'payment.failed'
+      required: true
     },
     provider: {
       type: String,
       default: 'razorpay'
+    },
+    payload: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true
     },
     payload_hash: {
       type: String,

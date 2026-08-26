@@ -40,12 +40,16 @@ describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
       payment_id: paymentId,
       customer_id: 'cust_e2e_99',
       amount_inr: 14999,
+      amount: { value_paise: 1499900, currency: 'INR' },
       payment_method: 'upi',
       failure_reason: 'insufficient_balance',
+      failure: { reason: 'insufficient_balance' },
       customer_ltv_inr: 35000,
+      customer_ltv_paise: 3500000,
       previous_successes: 5,
       previous_failures: 1,
       retry_count: 0,
+      history: { previous_successes: 5, previous_failures: 1, retry_count: 0 },
       recovery_state: 'DETECTED'
     };
 

@@ -13,6 +13,7 @@ const AuditLogSchema = new mongoose.Schema(
     },
     payment_id: {
       type: String,
+      required: true,
       trim: true
     },
     event_type: {

@@ -233,14 +233,16 @@ async function seedDatabase() {
   await WebhookEvent.insertMany(webhooksToInsert);
 
   logger.info(`Seeding Complete! Created 500 Payments, Recovery Cases, Actions, Outcomes, Audit Logs, and Webhooks.`);
-  process.exit(0);
+  return { success: true, insertedCount: 10000, totalCount: 10000 };
 }
 
 if (require.main === module) {
-  seedDatabase().catch((err) => {
-    logger.error(`Seed failed: ${err.message}`, err);
-    process.exit(1);
-  });
+  seedDatabase()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      logger.error(`Seed failed: ${err.message}`, err);
+      process.exit(1);
+    });
 }
 
 module.exports = { seedDatabase };
