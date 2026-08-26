@@ -271,3 +271,18 @@
 * **Tests:** PASS (68/68 passed across 16 test suites)
 * **Git Commit:** `test(e2e): add end-to-end integration test suite`
 * **Known Issues:** None.
+
+---
+
+### Phase 20: Performance & Security Hardening
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Installed and configured `helmet` middleware for HTTP security headers.
+  * Installed and configured `express-rate-limit`:
+    * Global API limiter: 200 requests / 15 minutes.
+    * Webhook burst limiter: 1000 requests / 1 minute.
+  * Configured CORS middleware for cross-origin access and custom header white-listing (`X-Razorpay-Signature`).
+  * Built custom recursive NoSQL injection sanitizer middleware stripping `$` keys from incoming JSON body payloads and query parameters.
+* **Tests:** PASS (68/68 passed across 16 test suites)
+* **Git Commit:** `feat(security): add rate limiting, helmet, and input sanitization`
+* **Known Issues:** None.

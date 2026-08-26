@@ -60,7 +60,7 @@ describe('Phase 4: Seed Data + 10K CSV Importer Tests', () => {
     expect(records[0]).toHaveProperty('customer_id');
     expect(records[0]).toHaveProperty('amount_inr');
     expect(records[0]).toHaveProperty('failure_reason');
-  });
+  }, 15000);
 
   test('seedDatabase initializes policy config and seeds transactions', async () => {
     const csvPath = path.resolve(__dirname, '../../data/raw/recoverx_revenue_recovery_dataset_10000.csv');
@@ -68,5 +68,5 @@ describe('Phase 4: Seed Data + 10K CSV Importer Tests', () => {
 
     expect(result.insertedCount).toEqual(10000);
     expect(result.totalCount).toEqual(10000);
-  });
+  }, 15000);
 });

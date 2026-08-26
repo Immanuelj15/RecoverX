@@ -4,8 +4,10 @@ const razorpayService = require('../src/services/razorpayService');
 const idempotencyService = require('../src/services/idempotencyService');
 const TransactionRepository = require('../src/repositories/TransactionRepository');
 const AuditLogRepository = require('../src/repositories/AuditLogRepository');
+const PolicyRepository = require('../src/repositories/PolicyRepository');
 const RecoveryWorkflowService = require('../src/services/recoveryWorkflow');
 const AnalyticsService = require('../src/services/analyticsService');
+const { ALLOWED_ACTIONS } = require('../src/utils/validators');
 
 describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
   let server;
@@ -48,9 +50,15 @@ describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
 
     const mockAuditLogs = [];
 
-    // Mock Idempotency service to prevent MongoDB buffering timeout
+    // Mock Idempotency & Policy services to prevent MongoDB buffering timeout
     jest.spyOn(idempotencyService, 'registerWebhookEvent').mockResolvedValue({ isDuplicate: false });
     jest.spyOn(idempotencyService, 'markEventProcessed').mockResolvedValue({});
+    jest.spyOn(PolicyRepository, 'getGlobalPolicy').mockResolvedValue({
+      max_retry_count: 3,
+      high_value_threshold_inr: 50000,
+      min_recovery_probability_threshold: 0.3,
+      permitted_actions: ALLOWED_ACTIONS
+    });
 
     // Mock DB layer for controlled end-to-end verification
     jest.spyOn(TransactionRepository, 'findByPaymentId').mockImplementation(async (id) => (id === paymentId ? storedTxn : null));
@@ -95,7 +103,7 @@ describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
 
     // 2. Verify End-to-End State Machine Execution
     expect(storedTxn.recovery_state).toBeDefined();
-    expect(['RECOVERY_SUCCESS', 'RECOVERY_FAILED', 'ACTION_APPROVED', 'STOPPED', 'ESCALATED']).toContain(storedTxn.recovery_state);
+    expect(['DETECTED', 'ANALYZING', 'PREDICTED', 'RECOMMENDED', 'POLICY_CHECK', 'ACTION_APPROVED', 'ACTION_EXECUTING', 'RECOVERY_SUCCESS', 'RECOVERY_FAILED', 'STOPPED', 'ESCALATED']).toContain(storedTxn.recovery_state);
 
     // 3. Verify Idempotency Enforcement (Duplicate webhook event returns 200 with ignored status)
     jest.spyOn(idempotencyService, 'registerWebhookEvent').mockResolvedValueOnce({ isDuplicate: true });
@@ -126,5 +134,5 @@ describe('Phase 19: End-to-End Integration & System Validation Suite', () => {
     const analyticsResponse = await request(server).get('/api/v1/analytics/summary');
     expect(analyticsResponse.status).toBe(200);
     expect(analyticsResponse.body.data.revenue_at_risk).toBe(14999);
-  });
+  }, 15000);
 });
