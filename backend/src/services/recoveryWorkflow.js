@@ -1,5 +1,6 @@
 const { recoveryStateMachine, RECOVERY_STATES } = require('./recoveryStateMachine');
 const TransactionRepository = require('../repositories/TransactionRepository');
+const paymentRepository = require('../repositories/paymentRepository');
 const AuditLogRepository = require('../repositories/AuditLogRepository');
 const PolicyRepository = require('../repositories/PolicyRepository');
 const logger = require('../utils/logger');
@@ -92,24 +93,29 @@ class RecoveryWorkflowService {
   /**
    * Evaluates deterministic policy guardrails against transaction and recommendation
    */
-  evaluatePolicyGuardrails(txn, recommendation, policyConfig, probability) {
+  evaluatePolicyGuardrails(txn, recommendation, policyConfig = {}, probability = 0.5) {
     const rulesTriggered = [];
     let allowed = true;
     let decision = 'ALLOWED';
 
-    if (txn.retry_count >= policyConfig.max_retry_count) {
+    const maxRetryCount = policyConfig.max_retry_count ?? 3;
+    const highValueThreshold = policyConfig.high_value_threshold_inr ?? 50000;
+    const minThreshold = policyConfig.min_recovery_probability_threshold ?? 0.3;
+    const allowedActions = policyConfig.allowed_actions || ['SMART_RETRY', 'DELAYED_RETRY', 'PAYMENT_RECOVERY_NUDGE', 'HUMAN_ESCALATION', 'STOP'];
+
+    if (txn.retry_count >= maxRetryCount) {
       allowed = false;
       decision = 'STOP';
-      rulesTriggered.push(`EXCEEDED_MAX_RETRIES (${txn.retry_count} >= ${policyConfig.max_retry_count})`);
-    } else if (txn.amount_inr >= policyConfig.high_value_threshold_inr) {
+      rulesTriggered.push(`EXCEEDED_MAX_RETRIES (${txn.retry_count} >= ${maxRetryCount})`);
+    } else if ((txn.amount_inr || 0) >= highValueThreshold) {
       allowed = false;
       decision = 'ESCALATE';
-      rulesTriggered.push(`HIGH_VALUE_THRESHOLD (${txn.amount_inr} >= ${policyConfig.high_value_threshold_inr})`);
-    } else if (probability < policyConfig.min_recovery_probability_threshold) {
+      rulesTriggered.push(`HIGH_VALUE_THRESHOLD (${txn.amount_inr} >= ${highValueThreshold})`);
+    } else if (probability < minThreshold) {
       allowed = false;
       decision = 'ESCALATE';
-      rulesTriggered.push(`LOW_PROBABILITY_THRESHOLD (${probability} < ${policyConfig.min_recovery_probability_threshold})`);
-    } else if (!policyConfig.allowed_actions.includes(recommendation.recommended_action)) {
+      rulesTriggered.push(`LOW_PROBABILITY_THRESHOLD (${probability} < ${minThreshold})`);
+    } else if (!allowedActions.includes(recommendation.recommended_action)) {
       allowed = false;
       decision = 'BLOCK';
       rulesTriggered.push(`UNPERMITTED_ACTION (${recommendation.recommended_action})`);
@@ -126,7 +132,7 @@ class RecoveryWorkflowService {
     logger.info(`Starting Recovery Workflow for ${paymentId} [${correlationId}]`);
 
     // 1. Fetch transaction
-    const txn = await TransactionRepository.findByPaymentId(paymentId);
+    const txn = (await TransactionRepository.findByPaymentId(paymentId)) || (await paymentRepository.findByPaymentId(null, paymentId));
     if (!txn) {
       throw new Error(`Transaction with payment_id '${paymentId}' not found`);
     }

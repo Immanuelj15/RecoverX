@@ -12,12 +12,12 @@ class PolicyEngine {
    * Evaluates business rules and security guardrails against a proposed AI recommendation
    */
   async evaluatePolicy(txn, recommendation, customConfig = null) {
-    const config = customConfig || (await PolicyRepository.getGlobalPolicy());
+    const config = customConfig || (await PolicyRepository.getGlobalPolicy()) || {};
 
     const maxRetries = config.max_retry_count ?? 3;
     const highValueThreshold = config.high_value_threshold_inr ?? 50000;
     const minProbabilityThreshold = config.min_recovery_probability_threshold ?? 0.30;
-    const permittedActions = config.permitted_actions || ALLOWED_ACTIONS;
+    const permittedActions = config.permitted_actions || config.allowed_actions || config.settings?.allowed_actions || ALLOWED_ACTIONS;
 
     let proposedAction = recommendation.recommended_action || 'STOP';
     let requiresHumanApproval = Boolean(recommendation.requires_human_approval);
