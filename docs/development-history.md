@@ -172,3 +172,33 @@
 * **Tests:** PASS (49/49 passed across 12 test suites)
 * **Git Commit:** `feat(policy): add policy engine`
 * **Known Issues:** None.
+
+---
+
+### Phase 14: Razorpay Test Mode Integration & Webhooks
+* **Date:** 2026-08-25
+* **Implemented:**
+  * Created `RazorpayService` (`backend/src/services/razorpayService.js`) providing Razorpay HMAC SHA256 webhook signature verification and Test Mode payment retry simulation.
+  * Created `WebhookController` (`backend/src/controllers/webhookController.js`) and `WebhookRoutes` (`backend/src/routes/webhookRoutes.js`) mounted on `/api/v1/webhooks/razorpay`.
+  * Integrated idempotency locks via `IdempotencyService` preventing duplicate webhook processing.
+  * Created Phase 14 test suite `backend/tests/razorpay_webhook.test.js`.
+* **Tests:** PASS (52/52 passed across 13 test suites)
+* **Git Commit:** `feat(razorpay): add webhooks and test integration`
+* **Known Issues:** None.
+
+---
+
+### Phase 15: Recovery Execution Workflow Engine
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Created `RecoveryExecutorService` (`backend/src/services/recoveryExecutor.js`) executing policy-approved recovery actions:
+    - `SMART_RETRY`: Triggers Razorpay payment retry simulation, updating state to `RECOVERY_SUCCESS` or `RECOVERY_FAILED`.
+    - `DELAYED_RETRY`: Schedules future retry attempts with `next_retry_scheduled_at` timestamp.
+    - `PAYMENT_RECOVERY_NUDGE`: Generates customer payment recovery link and logs nudge delivery payload (SMS/WhatsApp/Email).
+    - `HUMAN_ESCALATION`: Escalates high-value or low-probability transactions to `ESCALATED` state for manual review.
+    - `STOP`: Terminates recovery operations for unrecoverable or max-retry transactions, setting state to `STOPPED`.
+  * Integrated `RecoveryExecutorService` into `RecoveryWorkflowService` (`backend/src/services/recoveryWorkflow.js`).
+  * Created Phase 15 test suite `backend/tests/executor.test.js`.
+* **Tests:** PASS (58/58 passed across 14 test suites)
+* **Git Commit:** `feat(recovery): add recovery execution workflow`
+* **Known Issues:** None.

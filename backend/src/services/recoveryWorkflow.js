@@ -176,16 +176,9 @@ class RecoveryWorkflowService {
 
     await recoveryStateMachine.transition(paymentId, RECOVERY_STATES.ACTION_EXECUTING, { correlation_id: correlationId });
 
-    // 8. Outcome Verification (Simulated bounded recovery check based on probability)
-    const isRecovered = Math.random() < probability;
-    const finalState = isRecovered ? RECOVERY_STATES.RECOVERY_SUCCESS : RECOVERY_STATES.RECOVERY_FAILED;
-
-    return recoveryStateMachine.transition(paymentId, finalState, {
-      correlation_id: correlationId,
-      fields: {
-        retry_count: (txn.retry_count || 0) + 1
-      }
-    });
+    // 8. Execute recovery action via RecoveryExecutorService
+    const recoveryExecutor = require('./recoveryExecutor');
+    return recoveryExecutor.executeRecoveryAction(txn, recommendation.recommended_action, correlationId);
   }
 }
 

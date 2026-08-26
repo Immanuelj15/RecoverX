@@ -85,6 +85,7 @@ RecoverX is an enterprise-grade AI-powered revenue recovery control plane. It de
 - [x] **Phase 12:** AI Recovery Recommendation Agent (LLM Provider Abstraction & Safe Fallbacks)
 - [x] **Phase 13:** Policy / Guardrail Engine (Max Retries, High Value Thresholds, Failure Reason Guards)
 - [x] **Phase 14:** Razorpay Test Mode Integration & Webhooks (HMAC SHA256 Verification & Idempotency)
+- [x] **Phase 15:** Recovery Execution Workflow Engine (Smart Retry, Nudges, Escalations, Scheduling)
 
 ---
 
