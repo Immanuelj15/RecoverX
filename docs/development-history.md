@@ -202,3 +202,23 @@
 * **Tests:** PASS (58/58 passed across 14 test suites)
 * **Git Commit:** `feat(recovery): add recovery execution workflow`
 * **Known Issues:** None.
+
+---
+
+### Phase 16: Backend REST API Router
+* **Date:** 2026-08-26
+* **Implemented:**
+  * Created Express controllers (`TransactionController`, `AnalyticsController`, `PolicyController`, `AuditController`).
+  * Created Express route modules (`transactionRoutes`, `analyticsRoutes`, `policyRoutes`, `auditRoutes`).
+  * Mounted all routes on `/api/v1/` in `backend/src/app.js`:
+    - `GET /api/v1/transactions`: Paginated search with status, failure reason, risk band, and search query filters.
+    - `GET /api/v1/transactions/:payment_id`: Single transaction lookup with full audit timeline.
+    - `POST /api/v1/transactions/:payment_id/trigger-recovery`: Manual recovery execution endpoint.
+    - `GET /api/v1/analytics/summary`: Real-time dashboard KPI metrics aggregation.
+    - `GET /api/v1/analytics/charts`: Time-series and breakdown chart data.
+    - `GET /api/v1/policies` & `PUT /api/v1/policies`: Policy guardrails fetching and updating.
+    - `GET /api/v1/audit-logs`: Paginated audit log history.
+  * Created Phase 16 test suite `backend/tests/api.test.js`.
+* **Tests:** PASS (67/67 passed across 15 test suites)
+* **Git Commit:** `feat(api): add backend REST API endpoints`
+* **Known Issues:** None.
