@@ -84,7 +84,7 @@ sequenceDiagram
 ### **ML & AI Engine (`ml_service/`)**
 * **Framework**: Python 3.11, Scikit-Learn, FastAPI
 * **Predictive Pipeline**: Random Forest Classifier (`model.joblib`) trained on 10,000 transaction samples
-* **LLM Engine**: OpenAI API Provider Abstraction with deterministic heuristic fallback
+* **LLM Engine**: Groq API Provider Abstraction (`GroqProvider`) with deterministic heuristic fallback
 
 ### **Frontend Control Plane (`frontend/`)**
 * **Framework**: React 18 + Vite
@@ -149,7 +149,8 @@ PORT=5000
 NODE_ENV=development
 MONGODB_URI=mongodb://localhost:27017/recoverx
 RAZORPAY_WEBHOOK_SECRET=recoverx_secret_key_2026
-OPENAI_API_KEY=your_optional_openai_key
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=openai/gpt-oss-20b
 ```
 
 ### **3. Seed Synthetic Dataset (10,000 Transactions)**
