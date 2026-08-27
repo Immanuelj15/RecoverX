@@ -14,7 +14,9 @@ const {
   RecoveryAction,
   RecoveryOutcome,
   AuditLog,
-  WebhookEvent
+  WebhookEvent,
+  Transaction,
+  PolicyConfig
 } = require('../models');
 const { inrToPaise } = require('../utils/money');
 const logger = require('../utils/logger');
@@ -38,7 +40,8 @@ async function seedDatabase() {
     RecoveryAction.deleteMany({ merchant_id: merchant._id }),
     RecoveryOutcome.deleteMany({ merchant_id: merchant._id }),
     AuditLog.deleteMany({ merchant_id: merchant._id }),
-    WebhookEvent.deleteMany({ merchant_id: merchant._id })
+    WebhookEvent.deleteMany({ merchant_id: merchant._id }),
+    Transaction.deleteMany({})
   ]);
 
   // 2. Seed 100 Customers
@@ -65,10 +68,11 @@ async function seedDatabase() {
 
   // 3. Seed 500 Payments & Associated Workflow Entities
   const paymentMethods = ['upi', 'card', 'netbanking', 'wallet'];
-  const failureReasons = ['insufficient_balance', 'network_error', 'bank_timeout', 'card_expired', 'otp_timeout'];
+  const failureReasons = ['insufficient_balance', 'bank_declined', 'card_expired', 'network_timeout', 'authentication_failure'];
   const actions = ['SMART_RETRY', 'DELAYED_RETRY', 'PAYMENT_RECOVERY_NUDGE', 'HUMAN_ESCALATION', 'STOP'];
 
   const paymentsToInsert = [];
+  const transactionsToInsert = [];
   const casesToInsert = [];
   const predictionsToInsert = [];
   const aiDecisionsToInsert = [];
@@ -87,6 +91,8 @@ async function seedDatabase() {
     const method = paymentMethods[i % paymentMethods.length];
     const reason = failureReasons[i % failureReasons.length];
     const actionType = actions[i % actions.length];
+    const caseStatus = i % 5 === 0 ? 'RECOVERY_SUCCESS' : i % 3 === 0 ? 'RECOVERY_FAILED' : 'ACTION_APPROVED';
+    const isRecovered = caseStatus === 'RECOVERY_SUCCESS';
 
     // Payment
     paymentsToInsert.push({
@@ -103,9 +109,30 @@ async function seedDatabase() {
       metadata: { source: 'synthetic_dataset', dataset_version: '1.0.0' }
     });
 
+    // Transaction
+    transactionsToInsert.push({
+      payment_id: payId,
+      customer_id: custObj.customer_id,
+      amount_inr: amountInr,
+      payment_method: method,
+      payment_status: 'failed',
+      failure_reason: reason,
+      previous_successes: 3,
+      previous_failures: 1,
+      retry_count: 1,
+      customer_ltv_inr: (custObj.customer_ltv_paise / 100),
+      subscription_status: i % 2 === 0 ? 'active' : 'none',
+      recovery_probability: 0.75,
+      risk_band: 'HIGH',
+      executed_action: actionType,
+      recovery_state: caseStatus,
+      recovered: isRecovered ? 1 : 0,
+      amount_recovered: isRecovered ? amountInr : 0,
+      outcome: isRecovered ? 'failed_recovered' : 'failed_unrecovered'
+    });
+
     // Recovery Case
     const caseObjId = new mongoose.Types.ObjectId();
-    const caseStatus = i % 5 === 0 ? 'RECOVERY_SUCCESS' : i % 3 === 0 ? 'RECOVERY_FAILED' : 'ACTION_APPROVED';
     casesToInsert.push({
       _id: caseObjId,
       merchant_id: merchant._id,
@@ -224,6 +251,7 @@ async function seedDatabase() {
   }
 
   await Payment.insertMany(paymentsToInsert);
+  await Transaction.insertMany(transactionsToInsert);
   await RecoveryCase.insertMany(casesToInsert);
   await MLPrediction.insertMany(predictionsToInsert);
   await AIDecision.insertMany(aiDecisionsToInsert);
@@ -233,7 +261,7 @@ async function seedDatabase() {
   await AuditLog.insertMany(auditLogsToInsert);
   await WebhookEvent.insertMany(webhooksToInsert);
 
-  logger.info(`Seeding Complete! Created 500 Payments, Recovery Cases, Actions, Outcomes, Audit Logs, and Webhooks.`);
+  logger.info(`Seeding Complete! Created 500 Payments, Transactions, Recovery Cases, Actions, Outcomes, Audit Logs, and Webhooks.`);
   return { success: true, insertedCount: 10000, totalCount: 10000 };
 }
 
