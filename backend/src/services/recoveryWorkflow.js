@@ -3,6 +3,8 @@ const TransactionRepository = require('../repositories/TransactionRepository');
 const paymentRepository = require('../repositories/paymentRepository');
 const AuditLogRepository = require('../repositories/AuditLogRepository');
 const PolicyRepository = require('../repositories/PolicyRepository');
+const aiDecisionRepository = require('../repositories/aiDecisionRepository');
+const recoveryCaseRepository = require('../repositories/recoveryCaseRepository');
 const logger = require('../utils/logger');
 
 class RecoveryWorkflowService {
@@ -12,9 +14,12 @@ class RecoveryWorkflowService {
   calculateFallbackProbability(txn) {
     let score = 0.5;
 
+    const amountInr = txn.amount_paise ? (txn.amount_paise / 100) : (txn.amount_inr || 0);
+    const ltvInr = txn.customer_ltv_paise ? (txn.customer_ltv_paise / 100) : (txn.customer_ltv_inr || 0);
+
     // LTV factor
-    if (txn.customer_ltv_inr > 30000) score += 0.2;
-    else if (txn.customer_ltv_inr < 5000) score -= 0.1;
+    if (ltvInr > 30000) score += 0.2;
+    else if (ltvInr < 5000) score -= 0.1;
 
     // Historical success ratio
     const totalTxns = (txn.previous_successes || 0) + (txn.previous_failures || 0);
@@ -40,7 +45,9 @@ class RecoveryWorkflowService {
    * Deterministic recommendation fallback when LLM is offline
    */
   generateFallbackRecommendation(txn, probability) {
-    if (txn.retry_count >= 3) {
+    const amountInr = txn.amount_paise ? (txn.amount_paise / 100) : (txn.amount_inr || 0);
+
+    if ((txn.retry_count || 0) >= 3) {
       return {
         recommended_action: 'STOP',
         reason: 'Maximum automated retries reached.',
@@ -49,7 +56,7 @@ class RecoveryWorkflowService {
       };
     }
 
-    if (txn.amount_inr >= 50000) {
+    if (amountInr >= 50000) {
       return {
         recommended_action: 'HUMAN_ESCALATION',
         reason: 'High-value transaction exceeds automated processing threshold.',
@@ -98,19 +105,20 @@ class RecoveryWorkflowService {
     let allowed = true;
     let decision = 'ALLOWED';
 
+    const amountInr = txn.amount_paise ? (txn.amount_paise / 100) : (txn.amount_inr || 0);
     const maxRetryCount = policyConfig.max_retry_count ?? 3;
-    const highValueThreshold = policyConfig.high_value_threshold_inr ?? 50000;
+    const highValueThreshold = policyConfig.high_value_threshold_inr ?? (policyConfig.high_value_threshold_paise ? policyConfig.high_value_threshold_paise / 100 : 50000);
     const minThreshold = policyConfig.min_recovery_probability_threshold ?? 0.3;
     const allowedActions = policyConfig.allowed_actions || ['SMART_RETRY', 'DELAYED_RETRY', 'PAYMENT_RECOVERY_NUDGE', 'HUMAN_ESCALATION', 'STOP'];
 
-    if (txn.retry_count >= maxRetryCount) {
+    if ((txn.retry_count || 0) >= maxRetryCount) {
       allowed = false;
       decision = 'STOP';
       rulesTriggered.push(`EXCEEDED_MAX_RETRIES (${txn.retry_count} >= ${maxRetryCount})`);
-    } else if ((txn.amount_inr || 0) >= highValueThreshold) {
+    } else if (amountInr >= highValueThreshold) {
       allowed = false;
       decision = 'ESCALATE';
-      rulesTriggered.push(`HIGH_VALUE_THRESHOLD (${txn.amount_inr} >= ${highValueThreshold})`);
+      rulesTriggered.push(`HIGH_VALUE_THRESHOLD (${amountInr} >= ${highValueThreshold})`);
     } else if (probability < minThreshold) {
       allowed = false;
       decision = 'ESCALATE';
@@ -150,10 +158,49 @@ class RecoveryWorkflowService {
     });
 
     // 4. Generate AI recommendation (RECOMMENDED)
-    const recommendation = this.generateFallbackRecommendation(txn, probability);
+    const recoveryAgent = require('../agents/recoveryAgent');
+    const recommendation = await recoveryAgent.analyzeAndRecommend(txn, { recovery_probability: probability, risk_band: riskBand });
+
     await recoveryStateMachine.transition(paymentId, RECOVERY_STATES.RECOMMENDED, {
       correlation_id: correlationId,
       fields: { ai_recommendation: recommendation }
+    });
+
+    // Save AI Decision record if merchant & case IDs exist
+    if (txn.merchant_id && txn.case_id) {
+      await aiDecisionRepository.saveDecision({
+        merchant_id: txn.merchant_id,
+        recovery_case_id: txn.case_id,
+        context: {
+          failure_reason: txn.failure_reason || 'unknown',
+          amount_paise: txn.amount_paise || Math.round((txn.amount_inr || 0) * 100),
+          recovery_probability: probability,
+          retry_count: txn.retry_count || 0,
+          customer_ltv_paise: txn.customer_ltv_paise || Math.round((txn.customer_ltv_inr || 0) * 100)
+        },
+        recommendation: {
+          action: recommendation.recommended_action,
+          reason: recommendation.reason || 'AI generated recovery recommendation',
+          confidence: recommendation.confidence || probability
+        },
+        requires_human_approval: Boolean(recommendation.requires_human_approval),
+        prompt_version: recommendation.prompt_version || 'recovery-agent-v1',
+        llm_provider: 'groq',
+        status: recommendation.source === 'LLM_AGENT' ? 'accepted' : 'fallback'
+      });
+    }
+
+    // Record audit log for AI decision persistence
+    await AuditLogRepository.recordAuditLog({
+      merchant_id: txn.merchant_id,
+      payment_id: paymentId,
+      action: 'AI_DECISION_RECORDED',
+      details: {
+        action: recommendation.recommended_action,
+        source: recommendation.source,
+        confidence: recommendation.confidence,
+        correlation_id: correlationId
+      }
     });
 
     // 5. Evaluate policy engine guardrails (POLICY_CHECK)

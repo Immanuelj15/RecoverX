@@ -6,6 +6,10 @@ class AuditLogRepository {
     return auditLog.save();
   }
 
+  async recordAuditLog(logData) {
+    return this.createLog(logData);
+  }
+
   async findByPaymentId(paymentId) {
     return AuditLog.find({ payment_id: paymentId })
       .sort({ timestamp: 1 })
