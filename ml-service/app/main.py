@@ -54,6 +54,7 @@ def get_model_info():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/predict-recovery", response_model=PredictRecoveryResponse)
+@app.post("/predict", response_model=PredictRecoveryResponse)
 def predict_recovery(payload: PredictRecoveryRequest):
     try:
         predictor = get_predictor()
