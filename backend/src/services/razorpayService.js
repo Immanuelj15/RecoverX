@@ -10,18 +10,26 @@ class RazorpayService {
   }
 
   /**
-   * Verifies Razorpay webhook HMAC SHA256 signature
+   * Verifies Razorpay webhook HMAC SHA256 signature with constant time comparison
    */
   verifyWebhookSignature(rawBody, signature, secret = null) {
     if (!signature) return false;
     const expectedSecret = secret || this.webhookSecret;
     try {
+      const bodyString = typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody);
       const expectedSignature = crypto
         .createHmac('sha256', expectedSecret)
-        .update(typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody))
+        .update(bodyString)
         .digest('hex');
 
-      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+      const sigBuf = Buffer.from(signature);
+      const expBuf = Buffer.from(expectedSignature);
+
+      if (sigBuf.length !== expBuf.length) {
+        return false;
+      }
+
+      return crypto.timingSafeEqual(sigBuf, expBuf);
     } catch (error) {
       logger.error(`Webhook signature verification error: ${error.message}`);
       return false;
@@ -58,14 +66,17 @@ class RazorpayService {
     const event = eventPayload.event;
     const payloadEntity = eventPayload.payload?.payment?.entity || eventPayload.payload?.subscription?.entity || {};
 
+    const amountPaise = payloadEntity.amount || (payloadEntity.amount_inr ? Math.round(payloadEntity.amount_inr * 100) : 500000);
+
     return {
       event_id: eventPayload.event_id || `evt_${Date.now()}`,
       event_type: event,
       payment_id: payloadEntity.id || payloadEntity.payment_id || `pay_${Date.now()}`,
       customer_id: payloadEntity.customer_id || 'cust_default',
-      amount_inr: payloadEntity.amount ? payloadEntity.amount / 100 : 5000,
+      amount_paise: amountPaise,
+      amount_inr: (amountPaise / 100),
       payment_method: payloadEntity.method || 'upi',
-      failure_reason: payloadEntity.error_code || 'insufficient_balance',
+      failure_reason: payloadEntity.error_code || payloadEntity.failure_reason || 'insufficient_balance',
       retry_count: 0
     };
   }
