@@ -217,6 +217,7 @@ async function seedDatabase() {
       event_id: `evt_seed_${payId}`,
       event_type: 'payment.failed',
       provider: 'razorpay',
+      payload: { event: 'payment.failed', payment_id: payId },
       processing_status: 'processed',
       processed_at: new Date()
     });
