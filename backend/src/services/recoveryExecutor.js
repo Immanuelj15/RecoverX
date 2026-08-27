@@ -2,6 +2,8 @@ const razorpayService = require('./razorpayService');
 const { recoveryStateMachine, RECOVERY_STATES } = require('./recoveryStateMachine');
 const TransactionRepository = require('../repositories/TransactionRepository');
 const AuditLogRepository = require('../repositories/AuditLogRepository');
+const recoveryActionRepository = require('../repositories/recoveryActionRepository');
+const recoveryOutcomeRepository = require('../repositories/recoveryOutcomeRepository');
 const logger = require('../utils/logger');
 
 class RecoveryExecutorService {
@@ -14,32 +16,78 @@ class RecoveryExecutorService {
   async executeRecoveryAction(txn, action, correlationId) {
     logger.info(`Executing recovery action '${action}' for ${txn.payment_id} [${correlationId}]`);
 
+    // Create RecoveryAction record if merchant & case exist
+    let actionRecord = null;
+    if (txn.merchant_id && (txn.case_id || txn._id)) {
+      try {
+        actionRecord = await recoveryActionRepository.createAction({
+          merchant_id: txn.merchant_id,
+          recovery_case_id: txn.case_id || txn._id,
+          action_type: action,
+          idempotency_key: `act_${txn.payment_id}_${action}_${Date.now()}`,
+          status: 'executing'
+        });
+      } catch (err) {
+        logger.warn(`Failed to log RecoveryAction: ${err.message}`);
+      }
+    }
+
+    let result;
     switch (action) {
       case 'SMART_RETRY':
-        return this.executeSmartRetry(txn, correlationId);
+        result = await this.executeSmartRetry(txn, correlationId);
+        break;
 
       case 'DELAYED_RETRY':
-        return this.executeDelayedRetry(txn, correlationId);
+        result = await this.executeDelayedRetry(txn, correlationId);
+        break;
 
       case 'PAYMENT_RECOVERY_NUDGE':
-        return this.executePaymentNudge(txn, correlationId);
+        result = await this.executePaymentNudge(txn, correlationId);
+        break;
 
       case 'HUMAN_ESCALATION':
-        return this.executeHumanEscalation(txn, correlationId);
+        result = await this.executeHumanEscalation(txn, correlationId);
+        break;
 
       case 'STOP':
       default:
-        return this.executeStop(txn, correlationId);
+        result = await this.executeStop(txn, correlationId);
+        break;
     }
+
+    // Update Action & Outcome status
+    if (actionRecord && actionRecord._id) {
+      const actionStatus = result.success ? 'completed' : 'failed';
+      await recoveryActionRepository.updateStatus(actionRecord._id, actionStatus);
+    }
+
+    if (txn.merchant_id && (txn.case_id || txn._id) && (result.success || action === 'STOP')) {
+      const amountPaise = txn.amount_paise || Math.round((txn.amount_inr || 0) * 100);
+      try {
+        await recoveryOutcomeRepository.recordOutcome({
+          merchant_id: txn.merchant_id,
+          recovery_case_id: txn.case_id || txn._id,
+          status: result.success ? 'RECOVERED' : 'UNRECOVERABLE',
+          amount_recovered_paise: result.success ? amountPaise : 0,
+          recovered_at: result.success ? new Date() : null
+        });
+      } catch (err) {
+        logger.warn(`Failed to record RecoveryOutcome: ${err.message}`);
+      }
+    }
+
+    return result;
   }
 
   /**
    * 1. SMART_RETRY: Immediate payment retry via Razorpay Test Mode integration
    */
   async executeSmartRetry(txn, correlationId) {
+    const amountInr = txn.amount_paise ? (txn.amount_paise / 100) : (txn.amount_inr || 0);
     const result = await razorpayService.retryPayment(
       txn.payment_id,
-      txn.amount_inr
+      amountInr
     );
 
     const newRetryCount = (txn.retry_count || 0) + 1;
@@ -111,14 +159,15 @@ class RecoveryExecutorService {
    * 3. PAYMENT_RECOVERY_NUDGE: Generates customer payment link & logs nudge payload
    */
   async executePaymentNudge(txn, correlationId) {
+    const amountInr = txn.amount_paise ? (txn.amount_paise / 100).toFixed(2) : (txn.amount_inr || 0);
     const recoveryLink = `https://recoverx.razorpay.com/pay/${txn.payment_id}`;
     const nudgePayload = {
       customer_id: txn.customer_id,
       payment_id: txn.payment_id,
-      amount_inr: txn.amount_inr,
+      amount_inr: amountInr,
       recovery_link: recoveryLink,
       channels: ['SMS', 'WHATSAPP', 'EMAIL'],
-      message: `Your payment of ₹${txn.amount_inr} failed. Complete your recovery here: ${recoveryLink}`
+      message: `Your payment of ₹${amountInr} failed. Complete your recovery here: ${recoveryLink}`
     };
 
     logger.info(`Generated Payment Recovery Nudge for ${txn.payment_id}: ${recoveryLink}`);
