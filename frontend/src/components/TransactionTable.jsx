@@ -1,185 +1,219 @@
-import React, { useState } from 'react';
-import { Search, Filter, Play, Clock, ArrowRight, CheckCircle, AlertOctagon, PauseCircle, ShieldAlert } from 'lucide-react';
+import React from 'react';
+import { Eye, Play, CheckCircle, ShieldAlert, Clock, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 
 export default function TransactionTable({
-  transactions,
-  total,
-  page,
-  totalPages,
+  transactions = [],
+  total = 0,
+  page = 1,
+  totalPages = 1,
   onPageChange,
-  filters,
-  onFilterChange,
+  onSelectTransaction,
   onTriggerRecovery,
-  onViewTimeline,
+  filterState,
+  setFilterState,
+  filterRisk,
+  setFilterRisk,
   isLoading
 }) {
-  const [triggeringId, setTriggeringId] = useState(null);
-
-  const handleTrigger = async (paymentId) => {
-    setTriggeringId(paymentId);
-    await onTriggerRecovery(paymentId);
-    setTriggeringId(null);
+  const formatINR = (amountInr) => {
+    if (amountInr === undefined || amountInr === null) return '₹0';
+    return `₹${Number(amountInr).toLocaleString('en-IN')}`;
   };
 
-  const getRiskBadge = (band) => {
-    switch (band) {
-      case 'HIGH':
-        return <span className="px-2 py-0.5 text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-md">HIGH</span>;
-      case 'MEDIUM':
-        return <span className="px-2 py-0.5 text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md">MEDIUM</span>;
-      case 'LOW':
-      default:
-        return <span className="px-2 py-0.5 text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md">LOW</span>;
+  const getRiskBadge = (riskBand, probability) => {
+    const probPct = probability !== undefined && probability !== null ? Math.round(probability * 100) : null;
+    const label = probPct !== null ? `${probPct}%` : (riskBand || 'UNKNOWN');
+
+    if (riskBand === 'HIGH' || (probPct !== null && probPct >= 70)) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]">
+          {label} HIGH
+        </span>
+      );
     }
+    if (riskBand === 'MEDIUM' || (probPct !== null && probPct >= 40)) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FFFBEB] text-[#F59E0B] border border-[#FDE68A]">
+          {label} MED
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]">
+        {label} LOW
+      </span>
+    );
   };
 
   const getStateBadge = (state) => {
     switch (state) {
       case 'RECOVERY_SUCCESS':
-        return <span className="px-2.5 py-1 text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-lg flex items-center space-x-1 w-fit"><CheckCircle className="w-3 h-3 mr-1" />RECOVERED</span>;
-      case 'RECOVERY_FAILED':
-        return <span className="px-2.5 py-1 text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30 rounded-lg flex items-center space-x-1 w-fit"><AlertOctagon className="w-3 h-3 mr-1" />FAILED</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]">
+            <CheckCircle className="w-3 h-3" /> Recovered
+          </span>
+        );
       case 'STOPPED':
-        return <span className="px-2.5 py-1 text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 rounded-lg flex items-center space-x-1 w-fit"><PauseCircle className="w-3 h-3 mr-1" />STOPPED</span>;
+      case 'RECOVERY_FAILED':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]">
+            <ShieldAlert className="w-3 h-3" /> Stopped
+          </span>
+        );
       case 'ESCALATED':
-        return <span className="px-2.5 py-1 text-xs font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/30 rounded-lg flex items-center space-x-1 w-fit"><ShieldAlert className="w-3 h-3 mr-1" />ESCALATED</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EEF4FF] text-[#2D6CDF] border border-[#C7D7FE]">
+            Escalated
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-1 text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg flex items-center space-x-1 w-fit"><Clock className="w-3 h-3 mr-1 animate-pulse" />{state || 'DETECTED'}</span>;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F2F4F7] text-[#344054] border border-[#E4E7EC]">
+            <Clock className="w-3 h-3" /> {state || 'DETECTED'}
+          </span>
+        );
     }
   };
 
   return (
-    <div className="glass-card rounded-2xl border border-slate-800 p-6 mb-8">
-      
-      {/* Header & Filter Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+    <div className="bg-white border border-[#E4E7EC] rounded-xl shadow-sm overflow-hidden mb-8">
+      {/* Table Header & Controls */}
+      <div className="p-5 border-b border-[#E4E7EC] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFFFF]">
         <div>
-          <h2 className="text-base font-bold text-slate-100 tracking-wide">
-            Revenue Recovery Control Table
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Monitor failed transactions, predictive probability, and manual intervention controls
+          <h3 className="text-base font-semibold text-[#111827]">Revenue Recovery Control Table</h3>
+          <p className="text-xs text-[#667085]">
+            Monitor failed transactions, ML recovery scores, AI recommendations, and policy controls
           </p>
         </div>
 
-        {/* Filter Inputs */}
-        <div className="flex flex-wrap items-center gap-3">
-          
-          {/* Search Box */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search Payment / Customer ID..."
-              value={filters.search}
-              onChange={(e) => onFilterChange('search', e.target.value)}
-              className="bg-slate-900/90 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 w-56 placeholder-slate-500"
-            />
+        {/* Filters */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-[#667085]" />
+            <select
+              value={filterState || ''}
+              onChange={(e) => setFilterState && setFilterState(e.target.value)}
+              className="text-xs font-medium bg-[#F7F9FC] border border-[#E4E7EC] text-[#344054] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]"
+            >
+              <option value="">All States</option>
+              <option value="DETECTED">Detected</option>
+              <option value="ANALYZING">Analyzing</option>
+              <option value="ACTION_APPROVED">Approved</option>
+              <option value="RECOVERY_SUCCESS">Recovered</option>
+              <option value="STOPPED">Stopped</option>
+              <option value="ESCALATED">Escalated</option>
+            </select>
           </div>
 
-          {/* State Filter */}
           <select
-            value={filters.state}
-            onChange={(e) => onFilterChange('state', e.target.value)}
-            className="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-blue-500"
-          >
-            <option value="">All States</option>
-            <option value="DETECTED">DETECTED</option>
-            <option value="ANALYZING">ANALYZING</option>
-            <option value="ACTION_APPROVED">ACTION_APPROVED</option>
-            <option value="RECOVERY_SUCCESS">RECOVERY_SUCCESS</option>
-            <option value="RECOVERY_FAILED">RECOVERY_FAILED</option>
-            <option value="STOPPED">STOPPED</option>
-            <option value="ESCALATED">ESCALATED</option>
-          </select>
-
-          {/* Risk Band Filter */}
-          <select
-            value={filters.risk_band}
-            onChange={(e) => onFilterChange('risk_band', e.target.value)}
-            className="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-blue-500"
+            value={filterRisk || ''}
+            onChange={(e) => setFilterRisk && setFilterRisk(e.target.value)}
+            className="text-xs font-medium bg-[#F7F9FC] border border-[#E4E7EC] text-[#344054] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]"
           >
             <option value="">All Risk Bands</option>
-            <option value="HIGH">HIGH Risk</option>
-            <option value="MEDIUM">MEDIUM Risk</option>
-            <option value="LOW">LOW Risk</option>
+            <option value="HIGH">High Prob (&gt;70%)</option>
+            <option value="MEDIUM">Med Prob (40-70%)</option>
+            <option value="LOW">Low Prob (&lt;40%)</option>
           </select>
-
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800/80">
-        <table className="w-full text-left text-xs text-slate-300">
-          <thead className="bg-slate-900/90 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+      {/* Table Data */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-[#F7F9FC] border-b border-[#E4E7EC] text-[#667085] uppercase tracking-wider font-semibold text-[11px]">
             <tr>
               <th className="py-3.5 px-4">Payment ID</th>
               <th className="py-3.5 px-4">Customer</th>
               <th className="py-3.5 px-4">Amount</th>
               <th className="py-3.5 px-4">Failure Reason</th>
-              <th className="py-3.5 px-4">ML Recovery %</th>
-              <th className="py-3.5 px-4">Risk Band</th>
-              <th className="py-3.5 px-4">Recovery State</th>
-              <th className="py-3.5 px-4 text-right">Actions</th>
+              <th className="py-3.5 px-4">ML Recovery Prob</th>
+              <th className="py-3.5 px-4">Action</th>
+              <th className="py-3.5 px-4">State</th>
+              <th className="py-3.5 text-right px-4">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-medium">
+          <tbody className="divide-y divide-[#E4E7EC] text-[#111827]">
             {isLoading ? (
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="animate-pulse">
+                  <td colSpan="8" className="py-4 px-4 bg-[#FFFFFF]">
+                    <div className="h-4 bg-[#F2F4F7] rounded w-full"></div>
+                  </td>
+                </tr>
+              ))
+            ) : transactions.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center py-12 text-slate-500">
-                  Loading recovery data...
-                </td>
-              </tr>
-            ) : transactions?.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-center py-12 text-slate-500">
-                  No failed payment records found.
+                <td colSpan="8" className="py-12 text-center text-[#667085]">
+                  <p className="text-sm font-medium">No failed payment records found.</p>
+                  <p className="text-xs text-[#98A2B3] mt-1">
+                    Once payment failures occur or webhooks ingest data, recovery opportunities will appear here.
+                  </p>
                 </td>
               </tr>
             ) : (
-              transactions.map((txn) => (
-                <tr key={txn.payment_id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-semibold text-blue-400">
-                    {txn.payment_id}
+              transactions.map((t) => (
+                <tr key={t.payment_id} className="hover:bg-[#F8FAFC] transition-colors">
+                  {/* Payment ID */}
+                  <td className="py-3.5 px-4 font-mono font-medium text-[#2D6CDF]">
+                    {t.payment_id}
                   </td>
-                  <td className="py-3.5 px-4 font-mono text-slate-300">
-                    {txn.customer_id}
+
+                  {/* Customer */}
+                  <td className="py-3.5 px-4 font-medium text-[#344054]">
+                    {t.customer_id}
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-100">
-                    ₹{txn.amount_inr?.toLocaleString('en-IN')}
+
+                  {/* Amount */}
+                  <td className="py-3.5 px-4 font-bold text-[#111827] tabular-nums">
+                    {formatINR(t.amount_inr || (t.amount_paise ? t.amount_paise / 100 : 0))}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-300 capitalize">
-                    {txn.failure_reason?.replace('_', ' ')}
+
+                  {/* Failure Reason */}
+                  <td className="py-3.5 px-4 text-[#475467]">
+                    <span className="font-mono text-[11px] bg-[#F2F4F7] text-[#344054] px-2 py-0.5 rounded border border-[#E4E7EC]">
+                      {t.failure_reason || t.failure?.reason || 'unknown'}
+                    </span>
                   </td>
-                  <td className="py-3.5 px-4 font-mono">
-                    {txn.recovery_probability ? (
-                      <span className="font-bold text-emerald-400">
-                        {Math.round(txn.recovery_probability * 100)}%
-                      </span>
-                    ) : (
-                      <span className="text-slate-500">N/A</span>
-                    )}
-                  </td>
+
+                  {/* ML Recovery Prob */}
                   <td className="py-3.5 px-4">
-                    {getRiskBadge(txn.risk_band)}
+                    {getRiskBadge(t.risk_band, t.recovery_probability)}
                   </td>
+
+                  {/* Recommended Action */}
                   <td className="py-3.5 px-4">
-                    {getStateBadge(txn.recovery_state)}
+                    <span className="inline-flex items-center text-xs font-semibold text-[#635BFF] bg-[#EEF2FF] px-2.5 py-0.5 rounded-md border border-[#C7D2FE]">
+                      {t.recommended_action || t.executed_action || 'SMART_RETRY'}
+                    </span>
                   </td>
-                  <td className="py-3.5 px-4 text-right space-x-2">
-                    <button
-                      onClick={() => handleTrigger(txn.payment_id)}
-                      disabled={triggeringId === txn.payment_id}
-                      className="px-2.5 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-lg font-semibold text-[11px] transition-all disabled:opacity-50"
-                    >
-                      {triggeringId === txn.payment_id ? 'Running...' : 'Trigger AI'}
-                    </button>
-                    <button
-                      onClick={() => onViewTimeline(txn.payment_id)}
-                      className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg font-semibold text-[11px] transition-all"
-                    >
-                      Timeline
-                    </button>
+
+                  {/* Recovery State */}
+                  <td className="py-3.5 px-4">
+                    {getStateBadge(t.recovery_state || 'DETECTED')}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="py-3.5 px-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => onSelectTransaction && onSelectTransaction(t)}
+                        className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#344054] hover:text-[#111827] bg-[#F7F9FC] hover:bg-[#EAECF0] border border-[#E4E7EC] rounded-lg transition-all"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Timeline</span>
+                      </button>
+
+                      {t.recovery_state !== 'RECOVERY_SUCCESS' && (
+                        <button
+                          onClick={() => onTriggerRecovery && onTriggerRecovery(t.payment_id)}
+                          className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-white bg-[#2D6CDF] hover:bg-[#1B54BD] rounded-lg shadow-sm transition-all"
+                        >
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>Trigger</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -189,29 +223,35 @@ export default function TransactionTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="flex items-center justify-between mt-4 text-xs text-slate-400">
-        <div>
-          Showing page <span className="font-bold text-slate-200">{page}</span> of{' '}
-          <span className="font-bold text-slate-200">{totalPages || 1}</span> ({total || 0} total records)
+      <div className="p-4 border-t border-[#E4E7EC] flex items-center justify-between bg-[#F7F9FC]">
+        <div className="text-xs text-[#667085]">
+          Showing <span className="font-semibold text-[#111827]">{(page - 1) * 20 + (transactions.length ? 1 : 0)}</span> to{' '}
+          <span className="font-semibold text-[#111827]">{(page - 1) * 20 + transactions.length}</span> of{' '}
+          <span className="font-semibold text-[#111827]">{total}</span> records
         </div>
-        <div className="flex space-x-2">
+
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => onPageChange(page - 1)}
+            onClick={() => onPageChange && onPageChange(page - 1)}
             disabled={page <= 1}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 hover:text-white disabled:opacity-40"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#344054] bg-white border border-[#E4E7EC] rounded-lg hover:bg-[#F7F9FC] disabled:opacity-40"
           >
-            Previous
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous</span>
           </button>
+          <span className="text-xs font-semibold text-[#111827] px-2">
+            Page {page} of {totalPages || 1}
+          </span>
           <button
-            onClick={() => onPageChange(page + 1)}
+            onClick={() => onPageChange && onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 hover:text-white disabled:opacity-40"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#344054] bg-white border border-[#E4E7EC] rounded-lg hover:bg-[#F7F9FC] disabled:opacity-40"
           >
-            Next
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,77 +1,72 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import KPISummary from './components/KPISummary';
-import AnalyticsCharts from './components/AnalyticsCharts';
+import RecoveryPipeline from './components/RecoveryPipeline';
+import AIInsightCard from './components/AIInsightCard';
 import TransactionTable from './components/TransactionTable';
-import PolicyModal from './components/PolicyModal';
+import AnalyticsCharts from './components/AnalyticsCharts';
 import TimelineModal from './components/TimelineModal';
+import PolicyModal from './components/PolicyModal';
+import AIDecisionsView from './components/AIDecisionsView';
+import ModelInsightsView from './components/ModelInsightsView';
 import AuditTimelineView from './components/AuditTimelineView';
+import { Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('overview');
   const [summary, setSummary] = useState(null);
-  const [chartData, setChartData] = useState(null);
+  const [chartsData, setChartsData] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [policy, setPolicy] = useState(null);
+
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [filterState, setFilterState] = useState('');
+  const [filterRisk, setFilterRisk] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Filters state
-  const [filters, setFilters] = useState({
-    state: '',
-    risk_band: '',
-    search: ''
-  });
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [isPolicyOpen, setIsPolicyOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
 
-  // Timeline modal state
-  const [selectedTimeline, setSelectedTimeline] = useState(null);
-  const [timelineLogs, setTimelineLogs] = useState([]);
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
-  // Fetch data
-  const fetchData = async () => {
+  const fetchDashboardData = async () => {
     setIsRefreshing(true);
     try {
-      // 1. Analytics Summary
-      const summaryRes = await fetch('/api/v1/analytics/summary');
-      if (summaryRes.ok) {
-        const json = await summaryRes.json();
-        setSummary(json.data);
-      }
+      const [sumRes, chartsRes, polRes] = await Promise.all([
+        fetch('/api/v1/analytics/summary').then((r) => r.json()),
+        fetch('/api/v1/analytics/charts').then((r) => r.json()),
+        fetch('/api/v1/policies').then((r) => r.json())
+      ]);
 
-      // 2. Charts
-      const chartsRes = await fetch('/api/v1/analytics/charts');
-      if (chartsRes.ok) {
-        const json = await chartsRes.json();
-        setChartData(json.data);
-      }
-
-      // 3. Policy
-      const policyRes = await fetch('/api/v1/policies');
-      if (policyRes.ok) {
-        const json = await policyRes.json();
-        setPolicy(json.data);
-      }
-
-      // 4. Transactions
-      await fetchTransactions(page, filters);
+      if (sumRes.status === 'success') setSummary(sumRes.data);
+      if (chartsRes.status === 'success') setChartsData(chartsRes.data);
+      if (polRes.status === 'success') setPolicy(polRes.data);
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
+      console.error('Error fetching dashboard summary data:', err);
     } finally {
-      setIsLoading(false);
       setIsRefreshing(false);
     }
   };
 
-  const fetchTransactions = async (currentPage, currentFilters) => {
+  const fetchTransactions = async () => {
+    setIsLoading(true);
     const query = new URLSearchParams({
-      page: currentPage,
+      page,
       limit: 15,
-      ...(currentFilters.state && { state: currentFilters.state }),
-      ...(currentFilters.risk_band && { risk_band: currentFilters.risk_band }),
-      ...(currentFilters.search && { search: currentFilters.search })
+      ...(filterState && { state: filterState }),
+      ...(filterRisk && { risk_band: filterRisk }),
+      ...(searchQuery && { search: searchQuery })
     });
 
     try {
@@ -84,59 +79,48 @@ export default function App() {
       }
     } catch (err) {
       console.error('Error fetching transactions:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchDashboardData();
   }, []);
 
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    setPage(1);
-    fetchTransactions(1, newFilters);
-  };
-
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-    fetchTransactions(newPage, filters);
-  };
+  useEffect(() => {
+    fetchTransactions();
+  }, [page, filterState, filterRisk, searchQuery]);
 
   const handleTriggerRecovery = async (paymentId) => {
     try {
-      const res = await fetch(`/api/v1/transactions/${paymentId}/trigger-recovery`, { method: 'POST' });
-      if (res.ok) {
-        await fetchData();
+      showToast(`Executing AI recovery workflow for payment ${paymentId}...`);
+      const res = await fetch(`/api/v1/transactions/${paymentId}/trigger-recovery`, {
+        method: 'POST'
+      });
+      const json = await res.json();
+      if (res.ok && json.status === 'success') {
+        showToast(`✓ Recovery workflow complete for ${paymentId}!`);
+        fetchTransactions();
+        fetchDashboardData();
+      } else {
+        showToast(`⚠️ Workflow executed: ${json.error || 'Check policy guardrails'}`);
       }
     } catch (err) {
-      console.error(`Error triggering recovery for ${paymentId}:`, err);
+      showToast(`Error triggering recovery: ${err.message}`);
     }
   };
 
-  const handleViewTimeline = async (paymentId) => {
-    try {
-      const res = await fetch(`/api/v1/transactions/${paymentId}`);
-      if (res.ok) {
-        const json = await res.json();
-        setSelectedTimeline(paymentId);
-        setTimelineLogs(json.timeline || []);
-      }
-    } catch (err) {
-      console.error(`Error fetching timeline for ${paymentId}:`, err);
-    }
-  };
-
-  const handleUpdatePolicy = async (policyPayload) => {
+  const handleSavePolicy = async (policyData) => {
     try {
       const res = await fetch('/api/v1/policies', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(policyPayload)
+        body: JSON.stringify(policyData)
       });
       if (res.ok) {
-        const json = await res.json();
-        setPolicy(json.data);
+        showToast('✓ Guardrail Policy updated successfully!');
+        fetchDashboardData();
       }
     } catch (err) {
       console.error('Error updating policy:', err);
@@ -144,58 +128,165 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col">
-      <Navbar
+    <div className="flex min-h-screen bg-[#F7F9FC] text-[#111827] antialiased">
+      {/* Sidebar Navigation */}
+      <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onRefresh={fetchData}
-        isRefreshing={isRefreshing}
+        setActiveTab={(tab) => {
+          if (tab === 'settings') {
+            setIsPolicyOpen(true);
+          } else {
+            setActiveTab(tab);
+          }
+        }}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
-        
-        {activeTab === 'dashboard' ? (
-          <>
-            <KPISummary summary={summary} isLoading={isLoading} />
-            <AnalyticsCharts chartData={chartData} isLoading={isLoading} />
-            <TransactionTable
-              transactions={transactions}
-              total={total}
-              page={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onTriggerRecovery={handleTriggerRecovery}
-              onViewTimeline={handleViewTimeline}
-              isLoading={isLoading}
-            />
-          </>
-        ) : activeTab === 'audit' ? (
-          <AuditTimelineView />
-        ) : (
-          <PolicyModal
-            policy={policy}
-            onUpdatePolicy={handleUpdatePolicy}
-            onClose={() => setActiveTab('dashboard')}
-          />
+      {/* Main App Container */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Header Navbar */}
+        <Navbar
+          onRefresh={fetchDashboardData}
+          isRefreshing={isRefreshing}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+
+        {/* Toast Notification Alert */}
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#0C2651] text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl border border-[#1C4991] flex items-center gap-2 animate-bounce">
+            <Sparkles className="w-4 h-4 text-[#635BFF]" />
+            <span>{toastMessage}</span>
+          </div>
         )}
 
-      </main>
+        {/* Content Area */}
+        <main className="flex-1 p-8 max-w-[1400px] w-full mx-auto">
+          {/* Overview Dashboard View */}
+          {activeTab === 'overview' && (
+            <div>
+              {/* Page Title & Subtitle */}
+              <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Revenue Recovery</h1>
+                  <p className="text-sm text-[#667085] mt-1">
+                    Monitor failed payments, XGBoost probability scoring, Groq reasoning, and policy controls.
+                  </p>
+                </div>
 
-      {/* Timeline Modal Overlay */}
-      {selectedTimeline && (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsPolicyOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-[#0C2651] bg-[#EEF4FF] hover:bg-[#D0E2FF] border border-[#C7D7FE] rounded-lg transition-all"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-[#2D6CDF]" />
+                    <span>Guardrail Policies</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Top KPI Metric Cards */}
+              <KPISummary summary={summary} isLoading={isRefreshing} />
+
+              {/* AI Recovery Insight Card */}
+              <AIInsightCard onOpenPolicy={() => setIsPolicyOpen(true)} />
+
+              {/* Recovery Pipeline Flow */}
+              <RecoveryPipeline summary={summary} />
+
+              {/* Performance Charts */}
+              <AnalyticsCharts chartsData={chartsData} isLoading={isRefreshing} />
+
+              {/* Transaction Control Table */}
+              <TransactionTable
+                transactions={transactions}
+                total={total}
+                page={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+                onSelectTransaction={(t) => setSelectedTransaction(t)}
+                onTriggerRecovery={handleTriggerRecovery}
+                filterState={filterState}
+                setFilterState={setFilterState}
+                filterRisk={filterRisk}
+                setFilterRisk={setFilterRisk}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+
+          {/* Payments & Cases View */}
+          {activeTab === 'payments' && (
+            <div>
+              <div className="mb-8">
+                <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Payments & Recovery Cases</h1>
+                <p className="text-sm text-[#667085] mt-1">
+                  Comprehensive audit table of all failed payments, recovery scores, and intervention statuses.
+                </p>
+              </div>
+
+              <TransactionTable
+                transactions={transactions}
+                total={total}
+                page={page}
+                totalPages={totalPages}
+                onPageChange={(p) => setPage(p)}
+                onSelectTransaction={(t) => setSelectedTransaction(t)}
+                onTriggerRecovery={handleTriggerRecovery}
+                filterState={filterState}
+                setFilterState={setFilterState}
+                filterRisk={filterRisk}
+                setFilterRisk={setFilterRisk}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+
+          {/* AI Decisions View */}
+          {activeTab === 'ai-decisions' && (
+            <AIDecisionsView transactions={transactions} />
+          )}
+
+          {/* Analytics View */}
+          {activeTab === 'analytics' && (
+            <div>
+              <div className="mb-8">
+                <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Recovery Analytics</h1>
+                <p className="text-sm text-[#667085] mt-1">
+                  In-depth revenue recovery performance, failure reason breakdown, and payment method stats.
+                </p>
+              </div>
+              <AnalyticsCharts chartsData={chartsData} isLoading={isRefreshing} />
+            </div>
+          )}
+
+          {/* Audit Trail View */}
+          {activeTab === 'audit-trail' && (
+            <AuditTimelineView />
+          )}
+
+          {/* Model Insights View */}
+          {activeTab === 'model-insights' && (
+            <ModelInsightsView />
+          )}
+        </main>
+      </div>
+
+      {/* Timeline Inspector Modal */}
+      {selectedTransaction && (
         <TimelineModal
-          paymentId={selectedTimeline}
-          timeline={timelineLogs}
-          onClose={() => setSelectedTimeline(null)}
+          transaction={selectedTransaction}
+          onClose={() => setSelectedTransaction(null)}
         />
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 py-4 text-center text-xs text-slate-500">
-        RecoverX Revenue Recovery Control Plane • Submitted for Razorpay Buildathon 2026
-      </footer>
+      {/* Policy Guardrail Settings Modal */}
+      {isPolicyOpen && (
+        <PolicyModal
+          policy={policy}
+          onClose={() => setIsPolicyOpen(false)}
+          onSave={handleSavePolicy}
+        />
+      )}
     </div>
   );
 }
