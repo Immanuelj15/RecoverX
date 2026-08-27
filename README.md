@@ -3,59 +3,59 @@
 > **Razorpay Buildathon 2026 Submission** | Track 03 — AI Revenue Recovery  
 > *"Don't just detect lost revenue. Recover it."*
 
-[![Build & Test Status](https://img.shields.io/badge/Test_Suite-16_Passing_|_68_Tests-emerald?style=flat-square&logo=jest)](https://github.com/Immanuelj15/RecoverX)
+[![Build & Test Status](https://img.shields.io/badge/Test_Suite-18_Passing_|_77_Tests-emerald?style=flat-square&logo=jest)](https://github.com/Immanuelj15/RecoverX)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Track](https://img.shields.io/badge/Razorpay_Track-03_AI_Revenue_Recovery-indigo?style=flat-square)](https://razorpay.com)
 
 ---
 
 ## 📌 Data Honesty Notice
-**All development and evaluation datasets used in this repository are 100% synthetic (`recoverx_revenue_recovery_dataset_10000.csv`). Razorpay Test Mode APIs and signature algorithms are implemented for realistic workflow demonstrations. No production payment data or real customer information is used.**
+**All development and evaluation datasets used in this repository are 100% synthetic (`recoverx_revenue_recovery_dataset_10000.csv`). Razorpay Test Mode APIs and HMAC-SHA256 signature algorithms are implemented for realistic workflow demonstrations. No production payment data or real customer information is used.**
 
 ---
 
-## 🚀 Executive Summary & Problem Statement
+## 🚀 Executive Summary & Pitch
 
 In subscription commerce and digital transactions, payment failures (due to expired cards, insufficient funds, network glitches, or bank downtime) result in catastrophic involuntary churn. Traditional systems rely on crude, fixed schedule retries that annoy customers or fail silently.
 
 **RecoverX** bridges this gap by serving as an autonomous, multi-agent revenue recovery control plane:
-1. **Real-Time Webhook Ingestion**: Receives failed payment events instantly with HMAC-SHA256 signature verification and distributed idempotency locking.
+1. **Real-Time Webhook Ingestion**: Receives failed payment events instantly with HMAC-SHA256 signature verification and atomic idempotency locking.
 2. **State Machine Orchestration**: Manages strict state transitions (`DETECTED` → `ANALYZING` → `PREDICTED` → `RECOMMENDED` → `POLICY_CHECK` → `ACTION_APPROVED` → `ACTION_EXECUTING` → `RECOVERY_SUCCESS` / `RECOVERY_FAILED`).
-3. **ML Recovery Scoring**: Predicts the statistical likelihood of success for each transaction based on customer LTV, retry history, failure reasons, and payment methods.
-4. **LLM Context Agent**: Generates tailored recovery strategies (`SMART_RETRY`, `DELAYED_RETRY`, `PAYMENT_RECOVERY_NUDGE`, `HUMAN_ESCALATION`, `STOP`).
-5. **Deterministic Guardrail Engine**: Enforces strict financial limits (`max_retry_count`, `high_value_threshold_inr`, unrecoverable failure filters).
-6. **Immutable Audit Compliance**: Records full event timelines and JSON diff payloads for complete regulatory visibility.
+3. **ML Recovery Scoring (Layer 1)**: Predicts statistical probability of recovery $P(\text{recovery}) \in [0.0, 1.0]$ based on customer LTV, retry history, failure reasons, and payment methods.
+4. **Groq LLM Reasoning Agent (Layer 2)**: Generates context-aware recovery strategies using `openai/gpt-oss-20b` hosted on Groq API (`SMART_RETRY`, `DELAYED_RETRY`, `PAYMENT_RECOVERY_NUDGE`, `HUMAN_ESCALATION`, `STOP`).
+5. **Deterministic Guardrail Engine**: Enforces strict financial rules (`MAX_RETRIES`, `HIGH_VALUE_TRANSACTION`, `UNRECOVERABLE_FAILURE`, `LOW_PROBABILITY_THRESHOLD`) with integer paise precision.
+6. **Immutable Audit Compliance**: Records full event timelines, AI decisions, and JSON diff payloads in MongoDB for regulatory visibility.
 
 ---
 
-## 🏗 System Architecture & Workflow Diagram
+## 🏗 System Architecture Diagram
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Customer/Gateway as Razorpay Gateway (Test Mode)
+    actor Gateway as Razorpay Gateway (Test Mode)
     participant Webhook as Webhook Receiver
-    participant StateEngine as Recovery State Engine
-    participant ML as ML Probability Predictor
-    participant Agent as AI Recommendation Agent
-    participant Policy as Guardrail Policy Engine
+    participant StateEngine as Recovery State Machine
+    participant ML as XGBoost ML Predictor
+    participant Agent as Groq LLM Agent (gpt-oss-20b)
+    participant Policy as Policy Guardrail Engine
     participant Executor as Recovery Execution Driver
     participant Audit as Compliance Audit Trail
     participant UI as React Control Plane
 
-    Customer/Gateway->>Webhook: POST /api/v1/webhooks/razorpay (payment.failed)
-    Webhook->>Webhook: HMAC SHA256 Signature Verification & Idempotency Check
+    Gateway->>Webhook: POST /api/v1/webhooks/razorpay (payment.failed)
+    Webhook->>Webhook: HMAC SHA256 Signature Verification & Idempotency Lock
     Webhook->>StateEngine: Init Transaction (State: DETECTED)
     StateEngine->>ML: Compute Recovery Score (State: ANALYZING -> PREDICTED)
-    ML-->>StateEngine: Return Score (e.g. 0.82 High Risk/High Prob)
+    ML-->>StateEngine: Return Score (e.g. 0.87 HIGH Risk/Prob) + Top Factors
     StateEngine->>Agent: Formulate Strategy (State: RECOMMENDED)
     Agent-->>StateEngine: Recommend "SMART_RETRY" or "NUDGE"
-    StateEngine->>Policy: Evaluate Financial Policy (State: POLICY_CHECK)
+    StateEngine->>Policy: Evaluate Guardrail Rules (State: POLICY_CHECK)
     Policy-->>StateEngine: Decision: APPROVED (State: ACTION_APPROVED)
     StateEngine->>Executor: Execute Action (State: ACTION_EXECUTING)
-    Executor->>Customer/Gateway: Smart Retry / Nudge Dispatch
+    Executor->>Gateway: Smart Retry / Nudge Dispatch
     Executor->>StateEngine: Update Final State (RECOVERY_SUCCESS / RECOVERY_FAILED)
-    StateEngine->>Audit: Write Immutable Audit Log + Correlation ID
+    StateEngine->>Audit: Write Immutable Audit Log + AIDecision Document
     Audit-->>UI: Real-Time Stream & Dashboard Update
 ```
 
@@ -65,10 +65,10 @@ sequenceDiagram
 
 | Recovery Action | Trigger Condition | Execution Mechanism | Target Outcome |
 | :--- | :--- | :--- | :--- |
-| **`SMART_RETRY`** | High ML probability ($>0.70$), temporary failure reason (`network_error`, `bank_timeout`). | Triggers immediate automated payment retry via Razorpay Test Mode integration. | Instant revenue recovery without customer friction. |
-| **`DELAYED_RETRY`** | Medium ML probability ($0.40 - 0.70$), salary cycle alignment (`insufficient_balance`). | Schedules future retry attempt (`next_retry_scheduled_at`) aligned with optimal success window. | Maximize recovery rate while preventing bank overload. |
-| **`PAYMENT_RECOVERY_NUDGE`** | Low ML probability ($<0.40$), user authentication required (`otp_timeout`). | Generates unique Payment Recovery Link (`https://recoverx.razorpay.com/pay/...`) and dispatches notification. | Empowers customer to complete payment manually. |
-| **`HUMAN_ESCALATION`** | High value transaction ($\ge ₹50,000$). | Escalates transaction state to `ESCALATED` for human operator approval via Control Plane. | Risk mitigation on high-value enterprise accounts. |
+| **`SMART_RETRY`** | High ML probability ($P \ge 0.70$), temporary failure reason (`network_timeout`, `bank_declined`). | Triggers immediate automated payment retry via Razorpay Test Mode integration. | Instant revenue recovery without customer friction. |
+| **`DELAYED_RETRY`** | Medium ML probability ($0.40 \le P < 0.70$), salary cycle alignment (`insufficient_balance`). | Schedules future retry attempt (`next_retry_scheduled_at`) aligned with optimal success window. | Maximize recovery rate while preventing bank overload. |
+| **`PAYMENT_RECOVERY_NUDGE`** | User authentication required (`otp_timeout`, `user_dropped`). | Generates unique Payment Recovery Link (`https://recoverx.razorpay.com/pay/...`) and dispatches notification. | Empowers customer to complete payment manually. |
+| **`HUMAN_ESCALATION`** | High value transaction ($\ge ₹50,000$ / $5,000,000$ paise). | Escalates transaction state to `ESCALATED` for human operator approval via Control Plane. | Risk mitigation on high-value enterprise accounts. |
 | **`STOP`** | Max retries reached ($\ge 3$), or unrecoverable error (`card_expired`, `invalid_account`). | Terminates automated interventions, setting state to `STOPPED`. | Protects merchant reputation and avoids gateway penalties. |
 
 ---
@@ -78,46 +78,19 @@ sequenceDiagram
 ### **Backend Core (`backend/`)**
 * **Runtime**: Node.js v22+
 * **Framework**: Express.js
-* **Database**: MongoDB + Mongoose ODM (Schemas, Compound Indexes, Validation)
-* **Security & Performance**: Helmet, Express-Rate-Limit, NoSQL Injection Sanitization, CORS
+* **Database**: MongoDB + Mongoose ODM (11 Core Schemas, Compound Indexes, Multi-Tenant Scoping)
+* **Security**: Helmet, Express-Rate-Limit, NoSQL Injection Protection, CORS, HMAC-SHA256 Signature Verification
 
-### **ML & AI Engine (`ml_service/`)**
-* **Framework**: Python 3.11, Scikit-Learn, FastAPI
-* **Predictive Pipeline**: Random Forest Classifier (`model.joblib`) trained on 10,000 transaction samples
-* **LLM Engine**: Groq API Provider Abstraction (`GroqProvider`) with deterministic heuristic fallback
+### **ML & AI Engine (`ml-service/`)**
+* **Framework**: Python 3.11/3.12, Scikit-Learn, XGBoost, FastAPI, Pytest
+* **Layer 1 ML Score**: XGBoost Recovery Model (`recovery_model.joblib`) trained on 10,000 transaction samples
+* **Layer 2 LLM Reasoning**: Groq API Provider (`GroqProvider`) running `openai/gpt-oss-20b` with zero OpenAI dependencies
 
 ### **Frontend Control Plane (`frontend/`)**
 * **Framework**: React 18 + Vite
 * **Styling**: Modern Glassmorphism CSS, Tailwind CSS
-* **Visualizations**: Recharts (Payment Failure Reasons & Method Breakdown)
-* **Icons & UI**: Lucide React, JetBrains Mono & Inter typography
-
----
-
-## 🚦 Roadmap & Implementation Status
-
-- [x] **Phase 1:** Project + Git + MongoDB Foundation Setup (`feat(db): setup MongoDB foundation`)
-- [x] **Phase 2:** Mongoose Schemas (`feat(db): add Mongoose schemas`)
-- [x] **Phase 3:** Validation + Compound Indexes (`feat(db): add validation and indexes`)
-- [x] **Phase 4:** Seed Data + 10K CSV Importer Pipeline (`feat(db): add seed and CSV import`)
-- [x] **Phase 5:** Repositories + Database Services Layer (`feat(db): add repositories`)
-- [x] **Phase 6:** Recovery State Machine Engine (`feat(recovery): add recovery state machine`)
-- [x] **Phase 7:** End-to-End Recovery Transaction Workflow Orchestrator (`feat(recovery): add transaction workflows`)
-- [x] **Phase 8:** Compliance Audit Logging + Webhook Idempotency Layer (`feat(audit): add audit logging`)
-- [x] **Phase 9:** Real-Time Analytics Aggregation Pipelines (`feat(analytics): add recovery metrics`)
-- [x] **Phase 10:** Database Layer Integration Test Suite (10/10 Test Suites Passing)
-- [x] **Phase 11:** Recovery Probability ML Model (`feat(ml): add recovery prediction pipeline`)
-- [x] **Phase 12:** AI Recovery Recommendation Agent (`feat(agent): add AI recommendation agent`)
-- [x] **Phase 13:** Policy / Guardrail Engine (`feat(policy): add policy engine`)
-- [x] **Phase 14:** Razorpay Test Mode Integration & Webhooks (`feat(razorpay): add webhooks and test integration`)
-- [x] **Phase 15:** Recovery Execution Workflow Engine (`feat(recovery): add recovery execution workflow`)
-- [x] **Phase 16:** Backend REST API Router (`feat(api): add backend REST API endpoints`)
-- [x] **Phase 17:** Frontend Recovery Dashboard (`feat(frontend): add React Vite dashboard UI`)
-- [x] **Phase 18:** Audit Timeline UI & Compliance Inspection View (`feat(frontend): add audit timeline UI`)
-- [x] **Phase 19:** End-to-End System Integration Test Suite (`test(e2e): add end-to-end integration test suite`)
-- [x] **Phase 20:** Performance & Security Hardening (`feat(security): add rate limiting, helmet, and input sanitization`)
-- [x] **Phase 21:** Final Architecture & User Documentation (`docs(readme): add comprehensive architecture and user guide`)
-- [x] **Phase 22:** Hackathon Demo Preparation & Production Release Tag (`v1.0.0`)
+* **Visualizations**: Interactive SVG breakdown charts
+* **Typography**: JetBrains Mono & Inter fonts
 
 ---
 
@@ -125,6 +98,7 @@ sequenceDiagram
 
 ### **Prerequisites**
 - Node.js (v18.0+)
+- Python (v3.11+)
 - MongoDB (running locally on port 27017 or a MongoDB Atlas URI)
 - Git
 
@@ -140,6 +114,10 @@ npm install
 # Install Frontend Dependencies
 cd ../frontend
 npm install
+
+# Install ML Service Dependencies
+cd ../ml-service
+pip install -r requirements.txt
 ```
 
 ### **2. Environment Configuration**
@@ -151,28 +129,37 @@ MONGODB_URI=mongodb://localhost:27017/recoverx
 RAZORPAY_WEBHOOK_SECRET=recoverx_secret_key_2026
 GROQ_API_KEY=your_groq_api_key
 GROQ_MODEL=openai/gpt-oss-20b
+GROQ_TIMEOUT_MS=10000
+MAX_LLM_RETRIES=3
+MIN_RECOVERY_PROBABILITY=0.70
+HIGH_VALUE_THRESHOLD_PAISE=5000000
 ```
 
-### **3. Seed Synthetic Dataset (10,000 Transactions)**
+### **3. Import 10,000 Dataset & Run Tests**
 ```bash
+# Seed 10K dataset into MongoDB
 cd backend
-npm run seed
-```
-*Output*: Successfully populates `Transaction` and `PolicyConfig` collections with 10,000 records from `data/raw/recoverx_revenue_recovery_dataset_10000.csv`.
+npm run db:import
 
-### **4. Run Automated Test Suite (16 Test Suites, 68 Tests)**
-```bash
-cd backend
+# Run Node Test Suite (18 Test Suites, 77 Tests Passing)
 npm test
+
+# Run Python ML Test Suite (3 Tests Passing)
+cd ../ml-service
+pytest
 ```
 
-### **5. Launch Backend & Frontend Servers**
+### **4. Launch Application Services**
 ```bash
 # Terminal 1: Backend Server (Port 5000)
 cd backend
 npm run dev
 
-# Terminal 2: Frontend Vite App (Port 5173)
+# Terminal 2: ML Service (Port 8000)
+cd ml-service
+python app/main.py
+
+# Terminal 3: Frontend Dashboard (Port 5173)
 cd frontend
 npm run dev
 ```
@@ -199,4 +186,4 @@ Open your browser at `http://localhost:5173` to access the RecoverX Control Plan
 ---
 
 ## 🛡️ License & Acknowledgments
-Designed & developed for the **Razorpay Buildathon 2026**. Licensed under the [MIT License](LICENSE).
+Designed & developed for the **Razorpay Buildathon 2026 — Track 03: AI Revenue Recovery**. Licensed under the [MIT License](LICENSE).
