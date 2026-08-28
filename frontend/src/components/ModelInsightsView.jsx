@@ -81,7 +81,7 @@ export default function ModelInsightsView() {
       {/* Feature Importance Section */}
       <div className="bg-white border border-[#E4E7EC] rounded-xl p-6 shadow-sm">
         <h3 className="text-base font-semibold text-[#111827] mb-1">XGBoost Feature Importance Weights</h3>
-        <p className="text-xs text-[#667085] mb-6">Relative contribution of input features to $P(\text{recovery})$ predictions (Synthetic Training Baseline)</p>
+        <p className="text-xs text-[#667085] mb-6">Relative contribution of input features to P(recovery) predictions (Synthetic Training Baseline)</p>
 
         <div className="space-y-4">
           {featureImportance.map((item, idx) => (
