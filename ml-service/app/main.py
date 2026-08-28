@@ -1,6 +1,7 @@
 import os
 import sys
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 
@@ -12,6 +13,15 @@ app = FastAPI(
     title="RecoverX ML Service",
     description="FastAPI Revenue Recovery Probability Prediction Service",
     version="1.0.0"
+)
+
+# Enable CORS middleware to allow requests from frontend app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class PredictRecoveryRequest(BaseModel):

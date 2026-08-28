@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, CheckCircle2, Bot, ShieldCheck } from 'lucide-react';
+import { Cpu, CheckCircle2, Bot } from 'lucide-react';
 
 export default function ModelInsightsView() {
   const [modelInfo, setModelInfo] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/model-info')
+    fetch('/api/v1/analytics/model-info')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setModelInfo(data);
+      .then((json) => {
+        if (json && json.status === 'success' && json.data) {
+          setModelInfo(json.data);
+        }
       })
       .catch(() => {
-        // Fallback gracefully if direct cross-origin fetch is restricted
+        // Fallback gracefully if API is unreachable
       });
   }, []);
 
