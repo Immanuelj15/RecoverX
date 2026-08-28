@@ -18,20 +18,35 @@ import {
 const COLORS = ['#2D6CDF', '#16A34A', '#F59E0B', '#635BFF', '#DC2626'];
 
 export default function AnalyticsCharts({ chartsData, isLoading }) {
-  const failureReasons = chartsData?.failure_reasons || [
-    { failure_reason: 'insufficient_balance', count: 180, recovered: 95 },
-    { failure_reason: 'bank_declined', count: 140, recovered: 60 },
-    { failure_reason: 'network_timeout', count: 90, recovered: 78 },
-    { failure_reason: 'card_expired', count: 50, recovered: 5 },
-    { failure_reason: 'authentication_failure', count: 40, recovered: 25 }
+  const failureReasons = (chartsData?.failure_reasons || []).map((item) => ({
+    failure_reason: item.failure_reason || 'unknown',
+    total_cases: item.total_cases || item.count || 0,
+    recovered_cases: item.recovered_cases || item.recovered || 0
+  }));
+
+  const defaultFailureReasons = [
+    { failure_reason: 'insufficient_balance', total_cases: 180, recovered_cases: 95 },
+    { failure_reason: 'bank_declined', total_cases: 140, recovered_cases: 60 },
+    { failure_reason: 'network_timeout', total_cases: 90, recovered_cases: 78 },
+    { failure_reason: 'card_expired', total_cases: 50, recovered_cases: 5 },
+    { failure_reason: 'authentication_failure', total_cases: 40, recovered_cases: 25 }
   ];
 
-  const paymentMethods = chartsData?.payment_methods || [
-    { payment_method: 'upi', count: 250 },
-    { payment_method: 'card', count: 150 },
-    { payment_method: 'netbanking', count: 70 },
-    { payment_method: 'wallet', count: 30 }
+  const finalFailureReasons = failureReasons.length > 0 ? failureReasons : defaultFailureReasons;
+
+  const paymentMethods = (chartsData?.payment_methods || []).map((item) => ({
+    payment_method: item.payment_method || 'other',
+    total_cases: item.total_cases || item.count || 0
+  }));
+
+  const defaultPaymentMethods = [
+    { payment_method: 'upi', total_cases: 250 },
+    { payment_method: 'card', total_cases: 150 },
+    { payment_method: 'netbanking', total_cases: 70 },
+    { payment_method: 'wallet', total_cases: 30 }
   ];
+
+  const finalPaymentMethods = paymentMethods.length > 0 ? paymentMethods : defaultPaymentMethods;
 
   const trendData = [
     { date: 'Mon', atRisk: 120000, recovered: 75000 },
@@ -102,17 +117,17 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-6 shadow-sm">
           <h3 className="text-base font-semibold text-[#111827] mb-1">Payment Failure Reasons</h3>
           <p className="text-xs text-[#667085] mb-4">Total failed vs. recovered by failure category</p>
-          <div className="h-60">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={failureReasons} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={finalFailureReasons} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F2F4F7" vertical={false} />
                 <XAxis dataKey="failure_reason" stroke="#667085" fontSize={11} tickLine={false} />
                 <YAxis stroke="#667085" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E4E7EC', borderRadius: '8px', fontSize: '12px' }}
                 />
-                <Bar dataKey="count" fill="#2D6CDF" radius={[4, 4, 0, 0]} name="Total Failed" />
-                <Bar dataKey="recovered" fill="#16A34A" radius={[4, 4, 0, 0]} name="Recovered" />
+                <Bar dataKey="total_cases" fill="#2D6CDF" radius={[4, 4, 0, 0]} name="Total Failed" />
+                <Bar dataKey="recovered_cases" fill="#16A34A" radius={[4, 4, 0, 0]} name="Recovered" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -122,12 +137,12 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-6 shadow-sm">
           <h3 className="text-base font-semibold text-[#111827] mb-1">Payment Method Distribution</h3>
           <p className="text-xs text-[#667085] mb-4">Volume breakdown across UPI, Card, Netbanking, Wallet</p>
-          <div className="h-60 flex items-center justify-center">
+          <div className="h-64 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={paymentMethods}
-                  dataKey="count"
+                  data={finalPaymentMethods}
+                  dataKey="total_cases"
                   nameKey="payment_method"
                   cx="50%"
                   cy="50%"
@@ -135,7 +150,7 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
                   innerRadius={45}
                   paddingAngle={4}
                 >
-                  {paymentMethods.map((entry, index) => (
+                  {finalPaymentMethods.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
