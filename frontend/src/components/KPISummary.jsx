@@ -1,59 +1,113 @@
-import React from 'react';
-import { AlertCircle, CheckCircle2, TrendingUp, ShieldAlert, ArrowUpRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertCircle, CheckCircle2, TrendingUp, ShieldAlert } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function KPISummary({ summary, isLoading }) {
-  const formatINR = (amountInr) => {
-    if (amountInr === undefined || amountInr === null) return '₹0';
-    const num = Number(amountInr);
-    if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)}Cr`;
-    if (num >= 100000) return `₹${(num / 10000).toFixed(2)}L`;
-    return `₹${num.toLocaleString('en-IN')}`;
+  const [animatedValues, setAnimatedValues] = useState({
+    atRisk: 0,
+    recovered: 0,
+    rate: 0,
+    count: 0
+  });
+
+  const targetAtRisk = summary?.revenue_at_risk || 0;
+  const targetRecovered = summary?.revenue_recovered || 0;
+  const targetRate = summary?.recovery_rate || 0;
+  const targetCount = summary?.total_recovered_count || summary?.successful_recoveries || 0;
+
+  useEffect(() => {
+    // Check if user prefers reduced motion
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      setAnimatedValues({
+        atRisk: targetAtRisk,
+        recovered: targetRecovered,
+        rate: targetRate,
+        count: targetCount
+      });
+      return;
+    }
+
+    let start = null;
+    const duration = 700; // 700ms smooth count-up
+
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+      setAnimatedValues({
+        atRisk: Math.floor(targetAtRisk * easeProgress),
+        recovered: Math.floor(targetRecovered * easeProgress),
+        rate: parseFloat((targetRate * easeProgress).toFixed(1)),
+        count: Math.floor(targetCount * easeProgress)
+      });
+
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+
+    window.requestAnimationFrame(step);
+  }, [targetAtRisk, targetRecovered, targetRate, targetCount]);
+
+  const formatINR = (num) => {
+    if (num === undefined || num === null) return '₹0';
+    const n = Number(num);
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)}Cr`;
+    if (n >= 100000) return `₹${(n / 10000).toFixed(2)}L`;
+    return `₹${n.toLocaleString('en-IN')}`;
   };
 
   const metrics = [
     {
       title: 'Revenue at Risk',
-      value: formatINR(summary?.revenue_at_risk || 0),
+      value: formatINR(animatedValues.atRisk),
       subtext: `${summary?.total_transactions_analyzed || 0} failed payments detected`,
       change: 'Needs Attention',
-      changeType: 'warning',
       icon: ShieldAlert,
       accentColor: 'text-[#F59E0B]',
       bgColor: 'bg-[#FFFBEB]',
-      borderColor: 'border-[#FDE68A]'
+      borderColor: 'border-[#FDE68A]',
+      tooltipTerm: 'Revenue at Risk',
+      tooltipText: 'Total gross value of all failed payment transactions currently flagged for recovery.'
     },
     {
       title: 'Revenue Recovered',
-      value: formatINR(summary?.revenue_recovered || 0),
-      subtext: `${summary?.total_recovered_count || 0} successful AI recoveries`,
+      value: formatINR(animatedValues.recovered),
+      subtext: `${targetCount} successful AI recoveries`,
       change: '↑ 12.4% vs prev period',
       changeType: 'positive',
       icon: CheckCircle2,
       accentColor: 'text-[#16A34A]',
       bgColor: 'bg-[#F0FDF4]',
-      borderColor: 'border-[#BBF7D0]'
+      borderColor: 'border-[#BBF7D0]',
+      tooltipTerm: 'Revenue Recovered',
+      tooltipText: 'Actual money collected via automated smart retries, payment nudges, and policy-approved interventions.'
     },
     {
       title: 'Recovery Success Rate',
-      value: `${(summary?.recovery_rate || 0).toFixed(1)}%`,
-      subtext: `Avg ₹${summary?.revenue_recovered && summary?.total_recovered_count ? Math.round(summary.revenue_recovered / summary.total_recovered_count) : 0} per recovery`,
+      value: `${animatedValues.rate.toFixed(1)}%`,
+      subtext: `Avg ₹${summary?.revenue_recovered && targetCount ? Math.round(summary.revenue_recovered / targetCount) : 0} per recovery`,
       change: 'Target > 50%',
-      changeType: 'neutral',
       icon: TrendingUp,
       accentColor: 'text-[#2D6CDF]',
       bgColor: 'bg-[#EEF4FF]',
-      borderColor: 'border-[#C7D7FE]'
+      borderColor: 'border-[#C7D7FE]',
+      tooltipTerm: 'Recovery Success Rate',
+      tooltipText: 'Percentage of total failed revenue successfully recovered back into merchant accounts.'
     },
     {
       title: 'Payments Recovered',
-      value: (summary?.total_recovered_count || 0).toLocaleString('en-IN'),
-      subtext: `${summary?.total_escalated_count || 0} Escalated • ${summary?.total_stopped_count || 0} Guardrail Blocked`,
+      value: animatedValues.count.toLocaleString('en-IN'),
+      subtext: `${summary?.human_escalations || 0} Escalated • ${summary?.stopped_actions || 0} Guardrail Stopped`,
       change: 'Automated',
-      changeType: 'neutral',
       icon: AlertCircle,
       accentColor: 'text-[#635BFF]',
       bgColor: 'bg-[#EEF2FF]',
-      borderColor: 'border-[#C7D2FE]'
+      borderColor: 'border-[#C7D2FE]',
+      tooltipTerm: 'Payments Recovered',
+      tooltipText: 'Total count of individual transaction recovery cases completed successfully.'
     }
   ];
 
@@ -78,11 +132,13 @@ export default function KPISummary({ summary, isLoading }) {
         return (
           <div
             key={idx}
-            className="bg-white border border-[#E4E7EC] rounded-xl p-5 shadow-sm hover:shadow-md transition-all fintech-card"
+            className="bg-white border border-[#E4E7EC] rounded-xl p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all fintech-card"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-[#667085]">
-                {m.title}
+                <Tooltip term={m.tooltipTerm} text={m.tooltipText}>
+                  {m.title}
+                </Tooltip>
               </span>
               <div className={`p-2 rounded-lg ${m.bgColor} ${m.borderColor} border`}>
                 <Icon className={`w-4 h-4 ${m.accentColor}`} />

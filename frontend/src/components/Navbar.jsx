@@ -1,20 +1,26 @@
 import React from 'react';
-import { Search, Bell, Shield, Activity, RefreshCw } from 'lucide-react';
+import { Search, Bell, Shield, RefreshCw } from 'lucide-react';
 
-export default function Navbar({ onRefresh, isRefreshing, searchQuery, setSearchQuery }) {
+export default function Navbar({ onRefresh, isRefreshing, searchQuery, setSearchQuery, onOpenCommandPalette }) {
   return (
     <header className="h-16 bg-white border-b border-[#E4E7EC] px-8 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-      {/* Search Input */}
+      {/* Search Input with Command Palette Trigger */}
       <div className="flex items-center gap-4 flex-1 max-w-md">
-        <div className="relative w-full">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#667085]" />
+        <div
+          onClick={onOpenCommandPalette}
+          className="relative w-full cursor-pointer group"
+        >
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#667085] group-hover:text-[#2D6CDF]" />
           <input
             type="text"
-            placeholder="Search Payment ID (e.g. pay_...), Customer ID..."
+            readOnly
+            placeholder="Search payment ID, customer ID... (Press Ctrl + K)"
             value={searchQuery || ''}
-            onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-sm bg-[#F7F9FC] border border-[#E4E7EC] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2D6CDF] focus:border-transparent text-[#111827] placeholder-[#98A2B3]"
+            className="w-full pl-10 pr-16 py-2 text-xs bg-[#F7F9FC] border border-[#E4E7EC] rounded-lg cursor-pointer text-[#111827] placeholder-[#98A2B3] group-hover:border-[#C7D7FE]"
           />
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded bg-white border border-[#E4E7EC] text-[10px] font-mono font-semibold text-[#667085] shadow-2xl">
+            ⌘K
+          </div>
         </div>
       </div>
 

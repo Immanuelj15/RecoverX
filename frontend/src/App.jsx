@@ -11,7 +11,11 @@ import PolicyModal from './components/PolicyModal';
 import AIDecisionsView from './components/AIDecisionsView';
 import ModelInsightsView from './components/ModelInsightsView';
 import AuditTimelineView from './components/AuditTimelineView';
-import { Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import SafetyDiagram from './components/SafetyDiagram';
+import LiveActivityWidget from './components/LiveActivityWidget';
+import CommandPalette from './components/CommandPalette';
+import ConfirmationModal from './components/ConfirmationModal';
+import { Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -33,6 +37,8 @@ export default function App() {
 
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const [confirmTriggerId, setConfirmTriggerId] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg) => {
@@ -128,7 +134,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F7F9FC] text-[#111827] antialiased">
+    <div className="flex min-h-screen bg-[#F7F9FC] text-[#111827] antialiased font-sans">
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -149,6 +155,7 @@ export default function App() {
           isRefreshing={isRefreshing}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onOpenCommandPalette={() => setIsCommandOpen(true)}
         />
 
         {/* Toast Notification Alert */}
@@ -159,8 +166,8 @@ export default function App() {
           </div>
         )}
 
-        {/* Content Area */}
-        <main className="flex-1 p-8 max-w-[1400px] w-full mx-auto">
+        {/* Content Area with smooth transition */}
+        <main className="flex-1 p-8 max-w-[1400px] w-full mx-auto transition-all duration-200">
           {/* Overview Dashboard View */}
           {activeTab === 'overview' && (
             <div>
@@ -169,14 +176,14 @@ export default function App() {
                 <div>
                   <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Revenue Recovery</h1>
                   <p className="text-sm text-[#667085] mt-1">
-                    Monitor failed payments, XGBoost probability scoring, Groq reasoning, and policy controls.
+                    See where revenue is slipping away and how RecoverX is recovering it safely.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsPolicyOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-[#0C2651] bg-[#EEF4FF] hover:bg-[#D0E2FF] border border-[#C7D7FE] rounded-lg transition-all"
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-[#0C2651] bg-[#EEF4FF] hover:bg-[#D0E2FF] border border-[#C7D7FE] rounded-lg transition-all shadow-sm"
                   >
                     <ShieldCheck className="w-4 h-4 text-[#2D6CDF]" />
                     <span>Guardrail Policies</span>
@@ -184,11 +191,17 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 4 Top KPI Metric Cards */}
+              {/* 4 Top KPI Metric Cards with Count-Up Animation */}
               <KPISummary summary={summary} isLoading={isRefreshing} />
 
               {/* AI Recovery Insight Card */}
               <AIInsightCard onOpenPolicy={() => setIsPolicyOpen(true)} />
+
+              {/* Safety Architecture Diagram */}
+              <SafetyDiagram />
+
+              {/* Live Activity Feed */}
+              <LiveActivityWidget transactions={transactions} />
 
               {/* Recovery Pipeline Flow */}
               <RecoveryPipeline summary={summary} />
@@ -204,7 +217,7 @@ export default function App() {
                 totalPages={totalPages}
                 onPageChange={(p) => setPage(p)}
                 onSelectTransaction={(t) => setSelectedTransaction(t)}
-                onTriggerRecovery={handleTriggerRecovery}
+                onTriggerRecovery={(id) => setConfirmTriggerId(id)}
                 filterState={filterState}
                 setFilterState={setFilterState}
                 filterRisk={filterRisk}
@@ -231,7 +244,7 @@ export default function App() {
                 totalPages={totalPages}
                 onPageChange={(p) => setPage(p)}
                 onSelectTransaction={(t) => setSelectedTransaction(t)}
-                onTriggerRecovery={handleTriggerRecovery}
+                onTriggerRecovery={(id) => setConfirmTriggerId(id)}
                 filterState={filterState}
                 setFilterState={setFilterState}
                 filterRisk={filterRisk}
@@ -270,6 +283,27 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Command Palette Modal (Ctrl + K) */}
+      <CommandPalette
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        onNavigate={(tab, txn) => {
+          setActiveTab(tab);
+          if (txn) setSelectedTransaction(txn);
+        }}
+        transactions={transactions}
+      />
+
+      {/* Manual Trigger Confirmation Modal */}
+      <ConfirmationModal
+        paymentId={confirmTriggerId}
+        amountInr={transactions.find((t) => t.payment_id === confirmTriggerId)?.amount_inr}
+        action={transactions.find((t) => t.payment_id === confirmTriggerId)?.recommended_action}
+        isOpen={Boolean(confirmTriggerId)}
+        onClose={() => setConfirmTriggerId(null)}
+        onConfirm={() => confirmTriggerId && handleTriggerRecovery(confirmTriggerId)}
+      />
 
       {/* Timeline Inspector Modal */}
       {selectedTransaction && (

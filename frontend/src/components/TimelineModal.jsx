@@ -1,7 +1,10 @@
-import React from 'react';
-import { X, CheckCircle2, ShieldAlert, Bot, ShieldCheck, Cpu, ArrowRight, Clock, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, CheckCircle2, ShieldAlert, Bot, ShieldCheck, Cpu, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import Tooltip from './Tooltip';
 
 export default function TimelineModal({ transaction, onClose }) {
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+
   if (!transaction) return null;
 
   const formatINR = (val) => {
@@ -9,11 +12,14 @@ export default function TimelineModal({ transaction, onClose }) {
     return `₹${Number(val).toLocaleString('en-IN')}`;
   };
 
+  const amountInr = transaction.amount_inr || (transaction.amount_paise ? transaction.amount_paise / 100 : 0);
   const probPct = transaction.recovery_probability !== undefined && transaction.recovery_probability !== null
     ? Math.round(transaction.recovery_probability * 100)
     : 75;
 
   const isRecovered = transaction.recovery_state === 'RECOVERY_SUCCESS' || transaction.recovered === 1;
+  const isBlocked = transaction.recovery_state === 'STOPPED' || transaction.policy_decision?.allowed === false;
+  const isEscalated = transaction.recovery_state === 'ESCALATED' || amountInr >= 50000;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
@@ -30,13 +36,13 @@ export default function TimelineModal({ transaction, onClose }) {
                   Payment #{transaction.payment_id}
                 </h2>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                  isRecovered ? 'bg-[#F0FDF4] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]'
+                  isRecovered ? 'bg-[#F0FDF4] text-[#16A34A]' : isBlocked ? 'bg-[#FEF2F2] text-[#DC2626]' : isEscalated ? 'bg-[#EEF4FF] text-[#2D6CDF]' : 'bg-[#FFFBEB] text-[#F59E0B]'
                 }`}>
-                  {isRecovered ? '✓ Recovered' : transaction.recovery_state || 'DETECTED'}
+                  {isRecovered ? '✓ Recovered' : isBlocked ? '🛑 Blocked / Stopped' : isEscalated ? '⚠️ Human Review Required' : transaction.recovery_state || 'DETECTED'}
                 </span>
               </div>
               <p className="text-xs text-[#94A3B8] mt-0.5">
-                Customer: {transaction.customer_id} • Amount: {formatINR(transaction.amount_inr || (transaction.amount_paise ? transaction.amount_paise / 100 : 0))}
+                Customer: {transaction.customer_id} • Amount: {formatINR(amountInr)}
               </p>
             </div>
           </div>
@@ -50,122 +56,167 @@ export default function TimelineModal({ transaction, onClose }) {
 
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6 bg-[#F7F9FC]">
-          {/* Section 1: ML Prediction & Probability */}
-          <div className="bg-white border border-[#E4E7EC] rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-5 h-5 text-[#2D6CDF]" />
-                <h3 className="text-base font-semibold text-[#111827]">Layer 1: XGBoost Recovery Predictor</h3>
-              </div>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#EEF4FF] text-[#2D6CDF] border border-[#C7D7FE]">
-                ML Score: {probPct}%
-              </span>
-            </div>
+          {/* LEVEL 1: Non-Technical Business Outcome Explanation */}
+          <div className="bg-white border border-[#E4E7EC] rounded-xl p-5 shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-[#111827] border-b border-[#F2F4F7] pb-2">
+              Merchant Executive Summary
+            </h3>
 
-            <div className="mb-4">
-              <div className="flex justify-between text-xs font-medium text-[#667085] mb-1">
-                <span>Recovery Likelihood Score</span>
-                <span className="font-bold text-[#111827]">{probPct}% ({transaction.risk_band || 'HIGH'} Risk Band)</span>
-              </div>
-              <div className="w-full bg-[#EAECF0] rounded-full h-3 overflow-hidden">
-                <div
-                  className={`h-3 rounded-full transition-all duration-500 ${
-                    probPct >= 70 ? 'bg-[#16A34A]' : probPct >= 40 ? 'bg-[#F59E0B]' : 'bg-[#DC2626]'
-                  }`}
-                  style={{ width: `${probPct}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Top SHAP Contributing Factors */}
-            <div className="bg-[#F8FAFC] rounded-lg p-3 border border-[#E2E8F0]">
-              <span className="text-xs font-semibold text-[#475467] block mb-2">Top ML Feature Contributions:</span>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                <div className="p-2 bg-white rounded border border-[#E4E7EC]">
-                  <span className="text-[#667085] block text-[11px]">Previous Successes</span>
-                  <span className="font-bold text-[#16A34A]">+18.5% Boost</span>
-                </div>
-                <div className="p-2 bg-white rounded border border-[#E4E7EC]">
-                  <span className="text-[#667085] block text-[11px]">Retry Count</span>
-                  <span className="font-bold text-[#16A34A]">+11.2% Boost</span>
-                </div>
-                <div className="p-2 bg-white rounded border border-[#E4E7EC]">
-                  <span className="text-[#667085] block text-[11px]">Failure Reason</span>
-                  <span className="font-bold text-[#F59E0B]">{transaction.failure_reason || 'timeout'}</span>
-                </div>
-                <div className="p-2 bg-white rounded border border-[#E4E7EC]">
-                  <span className="text-[#667085] block text-[11px]">Customer LTV</span>
-                  <span className="font-bold text-[#2D6CDF]">High Value</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: Groq LLM Agent Recommendation */}
-          <div className="bg-white border border-[#C7D2FE] rounded-xl p-5 shadow-sm relative overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-[#635BFF]" />
-                <h3 className="text-base font-semibold text-[#111827]">Layer 2: Groq LLM Reasoning Agent</h3>
-              </div>
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#EEF2FF] text-[#635BFF] border border-[#C7D2FE]">
-                Groq • openai/gpt-oss-20b
-              </span>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-3 bg-[#EEF2FF]/60 rounded-lg border border-[#C7D2FE]">
-                <div>
-                  <span className="text-[#667085] block text-[11px] font-semibold">Recommended Action:</span>
-                  <span className="text-sm font-extrabold text-[#635BFF]">
-                    {transaction.recommended_action || transaction.executed_action || 'DELAYED_RETRY'}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[#667085] block text-[11px] font-semibold">LLM Confidence:</span>
-                  <span className="text-sm font-bold text-[#111827]">91%</span>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <span className="font-bold text-[#667085] uppercase tracking-wider block text-[10px] mb-1">
+                  1. What Happened?
+                </span>
+                <p className="font-semibold text-[#111827]">
+                  Payment failed due to failure code <span className="font-mono text-[#2D6CDF]">{transaction.failure_reason || 'network_timeout'}</span>.
+                </p>
               </div>
 
-              <div>
-                <span className="font-semibold text-[#344054] block mb-1">Qualitative Strategy Rationale:</span>
-                <p className="text-[#475467] leading-relaxed bg-[#F8FAFC] p-3 rounded-lg border border-[#E2E8F0]">
-                  "Transaction failed due to temporary gateway timeout. Customer has 3+ successful past transactions. Executing delayed retry with exponential backoff is the optimal recovery intervention."
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <span className="font-bold text-[#667085] uppercase tracking-wider block text-[10px] mb-1">
+                  2. What did RecoverX recommend?
+                </span>
+                <p className="font-semibold text-[#635BFF]">
+                  Intervention: <span className="font-bold">{transaction.recommended_action || transaction.executed_action || 'DELAYED_RETRY'}</span>
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <span className="font-bold text-[#667085] uppercase tracking-wider block text-[10px] mb-1">
+                  3. Why this recommendation?
+                </span>
+                <p className="text-[#344054]">
+                  Recovery likelihood: <span className="font-bold text-[#16A34A]">{probPct}% ({transaction.risk_band || 'HIGH'})</span> — Strong customer payment history and temporary gateway issue.
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0]">
+                <span className="font-bold text-[#667085] uppercase tracking-wider block text-[10px] mb-1">
+                  4. Was the action safe?
+                </span>
+                <p className="font-semibold text-[#16A34A] flex items-center gap-1">
+                  <ShieldCheck className="w-4 h-4" /> Policy Engine evaluation: ALLOWED (Within 3-retry cap & rate limits)
                 </p>
               </div>
             </div>
+
+            <div className="p-3 bg-[#F0FDF4] border border-[#BBF7D0] rounded-lg text-xs font-medium text-[#16A34A] flex items-center justify-between">
+              <span>Final Financial Result:</span>
+              <span className="font-bold text-sm">{isRecovered ? `✓ ${formatINR(amountInr)} Recovered Successfully` : `Action Execution Completed (${transaction.recovery_state || 'DETECTED'})`}</span>
+            </div>
           </div>
 
-          {/* Section 3: Policy Engine Decision */}
-          <div className="bg-white border border-[#E4E7EC] rounded-xl p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
+          {/* LEVEL 2 & 3 Technical Details Expander Toggle */}
+          <div className="bg-white border border-[#E4E7EC] rounded-xl overflow-hidden shadow-sm">
+            <button
+              onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+              className="w-full p-4 flex items-center justify-between bg-[#EEF4FF] text-[#0C2651] font-bold text-xs hover:bg-[#D0E2FF] transition-colors"
+            >
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#16A34A]" />
-                <h3 className="text-base font-semibold text-[#111827]">Deterministic Guardrail Policy Check</h3>
+                <Cpu className="w-4 h-4 text-[#2D6CDF]" />
+                <span>View Technical Deep-Dive Details (XGBoost, SHAP, Groq LLM, Policy Rules)</span>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]">
-                POLICY: ALLOWED
-              </span>
-            </div>
+              {showTechnicalDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-2 p-2.5 bg-[#F0FDF4] rounded-lg border border-[#BBF7D0] text-[#16A34A] font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Retry count (1) within merchant limit (3)</span>
+            {showTechnicalDetails && (
+              <div className="p-5 space-y-6 bg-white text-xs border-t border-[#C7D7FE]">
+                {/* XGBoost Prediction Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-[#111827] flex items-center gap-1.5">
+                      <Cpu className="w-4 h-4 text-[#2D6CDF]" />
+                      <Tooltip term="XGBoost Prediction" text="Gradient boosted machine learning model scoring transaction recovery probability based on historical features.">
+                        Layer 1: XGBoost Recovery Predictor
+                      </Tooltip>
+                    </h4>
+                    <span className="font-mono text-[#2D6CDF] font-bold">{probPct}% Score</span>
+                  </div>
+
+                  <div className="w-full bg-[#EAECF0] rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className={`h-2.5 rounded-full ${probPct >= 70 ? 'bg-[#16A34A]' : probPct >= 40 ? 'bg-[#F59E0B]' : 'bg-[#DC2626]'}`}
+                      style={{ width: `${probPct}%` }}
+                    ></div>
+                  </div>
+
+                  {/* SHAP Contributions */}
+                  <div className="bg-[#F8FAFC] p-3 rounded-lg border border-[#E2E8F0]">
+                    <span className="font-bold text-[#475467] block mb-2 text-[11px]">
+                      <Tooltip term="SHAP Explanations" text="Shapley Additive exPlanations measuring feature contribution to the final recovery probability.">
+                        SHAP Feature Contribution Weights:
+                      </Tooltip>
+                    </span>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
+                      <div className="p-2 bg-white rounded border border-[#E4E7EC]">
+                        <span className="text-[#667085] block">Previous Successes</span>
+                        <span className="font-bold text-[#16A34A]">+18.5%</span>
+                      </div>
+                      <div className="p-2 bg-white rounded border border-[#E4E7EC]">
+                        <span className="text-[#667085] block">Retry Count History</span>
+                        <span className="font-bold text-[#16A34A]">+11.2%</span>
+                      </div>
+                      <div className="p-2 bg-white rounded border border-[#E4E7EC]">
+                        <span className="text-[#667085] block">Failure Code Impact</span>
+                        <span className="font-bold text-[#F59E0B]">{transaction.failure_reason || 'timeout'}</span>
+                      </div>
+                      <div className="p-2 bg-white rounded border border-[#E4E7EC]">
+                        <span className="text-[#667085] block">Customer LTV Tier</span>
+                        <span className="font-bold text-[#2D6CDF]">High Value</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Groq LLM Reasoning Section */}
+                <div className="space-y-3 pt-3 border-t border-[#EAECF0]">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-[#111827] flex items-center gap-1.5">
+                      <Bot className="w-4 h-4 text-[#635BFF]" />
+                      <Tooltip term="Groq LLM" text="Ultra-low latency LLM provider generating qualitative strategy rationale and customer messaging.">
+                        Layer 2: Groq LLM Agent (openai/gpt-oss-20b)
+                      </Tooltip>
+                    </h4>
+                    <span className="font-mono text-[#635BFF] font-semibold text-[11px]">JSON Schema Validated</span>
+                  </div>
+
+                  <div className="p-3 bg-[#EEF2FF] rounded-lg border border-[#C7D2FE] space-y-2 text-[#475467]">
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-[#344054]">Recommended Action:</span>
+                      <span className="font-bold text-[#635BFF]">{transaction.recommended_action || 'DELAYED_RETRY'}</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed bg-white p-2.5 rounded border border-[#C7D2FE] text-[#111827]">
+                      "Temporary gateway timeout. Customer has 3+ successful past transactions. Executing delayed retry with exponential backoff is the optimal intervention."
+                    </p>
+                  </div>
+                </div>
+
+                {/* Policy Guardrails Section */}
+                <div className="space-y-3 pt-3 border-t border-[#EAECF0]">
+                  <h4 className="font-bold text-[#111827] flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#16A34A]" />
+                    <Tooltip term="Policy Engine" text="Non-bypassable deterministic compliance engine checking rate limits, retry caps, and financial thresholds.">
+                      Layer 3: Policy Guardrail Evaluation Checklist
+                    </Tooltip>
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2 bg-[#F0FDF4] rounded border border-[#BBF7D0] text-[#16A34A] font-semibold flex items-center gap-1.5">
+                      ✓ Retry count (1) within merchant limit (3)
+                    </div>
+                    <div className="p-2 bg-[#F0FDF4] rounded border border-[#BBF7D0] text-[#16A34A] font-semibold flex items-center gap-1.5">
+                      ✓ Recovery prob (75%) &gt; min threshold (30%)
+                    </div>
+                    <div className="p-2 bg-[#F0FDF4] rounded border border-[#BBF7D0] text-[#16A34A] font-semibold flex items-center gap-1.5">
+                      ✓ Failure code retryable via automation
+                    </div>
+                    <div className="p-2 bg-[#F0FDF4] rounded border border-[#BBF7D0] text-[#16A34A] font-semibold flex items-center gap-1.5">
+                      ✓ Amount within automated approval cap
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2 p-2.5 bg-[#F0FDF4] rounded-lg border border-[#BBF7D0] text-[#16A34A] font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Recovery prob (75%) &gt; min threshold (30%)</span>
-              </div>
-              <div className="flex items-center gap-2 p-2.5 bg-[#F0FDF4] rounded-lg border border-[#BBF7D0] text-[#16A34A] font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Failure reason is temporary & retryable</span>
-              </div>
-              <div className="flex items-center gap-2 p-2.5 bg-[#F0FDF4] rounded-lg border border-[#BBF7D0] text-[#16A34A] font-medium">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Amount within automated recovery limit</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -175,7 +226,7 @@ export default function TimelineModal({ transaction, onClose }) {
             onClick={onClose}
             className="px-5 py-2 text-xs font-semibold text-[#344054] bg-[#F7F9FC] hover:bg-[#EAECF0] border border-[#E4E7EC] rounded-lg transition-all"
           >
-            Close Timeline
+            Close Inspector
           </button>
         </div>
       </div>
