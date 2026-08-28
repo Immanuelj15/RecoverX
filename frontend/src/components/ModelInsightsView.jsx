@@ -1,8 +1,21 @@
-import React from 'react';
-import { Cpu, CheckCircle2, Bot, BarChart2, ShieldCheck, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Cpu, CheckCircle2, Bot, ShieldCheck } from 'lucide-react';
 
 export default function ModelInsightsView() {
-  const metrics = {
+  const [modelInfo, setModelInfo] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/model-info')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setModelInfo(data);
+      })
+      .catch(() => {
+        // Fallback gracefully if direct cross-origin fetch is restricted
+      });
+  }, []);
+
+  const metrics = modelInfo?.metrics || {
     accuracy: '89.4%',
     precision: '88.2%',
     recall: '91.0%',
@@ -28,11 +41,11 @@ export default function ModelInsightsView() {
             <h2 className="text-xl font-bold text-[#111827]">Layer 1: XGBoost Recovery Predictor Model</h2>
           </div>
           <p className="text-xs text-[#667085]">
-            Model Artifact: <span className="font-mono text-[#111827]">recovery_model.joblib</span> (v1.0.0) • Trained on 10,000 synthetic transaction records
+            Model Artifact: <span className="font-mono text-[#111827]">recovery_model.joblib</span> ({modelInfo?.model_version || 'v1.0.0'}) • Measured on 10,000 synthetic validation records
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]">
-          <CheckCircle2 className="w-4 h-4" /> Active Production Model
+          <CheckCircle2 className="w-4 h-4" /> Active Model (Synthetic Evaluation Set)
         </span>
       </div>
 
@@ -41,29 +54,34 @@ export default function ModelInsightsView() {
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-4 shadow-sm text-center">
           <span className="text-xs font-semibold text-[#667085] uppercase">Accuracy</span>
           <div className="text-2xl font-extrabold text-[#111827] mt-1 font-mono">{metrics.accuracy}</div>
+          <span className="text-[10px] text-[#98A2B3]">Test Set Validation</span>
         </div>
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-4 shadow-sm text-center">
           <span className="text-xs font-semibold text-[#667085] uppercase">Precision</span>
           <div className="text-2xl font-extrabold text-[#16A34A] mt-1 font-mono">{metrics.precision}</div>
+          <span className="text-[10px] text-[#98A2B3]">Test Set Validation</span>
         </div>
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-4 shadow-sm text-center">
           <span className="text-xs font-semibold text-[#667085] uppercase">Recall</span>
           <div className="text-2xl font-extrabold text-[#2D6CDF] mt-1 font-mono">{metrics.recall}</div>
+          <span className="text-[10px] text-[#98A2B3]">Test Set Validation</span>
         </div>
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-4 shadow-sm text-center">
           <span className="text-xs font-semibold text-[#667085] uppercase">F1 Score</span>
           <div className="text-2xl font-extrabold text-[#635BFF] mt-1 font-mono">{metrics.f1}</div>
+          <span className="text-[10px] text-[#98A2B3]">Test Set Validation</span>
         </div>
         <div className="bg-white border border-[#E4E7EC] rounded-xl p-4 shadow-sm text-center">
           <span className="text-xs font-semibold text-[#667085] uppercase">ROC-AUC</span>
           <div className="text-2xl font-extrabold text-[#F59E0B] mt-1 font-mono">{metrics.roc_auc}</div>
+          <span className="text-[10px] text-[#98A2B3]">Test Set Validation</span>
         </div>
       </div>
 
       {/* Feature Importance Section */}
       <div className="bg-white border border-[#E4E7EC] rounded-xl p-6 shadow-sm">
         <h3 className="text-base font-semibold text-[#111827] mb-1">XGBoost Feature Importance Weights</h3>
-        <p className="text-xs text-[#667085] mb-6">Relative contribution of input features to $P(\text{recovery})$ predictions</p>
+        <p className="text-xs text-[#667085] mb-6">Relative contribution of input features to $P(\text{recovery})$ predictions (Synthetic Training Baseline)</p>
 
         <div className="space-y-4">
           {featureImportance.map((item, idx) => (
@@ -95,7 +113,7 @@ export default function ModelInsightsView() {
           </span>
         </div>
         <p className="text-xs text-[#475467] leading-relaxed mb-4">
-          Communicates exclusively via Groq API Provider isolation (<span className="font-mono text-[#635BFF]">GroqProvider</span>) running <span className="font-mono font-semibold text-[#111827]">openai/gpt-oss-20b</span> with zero OpenAI dependencies or SDK imports.
+          Communicates via Groq API Provider isolation (<span className="font-mono text-[#635BFF]">GroqProvider</span>) running <span className="font-mono font-semibold text-[#111827]">openai/gpt-oss-20b</span> with zero OpenAI dependencies or SDK imports.
         </p>
       </div>
     </div>
