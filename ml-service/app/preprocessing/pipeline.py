@@ -1,5 +1,6 @@
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 import pandas as pd
 
@@ -31,31 +32,53 @@ def extract_and_clean_features(df: pd.DataFrame) -> pd.DataFrame:
     data = df.copy()
 
     # Convert amount_inr to amount_paise if amount_paise is missing
-    if 'amount_paise' not in data.columns and 'amount_inr' in data.columns:
-        data['amount_paise'] = (data['amount_inr'] * 100).round().astype(int)
+    if 'amount_paise' not in data.columns or data['amount_paise'].isnull().all():
+        if 'amount_inr' in data.columns:
+            data['amount_paise'] = (data['amount_inr'].fillna(0) * 100).round().astype(int)
+        else:
+            data['amount_paise'] = 0
+    else:
+        data['amount_paise'] = data['amount_paise'].fillna(0)
 
     # Convert customer_ltv_inr to customer_ltv_paise if missing
-    if 'customer_ltv_paise' not in data.columns and 'customer_ltv_inr' in data.columns:
-        data['customer_ltv_paise'] = (data['customer_ltv_inr'] * 100).round().astype(int)
+    if 'customer_ltv_paise' not in data.columns or data['customer_ltv_paise'].isnull().all():
+        if 'customer_ltv_inr' in data.columns:
+            data['customer_ltv_paise'] = (data['customer_ltv_inr'].fillna(0) * 100).round().astype(int)
+        else:
+            data['customer_ltv_paise'] = 0
+    else:
+        data['customer_ltv_paise'] = data['customer_ltv_paise'].fillna(0)
 
-    # Ensure required columns default gracefully
+    # Fill numerical missing values
     for col in NUMERICAL_FEATURES:
         if col not in data.columns:
             data[col] = 0
+        else:
+            data[col] = data[col].fillna(0)
 
+    # Fill categorical missing values
     for col in CATEGORICAL_FEATURES:
         if col not in data.columns:
             data[col] = 'unknown'
+        else:
+            data[col] = data[col].fillna('unknown')
 
     return data[ALL_INPUT_FEATURES]
 
 def build_preprocessing_pipeline():
     """
-    Constructs a ColumnTransformer pipeline for feature scaling and encoding.
+    Constructs a ColumnTransformer pipeline with imputation, feature scaling, and encoding.
     Ensures zero target leakage.
     """
-    numerical_transformer = StandardScaler()
-    categorical_transformer = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+    numerical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler())
+    ])
+
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='constant', fill_value='unknown')),
+        ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+    ])
 
     preprocessor = ColumnTransformer(
         transformers=[
