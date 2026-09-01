@@ -8,10 +8,9 @@ const { getConnectionStatus } = require('./config/db');
 const app = express();
 
 const webhookRoutes = require('./routes/webhookRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
-const policyRoutes = require('./routes/policyRoutes');
-const auditRoutes = require('./routes/auditRoutes');
+const recoveryRoutes = require('./routes/recoveryRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const batchRoutes = require('./routes/batchRoutes');
 
 // Security Headers via Helmet
 app.use(helmet({
@@ -64,16 +63,15 @@ if (process.env.NODE_ENV !== 'test') {
     message: { status: 'error', message: 'Webhook rate limit exceeded.' }
   });
 
-  app.use('/api/v1/webhooks', webhookLimiter);
-  app.use('/api/v1', globalLimiter);
+  app.use('/api/webhooks', webhookLimiter);
+  app.use('/api', globalLimiter);
 }
 
 // Mount API routes
-app.use('/api/v1/webhooks', webhookRoutes);
-app.use('/api/v1/transactions', transactionRoutes);
-app.use('/api/v1/analytics', analyticsRoutes);
-app.use('/api/v1/policies', policyRoutes);
-app.use('/api/v1/audit-logs', auditRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api/recovery', recoveryRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/batch', batchRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

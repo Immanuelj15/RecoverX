@@ -14,10 +14,11 @@ class AnalyticsController {
 
   async getCharts(req, res) {
     try {
-      const [byReason, byMethod, byIntervention] = await Promise.all([
+      const [byReason, byMethod, byIntervention, dailyTrend] = await Promise.all([
         AnalyticsService.getRecoveryByFailureReason(),
         AnalyticsService.getRecoveryByPaymentMethod(),
-        AnalyticsService.getRecoveryByInterventionType()
+        AnalyticsService.getRecoveryByInterventionType(),
+        AnalyticsService.getDailyRevenueTrend()
       ]);
 
       return res.status(200).json({
@@ -25,11 +26,22 @@ class AnalyticsController {
         data: {
           failure_reasons: byReason,
           payment_methods: byMethod,
-          intervention_types: byIntervention
+          intervention_types: byIntervention,
+          daily_revenue_trend: dailyTrend
         }
       });
     } catch (error) {
       logger.error(`Error fetching analytics charts: ${error.message}`);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  async getAIDecisions(req, res) {
+    try {
+      const telemetry = await AnalyticsService.getAIDecisionsTelemetry();
+      return res.status(200).json({ status: 'success', data: telemetry });
+    } catch (error) {
+      logger.error(`Error fetching AI decisions telemetry: ${error.message}`);
       return res.status(500).json({ error: 'Internal server error' });
     }
   }

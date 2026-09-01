@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const webhookController = require('../controllers/webhookController');
 
-router.post('/razorpay', (req, res) => webhookController.handleRazorpayWebhook(req, res));
+// Route to ingest webhooks from Razorpay
+router.post('/razorpay', webhookController.handleRazorpayWebhook);
 
 module.exports = router;

@@ -48,7 +48,7 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
 
   const finalPaymentMethods = paymentMethods.length > 0 ? paymentMethods : defaultPaymentMethods;
 
-  const trendData = [
+  const defaultTrendData = [
     { date: 'Mon', atRisk: 120000, recovered: 75000 },
     { date: 'Tue', atRisk: 180000, recovered: 110000 },
     { date: 'Wed', atRisk: 150000, recovered: 98000 },
@@ -57,6 +57,10 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
     { date: 'Sat', atRisk: 130000, recovered: 89000 },
     { date: 'Sun', atRisk: 160000, recovered: 115000 }
   ];
+
+  const trendData = (chartsData?.daily_revenue_trend && chartsData.daily_revenue_trend.length > 0)
+    ? chartsData.daily_revenue_trend
+    : defaultTrendData;
 
   if (isLoading) {
     return (

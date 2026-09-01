@@ -8,35 +8,35 @@ export default {
     extend: {
       colors: {
         navy: {
-          900: '#061329',
-          800: '#0C2651',
-          700: '#14366F',
-          600: '#1C4991',
+          900: '#0B0F19', // Dark Slate
+          800: '#111827', // Navy
+          700: '#1F2937', // Card Surfaces
+          600: '#374151',
           100: '#EEF4FF',
           50: '#F5F8FF'
         },
         brand: {
-          blue: '#2D6CDF',
-          blueHover: '#1B54BD',
-          navy: '#0C2651',
-          bg: '#F7F9FC',
-          surface: '#FFFFFF',
-          border: '#E4E7EC',
-          textPrimary: '#111827',
-          textSecondary: '#667085',
+          blue: '#2B6CB0', // Razorpay Blue
+          blueHover: '#3182CE',
+          cyan: '#00F2FE', // Accent Electric Cyan
+          bg: '#0B0F19', // Primary Background
+          surface: '#1F2937', // Card Surface
+          border: '#374151',
+          textPrimary: '#F9FAFB',
+          textSecondary: '#9CA3AF',
           ai: '#635BFF',
           aiLight: '#EEF2FF'
         },
         fintech: {
-          success: '#16A34A',
-          successBg: '#F0FDF4',
-          successBorder: '#BBF7D0',
-          warning: '#F59E0B',
-          warningBg: '#FFFBEB',
-          warningBorder: '#FDE68A',
-          danger: '#DC2626',
-          dangerBg: '#FEF2F2',
-          dangerBorder: '#FECACA'
+          success: '#10B981', // Success Green
+          successBg: 'rgba(16, 185, 129, 0.1)',
+          successBorder: 'rgba(16, 185, 129, 0.2)',
+          warning: '#F59E0B', // Warning Gold
+          warningBg: 'rgba(245, 158, 11, 0.1)',
+          warningBorder: 'rgba(245, 158, 11, 0.2)',
+          danger: '#EF4444', // Alert Crimson
+          dangerBg: 'rgba(239, 68, 68, 0.1)',
+          dangerBorder: 'rgba(239, 68, 68, 0.2)',
         }
       },
       fontFamily: {
@@ -44,9 +44,9 @@ export default {
         mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace']
       },
       boxShadow: {
-        card: '0 1px 3px 0 rgba(16, 24, 40, 0.06), 0 1px 2px -1px rgba(16, 24, 40, 0.04)',
-        cardHover: '0 4px 12px -2px rgba(16, 24, 40, 0.08), 0 2px 4px -2px rgba(16, 24, 40, 0.04)',
-        dropdown: '0 10px 15px -3px rgba(16, 24, 40, 0.08), 0 4px 6px -4px rgba(16, 24, 40, 0.03)'
+        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        cardHover: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        glow: '0 0 15px rgba(0, 242, 254, 0.3)'
       }
     }
   },
