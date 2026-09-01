@@ -10,18 +10,21 @@ export default function useRevenueRecovery() {
   });
   const [events, setEvents] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [chartsData, setChartsData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [metricsRes, eventsRes] = await Promise.all([
+      const [metricsRes, eventsRes, chartsRes] = await Promise.all([
         client.get('/dashboard/metrics'),
-        client.get('/dashboard/events')
+        client.get('/dashboard/events'),
+        client.get('/analytics/charts').catch(() => ({ data: { data: null } })) // gracefully handle if backend fails
       ]);
       setMetrics(metricsRes.data || metrics);
       setEvents(eventsRes.data || []);
+      setChartsData(chartsRes.data || null);
       setError(null);
     } catch (err) {
       setError(err.message || 'Failed to fetch dashboard data');
@@ -79,6 +82,7 @@ export default function useRevenueRecovery() {
     metrics,
     events,
     auditLogs,
+    chartsData,
     isLoading,
     error,
     fetchDashboardData,

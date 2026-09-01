@@ -72,6 +72,7 @@ app.use('/api/webhooks', webhookRoutes);
 app.use('/api/recovery', recoveryRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/batch', batchRoutes);
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

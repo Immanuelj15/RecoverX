@@ -8,39 +8,39 @@ export default {
     extend: {
       colors: {
         navy: {
-          900: '#0B0F19', // Dark Slate
-          800: '#111827', // Navy
-          700: '#1F2937', // Card Surfaces
-          600: '#374151',
+          900: '#080B12', // Near-black navy background
+          800: '#111722', // Surface
+          700: '#171F2C', // Elevated surface
+          600: '#263143', // Borders/dividers
           100: '#EEF4FF',
           50: '#F5F8FF'
         },
         brand: {
           blue: '#2B6CB0', // Razorpay Blue
           blueHover: '#3182CE',
-          cyan: '#00F2FE', // Accent Electric Cyan
-          bg: '#0B0F19', // Primary Background
-          surface: '#1F2937', // Card Surface
-          border: '#374151',
+          cyan: '#00F2FE', // Legacy cyan
+          bg: '#080B12', // Primary Background
+          surface: '#111722', // Card Surface
+          border: '#263143', // Subtle blue-gray border
           textPrimary: '#F9FAFB',
           textSecondary: '#9CA3AF',
-          ai: '#635BFF',
+          ai: '#635BFF', // Subtle violet/blue
           aiLight: '#EEF2FF'
         },
         fintech: {
-          success: '#10B981', // Success Green
+          success: '#10B981', // Emerald
           successBg: 'rgba(16, 185, 129, 0.1)',
           successBorder: 'rgba(16, 185, 129, 0.2)',
-          warning: '#F59E0B', // Warning Gold
+          warning: '#F59E0B', // Amber
           warningBg: 'rgba(245, 158, 11, 0.1)',
           warningBorder: 'rgba(245, 158, 11, 0.2)',
-          danger: '#EF4444', // Alert Crimson
+          danger: '#EF4444', // Red
           dangerBg: 'rgba(239, 68, 68, 0.1)',
           dangerBorder: 'rgba(239, 68, 68, 0.2)',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace']
       },
       boxShadow: {

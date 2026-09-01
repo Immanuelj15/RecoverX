@@ -1,57 +1,175 @@
 import React from 'react';
-import { ArrowRight, CheckCircle2, Bot, ShieldCheck, Zap, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Target, Zap, ShieldCheck, Activity, CheckCircle2, AlertOctagon, Loader2, Info } from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export default function RecoveryPipeline({ summary }) {
-  const totalFailed = summary?.total_transactions_analyzed || 500;
-  const totalAnalyzed = Math.round(totalFailed * 0.95);
-  const totalRecommended = Math.round(totalFailed * 0.82);
-  const totalApproved = Math.round(totalFailed * 0.76);
-  const totalRecovered = summary?.total_recovered_count || Math.round(totalFailed * 0.62);
+function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
 
-  const steps = [
-    { label: 'Failed Payments', count: totalFailed, icon: AlertTriangle, color: 'text-[#DC2626]', bg: 'bg-[#FEF2F2]', border: 'border-[#FECACA]' },
-    { label: 'ML Analyzed', count: totalAnalyzed, icon: Zap, color: 'text-[#F59E0B]', bg: 'bg-[#FFFBEB]', border: 'border-[#FDE68A]' },
-    { label: 'AI Recommended', count: totalRecommended, icon: Bot, color: 'text-[#635BFF]', bg: 'bg-[#EEF2FF]', border: 'border-[#C7D2FE]' },
-    { label: 'Policy Approved', count: totalApproved, icon: ShieldCheck, color: 'text-[#2D6CDF]', bg: 'bg-[#EEF4FF]', border: 'border-[#C7D7FE]' },
-    { label: 'Revenue Recovered', count: totalRecovered, icon: CheckCircle2, color: 'text-[#16A34A]', bg: 'bg-[#F0FDF4]', border: 'border-[#BBF7D0]' }
-  ];
+const steps = [
+  { id: 1, title: 'DETECTED', desc: 'Payment failed' },
+  { id: 2, title: 'DIAGNOSED', desc: 'Analyzing root cause' },
+  { id: 3, title: 'AI RECOMMENDATION', desc: 'Determining optimal strategy' },
+  { id: 4, title: 'POLICY CHECK', desc: 'Validating safety rules' },
+  { id: 5, title: 'RECOVERY', desc: 'Executing action' },
+  { id: 6, title: 'OUTCOME', desc: 'Final status' }
+];
+
+export default function RecoveryPipeline({ activeItem, currentStep, onDiagnose, onExecute, onOpenDrawer, isLoading, isHalted, strategy }) {
+  if (!activeItem) {
+    return (
+      <div className="fintech-card h-full flex flex-col items-center justify-center p-8 text-center border-dashed border-2 border-brand-border">
+        <Activity className="w-10 h-10 text-brand-border mb-4" />
+        <h3 className="text-brand-textPrimary font-semibold mb-1">Awaiting Selection</h3>
+        <p className="text-sm text-brand-textSecondary max-w-[200px]">Select a case from Revenue at Risk to begin recovery workflow.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white border border-[#E4E7EC] rounded-xl p-6 shadow-sm mb-8">
-      <div className="flex items-center justify-between mb-4">
+    <div className="fintech-card h-full flex flex-col relative overflow-hidden">
+      
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-brand-border flex items-center justify-between">
         <div>
-          <h3 className="text-base font-semibold text-[#111827]">Autonomous Recovery Pipeline Flow</h3>
-          <p className="text-xs text-[#667085]">Real-time transition volume through ML scoring, Groq reasoning, and policy guardrails</p>
+          <h2 className="font-bold text-white text-lg">Active Recovery Workflow</h2>
+          <span className="text-xs text-brand-textSecondary mt-1 flex items-center gap-2">
+            ID: <span className="font-mono text-brand-blue">{activeItem.id.split('-')[0]}</span>
+          </span>
         </div>
-        <span className="text-xs font-semibold text-[#635BFF] bg-[#EEF2FF] px-2.5 py-1 rounded-full border border-[#C7D2FE]">
-          End-to-End Orchestrated
-        </span>
+        <button 
+          onClick={onOpenDrawer}
+          className="text-xs font-semibold text-brand-blue hover:text-brand-cyan flex items-center gap-1 transition-colors"
+        >
+          <Info className="w-4 h-4" />
+          AI Insights
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-        {steps.map((step, idx) => {
-          const Icon = step.icon;
-          return (
-            <div key={idx} className="relative flex items-center">
-              <div className={`w-full p-4 rounded-xl border ${step.border} ${step.bg} flex flex-col justify-between`}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-[#475467] truncate">{step.label}</span>
-                  <Icon className={`w-4 h-4 ${step.color}`} />
-                </div>
-                <div className="text-xl font-bold text-[#111827] tabular-nums">
-                  {step.count.toLocaleString('en-IN')}
-                </div>
-                <div className="text-[10px] text-[#667085] mt-1 font-medium">
-                  {idx === 0 ? '100% Volume' : `${((step.count / totalFailed) * 100).toFixed(1)}% Conversion`}
-                </div>
-              </div>
-              {idx < steps.length - 1 && (
-                <ArrowRight className="hidden md:block w-4 h-4 text-[#98A2B3] absolute -right-3 z-10 bg-white rounded-full" />
-              )}
-            </div>
-          );
-        })}
+      <div className="flex-1 p-6 overflow-y-auto relative z-10">
+        <div className="relative pl-4 border-l-2 border-brand-border/50 ml-2 space-y-8">
+          
+          <AnimatePresence>
+            {steps.map((step, idx) => {
+              if (currentStep < step.id) return null;
+
+              const isPast = currentStep > step.id;
+              const isActive = currentStep === step.id;
+              const isFinalSuccess = step.id === 6 && activeItem.status === 'RECOVERED';
+              const isFinalFailed = step.id === 6 && (isHalted || activeItem.status === 'ESCALATED');
+
+              return (
+                <motion.div
+                  key={step.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="relative"
+                >
+                  {/* Timeline Dot */}
+                  <div className={cn(
+                    "absolute -left-[23px] top-1 w-3 h-3 rounded-full border-2",
+                    isPast ? "bg-fintech-success border-fintech-success" :
+                    isActive ? "bg-brand-blue border-brand-blue shadow-[0_0_8px_rgba(43,108,176,0.8)]" :
+                    "bg-navy-800 border-brand-border"
+                  )} />
+
+                  <div className="pl-4">
+                    <h4 className={cn(
+                      "text-xs font-bold tracking-widest uppercase mb-1",
+                      isActive ? "text-brand-blue" : isPast ? "text-brand-textPrimary" : "text-brand-textSecondary"
+                    )}>
+                      {step.title}
+                    </h4>
+
+                    {/* Step specific content */}
+                    <div className="text-sm">
+                      {step.id === 1 && (
+                        <div className="text-brand-textSecondary">
+                          Payment failed <br/>
+                          <span className="text-white font-semibold">₹{activeItem.riskAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                      )}
+
+                      {step.id === 2 && (
+                        <div className="text-brand-textSecondary">
+                          {isActive ? "Waiting for AI Diagnosis..." : "Root cause identified"}
+                        </div>
+                      )}
+
+                      {step.id === 3 && (
+                        <div className="text-brand-textSecondary">
+                           {strategy ? (
+                             <span>87% recovery probability <br/> <span className="text-brand-ai font-medium">{strategy.replace(/_/g, ' ')}</span></span>
+                           ) : "Generating strategy..."}
+                        </div>
+                      )}
+
+                      {step.id === 4 && (
+                        <div className="text-brand-textSecondary flex items-center gap-1">
+                          <ShieldCheck className="w-4 h-4 text-fintech-success" /> Approved
+                        </div>
+                      )}
+
+                      {step.id === 5 && (
+                        <div className="text-brand-textSecondary">
+                          Recovery action scheduled
+                        </div>
+                      )}
+
+                      {step.id === 6 && (
+                        <div className={cn("font-medium mt-1", isFinalSuccess ? "text-fintech-success" : "text-fintech-danger")}>
+                          {isFinalSuccess ? `₹${activeItem.riskAmount.toLocaleString('en-IN')} recovered` : 'Escalated to manual review'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+          
+        </div>
       </div>
+
+      {/* Action Area */}
+      <div className="p-5 border-t border-brand-border bg-navy-800/50">
+        {currentStep === 1 && (
+          <button 
+            onClick={onDiagnose}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-ai text-white rounded-lg text-sm font-bold hover:bg-brand-ai/90 transition-all disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Activity className="w-5 h-5" />}
+            Analyze with AI
+          </button>
+        )}
+        
+        {(currentStep >= 2 && currentStep <= 5) && (
+          <button 
+            onClick={onExecute}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-blue text-white rounded-lg text-sm font-bold hover:bg-brand-blueHover transition-all shadow-[0_0_15px_rgba(43,108,176,0.3)] disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+            {currentStep === 2 ? 'Generate AI Recommendation' : currentStep === 3 ? 'Run Policy Check' : currentStep === 4 ? 'Execute Recovery' : 'Confirm Outcome'}
+          </button>
+        )}
+
+        {currentStep === 6 && (
+          <div className={cn(
+            "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold border",
+            activeItem.status === 'RECOVERED' 
+              ? "bg-fintech-successBg text-fintech-success border-fintech-successBorder" 
+              : "bg-fintech-dangerBg text-fintech-danger border-fintech-dangerBorder"
+          )}>
+            {activeItem.status === 'RECOVERED' ? <CheckCircle2 className="w-5 h-5" /> : <AlertOctagon className="w-5 h-5" />}
+            Workflow Completed
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import HeroMetrics from './HeroMetrics';
-import LiveBatchTable from './LiveBatchTable';
-import WorkflowVisualizer from './WorkflowVisualizer';
-import AuditLogPanel from './AuditLogPanel';
+import TopNav from './TopNav';
+import KPICards from './KPICards';
+import RevenueAtRiskTable from './RevenueAtRiskTable';
+import RecoveryPipeline from './RecoveryPipeline';
+import AuditTrail from './AuditTrail';
+import RecoveryCaseDrawer from './RecoveryCaseDrawer';
+import SystemStatus from './SystemStatus';
+import AnalyticsCharts from './AnalyticsCharts';
 import useRevenueRecovery from '../hooks/useRevenueRecovery';
+import { PlayCircle, Eye } from 'lucide-react';
 
 export default function FintechDashboard() {
   const {
     metrics,
     events,
     auditLogs,
+    chartsData,
     isLoading,
     error,
     fetchDashboardData,
@@ -23,10 +29,11 @@ export default function FintechDashboard() {
   const [workflowStep, setWorkflowStep] = useState(1);
   const [isHalted, setIsHalted] = useState(false);
   const [strategy, setStrategy] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleSelect = (item) => {
     setActiveItem(item);
-    setWorkflowStep(1); // Reset local visualizer state
+    setWorkflowStep(1);
     setIsHalted(false);
     setStrategy('');
     fetchAuditLogs(item.id);
@@ -39,9 +46,9 @@ export default function FintechDashboard() {
   const handleTriggerDiagnosis = async () => {
     if (!activeItem) return;
     try {
-      const { data } = await triggerDiagnosis(activeItem.id);
+      const data = await triggerDiagnosis(activeItem.id);
       setStrategy(data.strategy);
-      setWorkflowStep(2); // Move to Step 2: Policy & Safety Check
+      setWorkflowStep(2); // DIAGNOSED
       fetchAuditLogs(activeItem.id);
     } catch (err) {
       console.error(err);
@@ -55,19 +62,18 @@ export default function FintechDashboard() {
       
       if (response && response.outcome === 'ESCALATED') {
         setIsHalted(true);
-        setWorkflowStep(4);
-        activeItem.status = 'ESCALATED'; // Optimistic local update
+        setWorkflowStep(6); // OUTCOME (Failed)
+        activeItem.status = 'ESCALATED';
       } else {
-        // Successfully moved a step
-        if (workflowStep === 2) {
-          setWorkflowStep(3); // Moved to execution
-        } else if (workflowStep === 3) {
-          setWorkflowStep(4); // Moved to resolution
+        if (workflowStep === 2) setWorkflowStep(3); // AI RECOMMENDATION
+        else if (workflowStep === 3) setWorkflowStep(4); // POLICY CHECK
+        else if (workflowStep === 4) setWorkflowStep(5); // RECOVERY
+        else if (workflowStep === 5) {
+          setWorkflowStep(6); // OUTCOME
           activeItem.status = response.data?.outcome || 'RECOVERED';
-          fetchDashboardData(); // Refresh global metrics
+          fetchDashboardData(); 
         }
       }
-      
       fetchAuditLogs(activeItem.id);
     } catch (err) {
       console.error(err);
@@ -75,65 +81,98 @@ export default function FintechDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-textPrimary p-6 lg:p-8 flex flex-col font-sans">
+    <div className="min-h-screen bg-navy-900 text-brand-textPrimary font-sans pb-12 relative overflow-x-hidden">
+      <TopNav />
       
-      {/* Header */}
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-brand-blue flex items-center justify-center shadow-glow">
-              <span className="text-white font-bold font-mono">RX</span>
-            </div>
-            RecoverX Dashboard
-          </h1>
-          <p className="text-brand-textSecondary mt-2">AI Revenue Recovery Agent • Razorpay Buildathon 2026</p>
-        </div>
-      </header>
-
-      {error && (
-        <div className="mb-6 p-4 bg-fintech-dangerBg border border-fintech-dangerBorder text-fintech-danger rounded-lg">
-          {error}
-        </div>
-      )}
-
-      {/* Main Grid Layout */}
-      <div className="flex-1 max-w-[1600px] w-full mx-auto flex flex-col gap-6">
+      <main className="max-w-[1600px] w-full mx-auto px-6 mt-8 flex flex-col gap-8">
         
-        {/* Section A: Hero Metrics */}
-        <section>
-          <HeroMetrics metrics={metrics} />
+        {/* Hero / Command Center */}
+        <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight">Revenue Recovery Command Center</h1>
+            <p className="text-brand-textSecondary mt-2">Recover revenue before it becomes lost revenue.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {}} 
+              className="px-4 py-2 rounded-lg border border-brand-border text-brand-textPrimary hover:bg-navy-800 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              View Live Events
+            </button>
+            <button 
+              onClick={handleSimulateBatch} 
+              disabled={isLoading}
+              className="px-5 py-2 rounded-lg bg-brand-blue hover:bg-brand-blueHover text-white transition-colors text-sm font-bold flex items-center gap-2 shadow-glow disabled:opacity-50"
+            >
+              <PlayCircle className="w-4 h-4" />
+              Run Recovery Scan
+            </button>
+          </div>
         </section>
 
-        {/* Sections B & C: Middle Row */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[400px]">
-          {/* Section B */}
-          <LiveBatchTable 
-            items={events} 
-            activeItem={activeItem} 
-            onSelect={handleSelect}
-            onTrigger={() => {}} // Not used auto anymore, user clicks inside visualizer
-            onSimulate={handleSimulateBatch}
-            isSimulating={isLoading}
-          />
+        {error && (
+          <div className="p-4 bg-fintech-dangerBg border border-fintech-dangerBorder text-fintech-danger rounded-lg text-sm font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* KPIs */}
+        <section>
+          <KPICards metrics={metrics} />
+        </section>
+
+        {/* Pipeline & Leaks */}
+        <section className="grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-[500px]">
+          <div className="xl:col-span-7 flex flex-col">
+            <RevenueAtRiskTable 
+              items={events} 
+              activeItem={activeItem} 
+              onSelect={handleSelect}
+              isSimulating={isLoading}
+            />
+          </div>
           
-          {/* Section C */}
-          <WorkflowVisualizer 
-            activeItem={activeItem}
-            currentStep={workflowStep}
-            onDiagnose={handleTriggerDiagnosis}
-            onExecute={handleExecuteStep}
-            isLoading={isLoading}
-            isHalted={isHalted}
-            strategy={strategy}
-          />
+          <div className="xl:col-span-5 flex flex-col">
+            <RecoveryPipeline 
+              activeItem={activeItem}
+              currentStep={workflowStep}
+              onDiagnose={handleTriggerDiagnosis}
+              onExecute={handleExecuteStep}
+              onOpenDrawer={() => setDrawerOpen(true)}
+              isLoading={isLoading}
+              isHalted={isHalted}
+              strategy={strategy}
+            />
+          </div>
         </section>
 
-        {/* Section D: Bottom Row */}
+        {/* Recovery Analytics */}
         <section>
-          <AuditLogPanel logs={auditLogs} />
+          <AnalyticsCharts chartsData={chartsData} isLoading={isLoading} />
+        </section>
+
+        {/* Audit & System Status */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <AuditTrail logs={auditLogs} />
+          </div>
+          <div className="lg:col-span-1">
+            <SystemStatus />
+          </div>
         </section>
         
-      </div>
+      </main>
+
+      {/* Side Drawer */}
+      <RecoveryCaseDrawer 
+        isOpen={drawerOpen} 
+        onClose={() => setDrawerOpen(false)} 
+        activeItem={activeItem}
+        strategy={strategy}
+        isHalted={isHalted}
+        currentStep={workflowStep}
+      />
     </div>
   );
 }
