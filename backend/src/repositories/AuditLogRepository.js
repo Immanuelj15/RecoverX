@@ -2,6 +2,11 @@ const { AuditLog } = require('../models');
 
 class AuditLogRepository {
   async createLog(logData) {
+    if (!logData.merchant_id) {
+      const merchantRepository = require('./merchantRepository');
+      const merchant = await merchantRepository.getOrCreateDemoMerchant();
+      logData.merchant_id = merchant._id;
+    }
     const auditLog = new AuditLog(logData);
     return auditLog.save();
   }

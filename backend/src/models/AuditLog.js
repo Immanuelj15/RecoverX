@@ -34,7 +34,8 @@ const AuditLogSchema = new mongoose.Schema(
         'DUPLICATE_WEBHOOK',
         'LLM_FAILURE',
         'ML_FAILURE',
-        'POLICY_FAILURE'
+        'POLICY_FAILURE',
+        'INVALID_STATE_TRANSITION_ATTEMPT'
       ],
       required: true
     },

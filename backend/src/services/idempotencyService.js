@@ -44,21 +44,20 @@ class IdempotencyService {
   async registerWebhookEvent(eventId, eventType, payload) {
     const existing = await WebhookRepository.findByEventId(eventId);
     if (existing) {
-      if (existing.processed) {
+      if (existing.processing_status === 'processed' || existing.processed) {
         logger.info(`Idempotency check: Webhook event '${eventId}' was already processed.`);
         return { isDuplicate: true, event: existing };
       }
       return { isDuplicate: false, event: existing };
     }
 
-    const event = await WebhookRepository.saveEvent({
-      event_id: eventId,
-      event_type: eventType,
-      payload,
-      processed: false
-    });
-
-    return { isDuplicate: false, event };
+    const res = await (WebhookRepository.saveEvent 
+      ? WebhookRepository.saveEvent(null, eventId, eventType, payload) 
+      : WebhookRepository.registerEvent(null, eventId, eventType, payload));
+    if (res && typeof res.isDuplicate === 'boolean') {
+      return res;
+    }
+    return { isDuplicate: false, event: res };
   }
 
   /**

@@ -71,6 +71,6 @@ exports.handleRazorpayWebhook = async (req, res) => {
     });
   } catch (error) {
     console.error('Webhook processing error:', error);
-    res.status(500).json({ status: 'error', message: 'Internal server error processing webhook' });
+    res.status(500).json({ status: 'error', message: 'Internal server error processing webhook', error: error.message });
   }
 };
