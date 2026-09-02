@@ -1,19 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    font-family: 'Inter', 'Geist', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #F8FBFF; /* Pale Blue Canvas */
-    color: #102A43; /* Primary text */
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #F8FAFC; /* Clean Pale Blue-White Canvas */
+    color: #0F172A; /* Slate-900 High Contrast Text */
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
 }
 
-/* Tabular Numerals for crisp financial data */
+/* Typography Hierarchy Utilities */
+.text-display-lg {
+  font-size: 2.25rem; /* 36px */
+  line-height: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.text-display-md {
+  font-size: 1.75rem; /* 28px */
+  line-height: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.text-display-sm {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.text-body-lg {
+  font-size: 1.05rem; /* 16.8px */
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.text-body-md {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.text-label-sm {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Tabular Numerals for crisp financial numbers */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 /* Custom Scrollbar for Light Theme */
@@ -27,40 +72,91 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D8E6F7;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B9D4F5;
+  background: #94A3B8;
 }
 
-/* Polished Card Hover for Light Theme */
+/* Polished Card & Button Motion Utilities */
 .fintech-card {
-  background: #FFFFFF; /* White Card Surface */
-  border: 1px solid #D8E6F7; /* Blue-gray border */
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fintech-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fintech-card-hover:hover {
-  border-color: #B9D4F5;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-  transform: translateY(-2px);
+  border-color: #93C5FD;
+  box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
+  transform: translateY(-3px);
+}
+
+/* Button Micro-interactions */
+.btn-animate {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-animate:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.btn-animate:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Pulse animation for active AI thinking */
 @keyframes aiPulse {
-  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
-  50% { opacity: 0.8; transform: scale(1.02); box-shadow: 0 0 15px 0 rgba(37, 99, 235, 0); }
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+  50% { opacity: 0.85; transform: scale(1.03); box-shadow: 0 0 16px 4px rgba(37, 99, 235, 0.15); }
 }
 
 .ai-pulse {
-  animation: aiPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: aiPulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Status Indicator Glow */
+@keyframes liveDotGlow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+}
+
+.live-dot {
+  position: relative;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.4;
+  animation: liveDotGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-effect {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
 }
 
 /* Terminal/Log styling */
 .terminal-text {
   font-family: 'JetBrains Mono', 'Menlo', 'Monaco', monospace;
+  font-size: 0.8125rem;
 }

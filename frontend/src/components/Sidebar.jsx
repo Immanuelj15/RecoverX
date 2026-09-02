@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { LayoutDashboard, Briefcase, BarChart3, List, Settings, Plug, ShieldCheck, Play, Repeat, Search, Layers, ShieldAlert, BookTemplate, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -24,54 +25,63 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[248px] bg-brand-surface border-r border-brand-border flex flex-col z-50">
+    <aside className="fixed left-0 top-0 bottom-0 w-[256px] bg-white border-r border-slate-200 flex flex-col z-50 shadow-2xs">
       {/* Branding */}
-      <div className="h-[68px] flex items-center px-6 border-b border-brand-border">
+      <div className="h-[72px] flex items-center px-6 border-b border-slate-200 bg-slate-50/50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-brand-primary flex items-center justify-center">
-            <Repeat className="w-4 h-4 text-brand-primary" />
+          <div className="w-9 h-9 rounded-xl bg-blue-600 border border-blue-500 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <Repeat className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-brand-navy font-extrabold text-[15px] leading-tight tracking-tight">RecoverFlow</span>
-            <span className="text-brand-textSecondary text-[10px] font-semibold tracking-wider uppercase">Revenue Recovery</span>
+            <span className="text-slate-900 font-extrabold text-lg leading-tight tracking-tight">RECOVERFLOW</span>
+            <span className="text-blue-600 text-xs font-bold tracking-wider uppercase">AI Recovery Ops</span>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-7 custom-scrollbar">
         
         {/* Main Menu */}
         <div>
-          <div className="space-y-1">
+          <div className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Main Navigation</div>
+          <div className="space-y-1.5">
             {mainLinks.map((link) => {
               const Icon = link.icon;
               const isActive = activeTab === link.id;
               return (
-                <button
+                <motion.button
                   key={link.id}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(link.id)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all relative overflow-hidden",
+                    "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all relative overflow-hidden cursor-pointer",
                     isActive 
-                      ? "bg-brand-softBlue text-brand-primaryHover" 
-                      : "text-brand-textSecondary hover:text-brand-primaryHover hover:bg-brand-appBg"
+                      ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs" 
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-r" />}
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeTabIndicator"
+                      className="absolute left-0 top-0 bottom-0 w-[4px] bg-blue-600 rounded-r-md"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
                   <div className="flex items-center gap-3 relative z-10">
-                    <Icon className={cn("w-4 h-4", isActive ? "text-brand-primary" : "text-brand-textMuted group-hover:text-brand-primary")} />
-                    {link.name}
+                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400 group-hover:text-blue-600")} />
+                    <span>{link.name}</span>
                   </div>
                   {link.badge && (
                     <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums relative z-10",
-                      isActive ? "bg-white text-brand-primary" : "bg-brand-appBg text-brand-textSecondary border border-brand-border"
+                      "text-xs font-extrabold px-2 py-0.5 rounded-full tabular-nums relative z-10",
+                      isActive ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 border border-slate-200"
                     )}>
                       {link.badge}
                     </span>
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -79,36 +89,44 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
         {/* Control Section */}
         <div>
-          <h4 className="px-3 text-[11px] font-bold text-brand-textMuted uppercase tracking-wider mb-2">Controls</h4>
-          <div className="space-y-1">
+          <div className="px-3 text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Governance & Audits</div>
+          <div className="space-y-1.5">
             {controlLinks.map((link) => {
               const Icon = link.icon;
               const isActive = activeTab === link.id;
               return (
-                <button
+                <motion.button
                   key={link.id}
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(link.id)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all relative overflow-hidden",
+                    "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all relative overflow-hidden cursor-pointer",
                     isActive 
-                      ? "bg-brand-softBlue text-brand-primaryHover" 
-                      : "text-brand-textSecondary hover:text-brand-primaryHover hover:bg-brand-appBg"
+                      ? "bg-blue-50 text-blue-700 border border-blue-200/80 shadow-2xs" 
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   )}
                 >
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-r" />}
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeTabIndicator"
+                      className="absolute left-0 top-0 bottom-0 w-[4px] bg-blue-600 rounded-r-md"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
                   <div className="flex items-center gap-3 relative z-10">
-                    <Icon className={cn("w-4 h-4", isActive ? "text-brand-primary" : "text-brand-textMuted")} />
-                    {link.name}
+                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400")} />
+                    <span>{link.name}</span>
                   </div>
                   {link.badge && (
                     <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums relative z-10",
-                      isActive ? "bg-white text-brand-primary" : "bg-brand-appBg text-brand-textSecondary border border-brand-border"
+                      "text-xs font-extrabold px-2 py-0.5 rounded-full tabular-nums relative z-10",
+                      isActive ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 border border-slate-200"
                     )}>
                       {link.badge}
                     </span>
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
@@ -116,12 +134,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
 
       {/* Footer / Workspace Selector */}
-      <div className="p-4 border-t border-brand-border bg-brand-appBg">
+      <div className="p-4 border-t border-slate-200 bg-slate-50">
         <div className="flex flex-col gap-1 px-2 cursor-pointer group">
-          <span className="text-xs font-semibold text-brand-textPrimary group-hover:text-brand-primary transition-colors">Acme Payments India</span>
+          <span className="text-sm font-extrabold text-slate-900 group-hover:text-blue-600 transition-colors">Acme Payments India</span>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-brand-textSecondary">Workspace</span>
-            <ChevronDown className="w-3 h-3 text-brand-textMuted group-hover:text-brand-primary transition-colors" />
+            <span className="text-xs font-semibold text-slate-500">B2B SaaS Workspace</span>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
           </div>
         </div>
       </div>
