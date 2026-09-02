@@ -11,6 +11,11 @@ const webhookRoutes = require('./routes/webhookRoutes');
 const recoveryRoutes = require('./routes/recoveryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const batchRoutes = require('./routes/batchRoutes');
+const promiseRoutes = require('./routes/promiseRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const policyRoutes = require('./routes/policyRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 
 // Security Headers via Helmet
 app.use(helmet({
@@ -64,15 +69,25 @@ if (process.env.NODE_ENV !== 'test') {
   });
 
   app.use('/api/webhooks', webhookLimiter);
+  app.use('/api/v1/webhooks', webhookLimiter);
   app.use('/api', globalLimiter);
 }
 
-// Mount API routes
-app.use('/api/webhooks', webhookRoutes);
-app.use('/api/recovery', recoveryRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/batch', batchRoutes);
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
+// Mount API routes (Standard & V1 Aliases)
+const mountRoutes = (prefix) => {
+  app.use(`${prefix}/webhooks`, webhookRoutes);
+  app.use(`${prefix}/recovery`, recoveryRoutes);
+  app.use(`${prefix}/dashboard`, dashboardRoutes);
+  app.use(`${prefix}/batch`, batchRoutes);
+  app.use(`${prefix}/analytics`, analyticsRoutes);
+  app.use(`${prefix}/promises`, promiseRoutes);
+  app.use(`${prefix}/transactions`, transactionRoutes);
+  app.use(`${prefix}/policies`, policyRoutes);
+  app.use(`${prefix}/audit-logs`, auditRoutes);
+};
+
+mountRoutes('/api');
+mountRoutes('/api/v1');
 
 // Health check endpoint
 app.get('/health', (req, res) => {

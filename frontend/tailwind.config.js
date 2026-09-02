@@ -7,46 +7,48 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: {
-          900: '#080B12', // Near-black navy background
-          800: '#111722', // Surface
-          700: '#171F2C', // Elevated surface
-          600: '#263143', // Borders/dividers
-          100: '#EEF4FF',
-          50: '#F5F8FF'
-        },
         brand: {
-          blue: '#2B6CB0', // Razorpay Blue
-          blueHover: '#3182CE',
-          cyan: '#00F2FE', // Legacy cyan
-          bg: '#080B12', // Primary Background
-          surface: '#111722', // Card Surface
-          border: '#263143', // Subtle blue-gray border
-          textPrimary: '#F9FAFB',
-          textSecondary: '#9CA3AF',
-          ai: '#635BFF', // Subtle violet/blue
-          aiLight: '#EEF2FF'
+          appBg: '#F8FBFF',
+          surface: '#FFFFFF',
+          softBlue: '#EFF6FF',
+          softBlueHover: '#DBEAFE',
+          primary: '#2563EB',
+          primaryHover: '#1D4ED8',
+          navy: '#0F2A5F',
+          secondaryNavy: '#173B7A',
+          accent: '#3B82F6',
+          paleBlue: '#EAF3FF',
+          info: '#0EA5E9',
+          border: '#D8E6F7',
+          strongBorder: '#B9D4F5',
+          textPrimary: '#102A43',
+          textSecondary: '#486581',
+          textMuted: '#7B93AA',
+          disabledBg: '#EEF4FA',
+          disabledText: '#9FB3C8',
         },
-        fintech: {
-          success: '#10B981', // Emerald
-          successBg: 'rgba(16, 185, 129, 0.1)',
-          successBorder: 'rgba(16, 185, 129, 0.2)',
-          warning: '#F59E0B', // Amber
-          warningBg: 'rgba(245, 158, 11, 0.1)',
-          warningBorder: 'rgba(245, 158, 11, 0.2)',
-          danger: '#EF4444', // Red
-          dangerBg: 'rgba(239, 68, 68, 0.1)',
-          dangerBorder: 'rgba(239, 68, 68, 0.2)',
+        status: {
+          successBg: '#EAF3FF',
+          successText: '#0B5CAD',
+          successBorder: '#93C5FD',
+          warningBg: '#FFF8E6',
+          warningText: '#A16207',
+          warningBorder: '#F7D28A',
+          dangerBg: '#FFF1F2',
+          dangerText: '#BE123C',
+          dangerBorder: '#FECDD3',
+          neutralBg: '#F1F5F9',
+          neutralText: '#64748B',
+          neutralBorder: '#CBD5E1',
         }
       },
       fontFamily: {
-        sans: ['Inter', 'Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace']
+        sans: ['Inter', 'Geist', 'Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'monospace']
       },
       boxShadow: {
-        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        cardHover: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        glow: '0 0 15px rgba(0, 242, 254, 0.3)'
+        card: '0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03)',
+        floating: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
       }
     }
   },

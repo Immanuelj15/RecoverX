@@ -18,41 +18,41 @@ const steps = [
 export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose, onExecute, isLoading, isHalted, strategy }) {
   if (!activeItem) {
     return (
-      <div className="fintech-card h-full flex flex-col items-center justify-center p-8 text-center bg-navy-900 border-dashed border-2 border-brand-border">
+      <div className="fintech-card h-full flex flex-col items-center justify-center p-8 text-center bg-white border-dashed border-2 border-brand-border">
         <Activity className="w-12 h-12 text-brand-border mb-4" />
-        <h3 className="text-lg font-semibold text-brand-textSecondary mb-2">Awaiting Agent Intervention</h3>
-        <p className="text-sm text-brand-textSecondary max-w-[200px]">Select a leakage event from the batch feed to monitor the AI recovery workflow.</p>
+        <h3 className="text-lg font-bold text-brand-textPrimary mb-2">Awaiting Agent Intervention</h3>
+        <p className="text-sm font-medium text-brand-textSecondary max-w-[200px]">Select a leakage event from the batch feed to monitor the AI recovery workflow.</p>
       </div>
     );
   }
 
   return (
-    <div className="fintech-card h-full flex flex-col relative overflow-hidden bg-navy-800">
+    <div className="fintech-card h-full flex flex-col relative overflow-hidden bg-white border border-brand-border shadow-sm">
       {isHalted && (
-        <div className="absolute inset-0 bg-fintech-dangerBg/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm p-6 text-center animate-in fade-in">
-          <AlertOctagon className="w-16 h-16 text-fintech-danger mb-4 animate-bounce" />
-          <h2 className="text-2xl font-bold text-fintech-danger mb-2 tracking-wide uppercase">Halted / Escalated</h2>
-          <p className="text-white">Stopping rule triggered (e.g. Max retries exceeded). Workflow has been escalated to human compliance teams.</p>
+        <div className="absolute inset-0 bg-status-dangerBg/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm p-6 text-center animate-in fade-in">
+          <AlertOctagon className="w-16 h-16 text-status-dangerText mb-4 animate-bounce" />
+          <h2 className="text-2xl font-extrabold text-status-dangerText mb-2 tracking-wide uppercase">Halted / Escalated</h2>
+          <p className="text-brand-textPrimary font-bold text-sm">Stopping rule triggered (e.g. Max retries exceeded). Workflow has been escalated to human compliance teams.</p>
         </div>
       )}
 
-      <div className="px-6 py-4 border-b border-brand-border flex items-center justify-between bg-navy-900">
+      <div className="px-6 py-4 border-b border-brand-border flex items-center justify-between bg-brand-appBg">
         <div>
-          <h2 className="font-semibold text-brand-textPrimary flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-fintech-success animate-pulse"></div>
+          <h2 className="font-extrabold text-brand-textPrimary text-[13px] flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
             Bounded Agent Workflow
           </h2>
-          <span className="text-xs text-brand-textSecondary mt-0.5 block">
-            Event ID: <span className="font-mono text-brand-cyan">{activeItem.id.split('-')[0]}</span>
+          <span className="text-[11px] font-medium text-brand-textSecondary mt-0.5 block">
+            Event ID: <span className="font-mono font-bold text-brand-primary">{activeItem.id.split('-')[0]}</span>
           </span>
         </div>
         
         {/* Status Indicator */}
         <div className={cn(
-          "px-3 py-1 text-xs font-semibold rounded-md flex items-center gap-1.5",
-          currentStep === 4 && activeItem.status === 'RECOVERED' ? "bg-fintech-successBg text-fintech-success border border-fintech-successBorder" :
-          isHalted || (currentStep === 4 && activeItem.status === 'ESCALATED') ? "bg-fintech-dangerBg text-fintech-danger border border-fintech-dangerBorder" :
-          "bg-brand-aiLight text-brand-ai border border-brand-ai/30 ai-pulse"
+          "px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md flex items-center gap-1.5 border",
+          currentStep === 4 && activeItem.status === 'RECOVERED' ? "bg-status-successBg text-status-successText border-status-successBorder" :
+          isHalted || (currentStep === 4 && activeItem.status === 'ESCALATED') ? "bg-status-dangerBg text-status-dangerText border-status-dangerBorder" :
+          "bg-brand-softBlue text-brand-primary border-brand-primary/20"
         )}>
           {currentStep === 4 && activeItem.status === 'RECOVERED' ? <CheckCircle2 className="w-3.5 h-3.5" /> : null}
           {(isHalted || activeItem.status === 'ESCALATED') ? <AlertOctagon className="w-3.5 h-3.5" /> : null}
@@ -82,24 +82,24 @@ export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose
                   className="relative z-10 flex gap-4 mb-8 last:mb-0"
                 >
                   <div className={cn(
-                    "flex-shrink-0 w-14 h-14 rounded-xl border flex items-center justify-center transition-all duration-300",
-                    isPast ? "bg-navy-700 border-fintech-success text-fintech-success" :
-                    isActive ? "bg-brand-blue border-brand-cyan text-white shadow-glow" :
-                    "bg-navy-900 border-brand-border text-brand-textSecondary"
+                    "flex-shrink-0 w-14 h-14 rounded-xl border flex items-center justify-center transition-all duration-300 shadow-sm",
+                    isPast ? "bg-status-successBg border-status-successBorder text-status-successText" :
+                    isActive ? "bg-brand-primary border-brand-primary text-white shadow-[0_4px_14px_0_rgba(37,99,235,0.39)]" :
+                    "bg-brand-appBg border-brand-border text-brand-textSecondary"
                   )}>
                     <Icon className="w-6 h-6" />
                   </div>
                   
                   <div className="flex-1 pt-1.5">
                     <h4 className={cn(
-                      "text-sm font-bold tracking-wide uppercase",
+                      "text-xs font-extrabold tracking-wider uppercase",
                       isPast || isActive ? "text-brand-textPrimary" : "text-brand-textSecondary"
                     )}>
                       {step.title}
                     </h4>
                     <p className={cn(
-                      "text-sm mt-1",
-                      isPast || isActive ? "text-brand-cyan font-mono" : "text-brand-textSecondary"
+                      "text-xs mt-1 font-bold",
+                      isPast || isActive ? "text-brand-primary font-mono" : "text-brand-textSecondary"
                     )}>
                       {step.desc}
                     </p>
@@ -109,7 +109,7 @@ export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
-                          className="mt-3 p-3 rounded-lg bg-navy-900 border border-brand-border/50 text-xs text-brand-textSecondary"
+                          className="mt-3 p-3 rounded-lg bg-brand-appBg border border-brand-border text-xs font-medium text-brand-textSecondary"
                         >
                           {step.id === 1 && "Waiting for AI Diagnosis Trigger..."}
                           {step.id === 2 && `Strategy Assigned: [${strategy}]. Running safety checks...`}
@@ -126,12 +126,12 @@ export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose
         </div>
       </div>
 
-      <div className="p-4 border-t border-brand-border bg-navy-900 flex gap-3">
+      <div className="p-4 border-t border-brand-border bg-brand-appBg flex gap-3">
         {currentStep === 1 && (
           <button 
             onClick={onDiagnose}
             disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brand-blue text-white rounded-lg text-sm font-semibold hover:bg-brand-blueHover transition-colors disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-lg text-[13px] font-bold hover:bg-brand-primaryHover transition-colors disabled:opacity-50 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)]"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
             Run AI Diagnosis
@@ -142,7 +142,7 @@ export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose
           <button 
             onClick={onExecute}
             disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-brand-ai text-white rounded-lg text-sm font-semibold hover:bg-brand-ai/80 transition-colors shadow-glow disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-lg text-[13px] font-bold hover:bg-brand-primaryHover transition-colors shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] disabled:opacity-50"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
             Execute Recovery Action
@@ -152,9 +152,9 @@ export default function WorkflowVisualizer({ activeItem, currentStep, onDiagnose
         {currentStep === 4 && (
           <button 
             disabled
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-navy-700 text-brand-textSecondary rounded-lg text-sm font-semibold border border-brand-border"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-appBg text-brand-textSecondary rounded-lg text-[13px] font-bold border border-brand-border"
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4 text-status-successText" />
             Workflow Completed
           </button>
         )}

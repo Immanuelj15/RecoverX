@@ -1,9 +1,9 @@
 const request = require('supertest');
 const app = require('../src/app');
-const TransactionRepository = require('../src/repositories/transactionRepository');
+const TransactionRepository = require('../src/repositories/TransactionRepository');
 const AnalyticsService = require('../src/services/analyticsService');
-const PolicyRepository = require('../src/repositories/policyRepository');
-const AuditLogRepository = require('../src/repositories/auditLogRepository');
+const PolicyRepository = require('../src/repositories/PolicyRepository');
+const AuditLogRepository = require('../src/repositories/AuditLogRepository');
 const recoveryWorkflow = require('../src/services/recoveryWorkflow');
 
 describe('Phase 16: Backend REST API Router Test Suite', () => {
@@ -65,6 +65,7 @@ describe('Phase 16: Backend REST API Router Test Suite', () => {
       recommended_action: 'SMART_RETRY',
       policy_decision: { approved: true, action: 'SMART_RETRY' }
     };
+    jest.spyOn(TransactionRepository, 'findByPaymentId').mockResolvedValue({ payment_id: 'pay_api_3', amount_inr: 5000 });
     jest.spyOn(recoveryWorkflow, 'runRecoveryWorkflow').mockResolvedValue(mockResult);
 
     const response = await request(server).post('/api/v1/transactions/pay_api_3/trigger-recovery');

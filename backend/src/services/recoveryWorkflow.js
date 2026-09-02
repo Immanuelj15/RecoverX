@@ -233,6 +233,10 @@ class RecoveryWorkflowService {
     const recoveryExecutor = require('./recoveryExecutor');
     return recoveryExecutor.executeRecoveryAction(txn, recommendation.recommended_action, correlationId);
   }
+
+  runRecoveryWorkflow(paymentId, customCorrelationId = null) {
+    return this.processRecoveryWorkflow(paymentId, customCorrelationId);
+  }
 }
 
 module.exports = new RecoveryWorkflowService();

@@ -17,10 +17,10 @@ export default function SystemStatus() {
   ];
 
   return (
-    <div className="fintech-card bg-navy-800 border border-brand-border flex flex-col h-[400px]">
-      <div className="px-6 py-4 border-b border-brand-border flex justify-between items-center bg-navy-900">
+    <div className="fintech-card flex flex-col h-[400px]">
+      <div className="px-6 py-4 border-b border-brand-border flex justify-between items-center bg-brand-appBg/50 rounded-t-xl">
         <div>
-          <h2 className="text-lg font-bold text-white">System Status</h2>
+          <h2 className="text-lg font-bold text-brand-textPrimary">System Status</h2>
           <p className="text-brand-textSecondary text-xs mt-1">Live service health monitoring.</p>
         </div>
       </div>
@@ -33,19 +33,19 @@ export default function SystemStatus() {
             return (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-navy-900 border border-brand-border flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-brand-textSecondary" />
+                  <div className="w-8 h-8 rounded-lg bg-brand-softBlue border border-brand-strongBorder flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-brand-primary" />
                   </div>
-                  <span className="text-sm font-medium text-white">{service.name}</span>
+                  <span className="text-sm font-medium text-brand-textPrimary">{service.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-brand-textSecondary">
                     {service.status}
                   </span>
                   {isOk ? (
-                    <CheckCircle2 className="w-4 h-4 text-fintech-success" />
+                    <CheckCircle2 className="w-4 h-4 text-brand-primary" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-fintech-danger" />
+                    <AlertCircle className="w-4 h-4 text-status-dangerText" />
                   )}
                 </div>
               </div>
@@ -56,7 +56,7 @@ export default function SystemStatus() {
         <div className="mt-auto pt-4 border-t border-brand-border/50">
           <div className="flex items-center justify-between text-xs">
             <span className="text-brand-textSecondary">Last Checked</span>
-            <span className="text-white font-mono">{new Date().toLocaleTimeString('en-US')}</span>
+            <span className="text-brand-textPrimary font-mono">{new Date().toLocaleTimeString('en-US')}</span>
           </div>
         </div>
       </div>

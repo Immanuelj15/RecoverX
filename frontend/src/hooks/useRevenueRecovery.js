@@ -10,6 +10,7 @@ export default function useRevenueRecovery() {
   });
   const [events, setEvents] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [promises, setPromises] = useState([]);
   const [chartsData, setChartsData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -33,9 +34,9 @@ export default function useRevenueRecovery() {
     }
   }, []);
 
-  const simulateBatch = async () => {
+  const simulateBatch = async (cohort = 'ALL', count = 120) => {
     try {
-      await client.post('/batch/simulate-ingestion');
+      await client.post('/batch/simulate-ingestion', { cohort, count });
       await fetchDashboardData(); // Refresh table and metrics
     } catch (err) {
       setError('Failed to simulate batch ingestion: ' + err.message);
@@ -74,6 +75,33 @@ export default function useRevenueRecovery() {
     }
   };
 
+  const fetchPromises = async () => {
+    try {
+      const response = await client.get('/promises');
+      setPromises(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch promises', err);
+    }
+  };
+
+  const fulfillPromise = async (id) => {
+    try {
+      await client.post(`/promises/${id}/fulfill`);
+      await fetchPromises();
+    } catch (err) {
+      console.error('Failed to fulfill promise', err);
+    }
+  };
+
+  const missPromise = async (id) => {
+    try {
+      await client.post(`/promises/${id}/miss`);
+      await fetchPromises();
+    } catch (err) {
+      console.error('Failed to miss promise', err);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
@@ -89,6 +117,10 @@ export default function useRevenueRecovery() {
     simulateBatch,
     triggerDiagnosis,
     executeStep,
-    fetchAuditLogs
+    fetchAuditLogs,
+    promises,
+    fetchPromises,
+    fulfillPromise,
+    missPromise
   };
 }

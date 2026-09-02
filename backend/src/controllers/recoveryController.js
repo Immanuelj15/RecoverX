@@ -16,11 +16,15 @@ exports.diagnoseRCA = async (req, res) => {
     }
 
     // In a real production system, this is where we'd call LangChain/LLaMA/OpenAI API.
-    // Simulating RCA logic:
+    // Simulating RCA logic based on Razorpay Track 03:
     let recommendedStrategy = 'Dynamic Retry Sequencer';
-    if (event.channel === 'OVERDUE_INVOICE') recommendedStrategy = 'Hinglish Voice AI Call';
-    else if (event.channel === 'CHECKOUT_ABANDONED') recommendedStrategy = 'WhatsApp Discount Offer';
-    else if (event.channel === 'FAILED_SUBSCRIPTION') recommendedStrategy = 'Smart Dunning Email';
+    if (event.channel === 'PAYMENT_DEGRADATION') recommendedStrategy = 'Root Cause Network Routing';
+    else if (event.channel === 'CHECKOUT_DROPOFF') recommendedStrategy = 'Checkout Drop-off Recovery Nudge';
+    else if (event.channel === 'FAILED_SUBSCRIPTION') recommendedStrategy = 'Failed-Subscription Recovery Nudge';
+    else if (event.channel === 'B2B_RECEIVABLES') recommendedStrategy = 'B2B Receivables Chaser Workflow';
+    else if (event.channel === 'MANDATE_RETRY') recommendedStrategy = 'Mandate Retry Sequencer';
+    else if (event.channel === 'PROMISE_TO_PAY') recommendedStrategy = 'Promise-to-pay Tracker Agent';
+    else if (event.channel === 'OVERDUE_INVOICE') recommendedStrategy = 'Hinglish Voice Recovery AI';
 
     // Create workflow state
     let workflow = await RecoveryWorkflow.findOne({ leakageEventId: event.id });

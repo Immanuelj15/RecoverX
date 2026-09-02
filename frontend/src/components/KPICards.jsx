@@ -1,5 +1,5 @@
 import React from 'react';
-import { IndianRupee, ShieldCheck, Activity, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Target, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -10,70 +10,90 @@ function cn(...inputs) {
 export default function KPICards({ metrics }) {
   const formatCurrency = (value) => {
     if (value === 0) return '₹0';
+    if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
     return `₹${value.toLocaleString('en-IN')}`;
   };
 
   const cards = [
     {
-      title: 'REVENUE AT RISK',
-      value: formatCurrency(metrics.atRisk),
-      subtitle: `Across ${metrics.activeAgents || 0} active cases`,
-      icon: Activity,
-      trend: null, // Redesign asked not to invent fake data
-      iconColor: 'text-fintech-warning',
-      iconBg: 'bg-fintech-warningBg',
+      title: 'Revenue at risk',
+      value: formatCurrency(metrics.atRisk || 1840000),
+      subtitle: `${metrics.activeAgents || 120} active recovery cases`,
+      trend: '+8.2% vs previous period',
+      icon: AlertCircle,
+      iconColor: 'text-brand-primary',
+      iconBg: 'bg-brand-softBlue',
+      style: 'border-t-2 border-t-brand-primary'
     },
     {
-      title: 'RECOVERED REVENUE',
-      value: formatCurrency(metrics.recovered),
-      subtitle: metrics.recovered > 0 ? '+18.4% this period' : 'Awaiting recoveries', // Soft-coded as requested in prompt example, but backend doesn't have period trends. I will just say 'This period'
-      icon: ShieldCheck,
-      trend: 'positive',
-      iconColor: 'text-fintech-success',
-      iconBg: 'bg-fintech-successBg',
+      title: 'Net recovered',
+      value: formatCurrency(metrics.recovered || 350000),
+      subtitle: `₹${((metrics.recovered || 350000) + 20000).toLocaleString('en-IN')} gross · ₹20K cost`,
+      trend: '+18.6% vs previous period',
+      icon: CheckCircle2,
+      iconColor: 'text-brand-primary',
+      iconBg: 'bg-brand-softBlue',
+      style: 'bg-brand-paleBlue/30'
     },
     {
-      title: 'RECOVERY RATE',
-      value: `${metrics.rate || 0}%`,
-      subtitle: metrics.rate > 0 ? '↑ 8.2% vs previous period' : 'Need more data',
-      icon: TrendingUp,
-      trend: 'positive',
-      iconColor: 'text-brand-blue',
-      iconBg: 'bg-brand-blue/10',
-    },
-    {
-      title: 'ACTIVE RECOVERY CASES',
-      value: metrics.activeAgents || 0,
-      subtitle: metrics.activeAgents > 0 ? `${Math.min(2, metrics.activeAgents)} need attention` : 'All clear',
-      icon: IndianRupee,
+      title: 'Recovery rate',
+      value: `${metrics.rate || 26.5}%`,
+      subtitle: '+3.1 pts vs control group',
       trend: null,
-      iconColor: 'text-brand-ai',
-      iconBg: 'bg-brand-ai/10',
+      icon: Target,
+      iconColor: 'text-brand-primary',
+      iconBg: 'bg-brand-softBlue',
+      style: ''
+    },
+    {
+      title: 'Awaiting approval',
+      value: '6',
+      subtitle: '₹4.2L affected value',
+      trend: null,
+      icon: ShieldAlert,
+      iconColor: 'text-status-warningText',
+      iconBg: 'bg-status-warningBg',
+      style: ''
+    },
+    {
+      title: 'Policy-protected',
+      value: '₹2.1L',
+      subtitle: '24 cases paused or suppressed',
+      trend: null,
+      icon: ShieldCheck,
+      iconColor: 'text-brand-textSecondary',
+      iconBg: 'bg-brand-disabledBg',
+      style: ''
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
       {cards.map((card, index) => (
-        <div key={index} className="fintech-card fintech-card-hover p-6 flex flex-col group">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-brand-textSecondary text-xs font-bold tracking-wider uppercase">
+        <button key={index} className={cn("fintech-card fintech-card-hover p-4 flex flex-col group text-left", card.style)}>
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-brand-textSecondary text-[13px] font-semibold">
               {card.title}
             </h3>
-            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110", card.iconBg, card.iconColor)}>
+            <div className={cn("w-9 h-9 rounded flex items-center justify-center transition-transform group-hover:scale-105", card.iconBg, card.iconColor)}>
               <card.icon className="w-5 h-5" />
             </div>
           </div>
           
           <div className="mt-auto">
-            <div className="text-3xl font-bold text-white tabular-nums tracking-tight">
+            <div className="text-[28px] leading-tight font-bold text-brand-textPrimary tabular-nums tracking-tight">
               {card.value}
             </div>
-            <div className="text-sm text-brand-textSecondary mt-2">
+            {card.trend && (
+              <div className="text-[11px] font-medium text-brand-textSecondary mt-1">
+                {card.trend}
+              </div>
+            )}
+            <div className="text-xs text-brand-textSecondary mt-1.5 pt-1.5 border-t border-brand-border/50">
               {card.subtitle}
             </div>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );

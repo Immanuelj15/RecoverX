@@ -1,80 +1,129 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  CreditCard, 
-  Bot, 
-  BarChart3, 
-  ShieldCheck, 
-  Cpu, 
-  Settings, 
-  FileText
-} from 'lucide-react';
+import { LayoutDashboard, Briefcase, BarChart3, List, Settings, Plug, ShieldCheck, Play, Repeat, Search, Layers, ShieldAlert, BookTemplate, ChevronDown } from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
 
 export default function Sidebar({ activeTab, setActiveTab }) {
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'payments', label: 'Payments & Cases', icon: CreditCard },
-    { id: 'ai-decisions', label: 'AI Decisions', icon: Bot },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'audit-trail', label: 'Audit Trail', icon: FileText },
-    { id: 'model-insights', label: 'Model Insights', icon: Cpu },
-    { id: 'settings', label: 'Policy Settings', icon: Settings },
+  const mainLinks = [
+    { id: 'overview', name: 'Overview', icon: LayoutDashboard },
+    { id: 'cases', name: 'Recovery Queue', icon: List, badge: 42 },
+    { id: 'batch', name: 'Workflows', icon: Layers },
+    { id: 'promises', name: 'Promises to Pay', icon: Repeat },
+    { id: 'analytics', name: 'Analytics', icon: BarChart3 },
+  ];
+
+  const controlLinks = [
+    { id: 'audit', name: 'Audit Trail', icon: Search, badge: 11 },
+    { id: 'settings', name: 'Policies', icon: ShieldCheck, badge: 6 },
+    { id: 'templates', name: 'Templates', icon: BookTemplate },
+    { id: 'integrations', name: 'Settings', icon: Settings },
   ];
 
   return (
-    <aside className="w-64 bg-[#0C2651] text-white flex flex-col shrink-0 min-h-screen border-r border-[#1C4991]">
-      {/* Brand Header */}
-      <div className="p-6 border-b border-[#1C4991]">
+    <aside className="fixed left-0 top-0 bottom-0 w-[248px] bg-brand-surface border-r border-brand-border flex flex-col z-50">
+      {/* Branding */}
+      <div className="h-[68px] flex items-center px-6 border-b border-brand-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2D6CDF] to-[#635BFF] flex items-center justify-center shadow-lg shadow-[#2D6CDF]/30 font-extrabold text-white text-xl">
-            R
+          <div className="w-8 h-8 rounded-full border-2 border-brand-primary flex items-center justify-center">
+            <Repeat className="w-4 h-4 text-brand-primary" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg tracking-tight text-white">RecoverX</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-[#635BFF]/30 text-[#A5B4FC] border border-[#635BFF]/40">
-                AI
-              </span>
-            </div>
-            <p className="text-xs text-[#94A3B8] font-medium">AI Revenue Recovery</p>
+          <div className="flex flex-col">
+            <span className="text-brand-navy font-extrabold text-[15px] leading-tight tracking-tight">RecoverFlow</span>
+            <span className="text-brand-textSecondary text-[10px] font-semibold tracking-wider uppercase">Revenue Recovery</span>
           </div>
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-6 space-y-1.5">
-        <div className="px-3 pb-2 text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">
-          Main Navigation
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 custom-scrollbar">
+        
+        {/* Main Menu */}
+        <div>
+          <div className="space-y-1">
+            {mainLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = activeTab === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => setActiveTab(link.id)}
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all relative overflow-hidden",
+                    isActive 
+                      ? "bg-brand-softBlue text-brand-primaryHover" 
+                      : "text-brand-textSecondary hover:text-brand-primaryHover hover:bg-brand-appBg"
+                  )}
+                >
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-r" />}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <Icon className={cn("w-4 h-4", isActive ? "text-brand-primary" : "text-brand-textMuted group-hover:text-brand-primary")} />
+                    {link.name}
+                  </div>
+                  {link.badge && (
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums relative z-10",
+                      isActive ? "bg-white text-brand-primary" : "bg-brand-appBg text-brand-textSecondary border border-brand-border"
+                    )}>
+                      {link.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-[#EEF4FF] text-[#0C2651] font-semibold shadow-sm'
-                  : 'text-[#CBD5E1] hover:bg-[#14366F] hover:text-white'
-              }`}
-            >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-[#2D6CDF]' : 'text-[#94A3B8]'}`} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
 
-      {/* Environment Footer */}
-      <div className="p-4 m-3 rounded-xl bg-[#061329]/60 border border-[#1C4991] text-xs text-[#94A3B8]">
-        <div className="flex items-center gap-2 mb-1 text-white font-medium">
-          <ShieldCheck className="w-4 h-4 text-[#16A34A]" />
-          <span>Razorpay Test Mode</span>
+        {/* Control Section */}
+        <div>
+          <h4 className="px-3 text-[11px] font-bold text-brand-textMuted uppercase tracking-wider mb-2">Controls</h4>
+          <div className="space-y-1">
+            {controlLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = activeTab === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => setActiveTab(link.id)}
+                  className={cn(
+                    "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all relative overflow-hidden",
+                    isActive 
+                      ? "bg-brand-softBlue text-brand-primaryHover" 
+                      : "text-brand-textSecondary hover:text-brand-primaryHover hover:bg-brand-appBg"
+                  )}
+                >
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-brand-primary rounded-r" />}
+                  <div className="flex items-center gap-3 relative z-10">
+                    <Icon className={cn("w-4 h-4", isActive ? "text-brand-primary" : "text-brand-textMuted")} />
+                    {link.name}
+                  </div>
+                  {link.badge && (
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded tabular-nums relative z-10",
+                      isActive ? "bg-white text-brand-primary" : "bg-brand-appBg text-brand-textSecondary border border-brand-border"
+                    )}>
+                      {link.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <p className="text-[11px] text-[#94A3B8] leading-relaxed">
-          HMAC-SHA256 Signed & Autonomous Recovery Guardrails Active
-        </p>
+      </div>
+
+      {/* Footer / Workspace Selector */}
+      <div className="p-4 border-t border-brand-border bg-brand-appBg">
+        <div className="flex flex-col gap-1 px-2 cursor-pointer group">
+          <span className="text-xs font-semibold text-brand-textPrimary group-hover:text-brand-primary transition-colors">Acme Payments India</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-brand-textSecondary">Workspace</span>
+            <ChevronDown className="w-3 h-3 text-brand-textMuted group-hover:text-brand-primary transition-colors" />
+          </div>
+        </div>
       </div>
     </aside>
   );
