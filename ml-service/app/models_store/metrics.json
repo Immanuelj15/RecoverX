@@ -1,0 +1,54 @@
+{
+  "model": "Logistic Regression",
+  "accuracy": 0.6013,
+  "precision": 0.392,
+  "recall": 0.6463,
+  "f1": 0.488,
+  "roc_auc": 0.6411,
+  "pr_auc": 0.4152,
+  "confusion_matrix": [
+    [
+      617,
+      442
+    ],
+    [
+      156,
+      285
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.7981888745148771,
+      "recall": 0.5826251180358829,
+      "f1-score": 0.6735807860262009,
+      "support": 1059.0
+    },
+    "1": {
+      "precision": 0.3920220082530949,
+      "recall": 0.6462585034013606,
+      "f1-score": 0.488013698630137,
+      "support": 441.0
+    },
+    "accuracy": 0.6013333333333334,
+    "macro avg": {
+      "precision": 0.595105441383986,
+      "recall": 0.6144418107186218,
+      "f1-score": 0.5807972423281689,
+      "support": 1500.0
+    },
+    "weighted avg": {
+      "precision": 0.6787758158339131,
+      "recall": 0.6013333333333334,
+      "f1-score": 0.6190240623317581,
+      "support": 1500.0
+    }
+  },
+  "business_metrics": {
+    "revenue_at_risk_inr": 3993597.59,
+    "actual_recovered_inr": 1074521.03,
+    "predicted_recoverable_inr": 1841265.38,
+    "expected_ml_value_inr": 962612.18,
+    "always_retry_baseline_inr": 1174117.69,
+    "value_lift_vs_baseline_pct": -18.01
+  }
+}

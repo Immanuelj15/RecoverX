@@ -1,0 +1,17 @@
+{
+  "input_features": [
+    "amount_paise",
+    "previous_successes",
+    "previous_failures",
+    "retry_count",
+    "customer_ltv_paise",
+    "customer_payment_success_rate",
+    "amount_to_ltv_ratio",
+    "retry_remaining",
+    "failure_severity",
+    "total_payment_attempts",
+    "payment_method",
+    "failure_reason",
+    "subscription_status"
+  ]
+}

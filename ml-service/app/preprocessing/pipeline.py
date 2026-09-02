@@ -9,7 +9,12 @@ NUMERICAL_FEATURES = [
     'previous_successes',
     'previous_failures',
     'retry_count',
-    'customer_ltv_paise'
+    'customer_ltv_paise',
+    'customer_payment_success_rate',
+    'amount_to_ltv_ratio',
+    'retry_remaining',
+    'failure_severity',
+    'total_payment_attempts'
 ]
 
 CATEGORICAL_FEATURES = [
@@ -24,9 +29,22 @@ TARGET_FEATURE = 'recovered'
 # Strict target leakage protection check
 TARGET_LEAKAGE_COLUMNS = ['recovered', 'outcome', 'amount_recovered', 'amount_recovered_paise', 'result']
 
+FAILURE_SEVERITY_MAP = {
+    'network_timeout': 1,
+    'gateway_timeout': 1,
+    'system_error': 1,
+    'insufficient_balance': 2,
+    'user_cancelled': 2,
+    'bank_declined': 3,
+    'authentication_failure': 3,
+    'card_expired': 4,
+    'account_blocked': 4,
+    'stolen_card': 4
+}
+
 def extract_and_clean_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Extracts numerical and categorical features for XGBoost model,
+    Extracts numerical, derived, and categorical features for XGBoost model,
     converting INR to paise if needed and dropping target leakage columns.
     """
     data = df.copy()
@@ -49,12 +67,31 @@ def extract_and_clean_features(df: pd.DataFrame) -> pd.DataFrame:
     else:
         data['customer_ltv_paise'] = data['customer_ltv_paise'].fillna(0)
 
-    # Fill numerical missing values
-    for col in NUMERICAL_FEATURES:
+    # Base numeric defaults
+    for col in ['previous_successes', 'previous_failures', 'retry_count']:
         if col not in data.columns:
             data[col] = 0
         else:
             data[col] = data[col].fillna(0)
+
+    # 1. Feature Engineering: customer_payment_success_rate
+    total_past = data['previous_successes'] + data['previous_failures']
+    data['customer_payment_success_rate'] = (data['previous_successes'] / (total_past + 1e-5)).round(4)
+
+    # 2. Feature Engineering: amount_to_ltv_ratio
+    data['amount_to_ltv_ratio'] = (data['amount_paise'] / (data['customer_ltv_paise'] + 100.0)).round(4)
+
+    # 3. Feature Engineering: retry_remaining
+    data['retry_remaining'] = (3 - data['retry_count']).clip(lower=0)
+
+    # 4. Feature Engineering: total_payment_attempts
+    data['total_payment_attempts'] = data['previous_successes'] + data['previous_failures'] + data['retry_count']
+
+    # 5. Feature Engineering: failure_severity
+    if 'failure_reason' in data.columns:
+        data['failure_severity'] = data['failure_reason'].map(lambda r: FAILURE_SEVERITY_MAP.get(str(r).lower(), 2))
+    else:
+        data['failure_severity'] = 2
 
     # Fill categorical missing values
     for col in CATEGORICAL_FEATURES:

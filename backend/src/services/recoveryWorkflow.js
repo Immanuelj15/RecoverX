@@ -5,6 +5,7 @@ const AuditLogRepository = require('../repositories/AuditLogRepository');
 const PolicyRepository = require('../repositories/PolicyRepository');
 const aiDecisionRepository = require('../repositories/aiDecisionRepository');
 const recoveryCaseRepository = require('../repositories/recoveryCaseRepository');
+const mlService = require('./mlService');
 const logger = require('../utils/logger');
 
 class RecoveryWorkflowService {
@@ -148,13 +149,37 @@ class RecoveryWorkflowService {
     // 2. DETECTED -> ANALYZING
     await recoveryStateMachine.transition(paymentId, RECOVERY_STATES.ANALYZING, { correlation_id: correlationId });
 
-    // 3. Calculate recovery probability (PREDICTED)
-    const probability = this.calculateFallbackProbability(txn);
-    const riskBand = probability >= 0.7 ? 'HIGH' : probability >= 0.4 ? 'MEDIUM' : 'LOW';
+    // 3. Calculate recovery probability (PREDICTED via XGBoost ML Service)
+    let mlPrediction = await mlService.predictRecoveryProbability(txn);
+    if (!mlPrediction) {
+      const probability = this.calculateFallbackProbability(txn);
+      const riskBand = probability >= 0.7 ? 'HIGH' : probability >= 0.4 ? 'MEDIUM' : 'LOW';
+      mlPrediction = {
+        recovery_probability: probability,
+        risk_band: riskBand,
+        top_factors: [
+          { feature: 'customer_payment_success_rate', impact: 0.35 },
+          { feature: 'failure_severity', impact: 0.25 },
+          { feature: 'retry_count', impact: 0.20 }
+        ],
+        model_name: 'Deterministic Fallback',
+        model_version: 'v1.0.0',
+        source: 'HEURISTIC'
+      };
+    }
+
+    const probability = mlPrediction.recovery_probability;
+    const riskBand = mlPrediction.risk_band;
 
     await recoveryStateMachine.transition(paymentId, RECOVERY_STATES.PREDICTED, {
       correlation_id: correlationId,
-      fields: { recovery_probability: probability, risk_band: riskBand }
+      fields: {
+        recovery_probability: probability,
+        risk_band: riskBand,
+        top_factors: mlPrediction.top_factors,
+        model_name: mlPrediction.model_name,
+        model_version: mlPrediction.model_version
+      }
     });
 
     // 4. Generate AI recommendation (RECOMMENDED)
