@@ -8,12 +8,18 @@ import AuditTrailView from './views/AuditTrailView';
 import PromisesView from './views/PromisesView';
 import PoliciesView from './views/PoliciesView';
 import BatchSimulatorView from './views/BatchSimulatorView';
+import LoginView from './views/LoginView';
 import useRevenueRecovery from './hooks/useRevenueRecovery';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export default function App() {
+function MainDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
-
   const recoveryState = useRevenueRecovery();
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
 
   const renderView = () => {
     switch (activeTab) {
@@ -37,14 +43,22 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-appBg text-brand-textPrimary font-sans flex">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex-1 ml-[248px] flex flex-col min-h-screen relative overflow-hidden">
+      <div className="flex-1 ml-[256px] flex flex-col min-h-screen relative overflow-hidden">
         <TopBar activeTab={activeTab} activeItem={null} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {renderView()}
         </main>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainDashboard />
+    </AuthProvider>
   );
 }

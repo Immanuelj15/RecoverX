@@ -8,6 +8,7 @@ const { getConnectionStatus } = require('./config/db');
 const app = express();
 
 const webhookRoutes = require('./routes/webhookRoutes');
+const authRoutes = require('./routes/authRoutes');
 const recoveryRoutes = require('./routes/recoveryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const batchRoutes = require('./routes/batchRoutes');
@@ -75,6 +76,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Mount API routes (Standard & V1 Aliases)
 const mountRoutes = (prefix) => {
+  app.use(`${prefix}/auth`, authRoutes);
   app.use(`${prefix}/webhooks`, webhookRoutes);
   app.use(`${prefix}/recovery`, recoveryRoutes);
   app.use(`${prefix}/dashboard`, dashboardRoutes);

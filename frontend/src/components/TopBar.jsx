@@ -1,7 +1,11 @@
-import React from 'react';
-import { Search, Calendar, Bell, ChevronDown, Activity } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Calendar, Bell, ChevronDown, Activity, LogOut, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function TopBar({ activeItem, activeTab }) {
+  const { user, logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
   const getBreadcrumb = () => {
     if (activeItem) {
       return `Recovery Queue / ${activeItem.id.split('-')[0]}`;
@@ -17,6 +21,13 @@ export default function TopBar({ activeItem, activeTab }) {
       integrations: 'Integrations'
     };
     return titles[activeTab] || 'Dashboard';
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'DM';
+    const parts = name.split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -56,20 +67,61 @@ export default function TopBar({ activeItem, activeTab }) {
           <span className="text-xs font-bold uppercase tracking-wider">Simulation Mode</span>
         </div>
 
-        <button className="relative p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50">
+        <button className="relative p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-slate-50 cursor-pointer">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 block h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
         </button>
 
-        <div className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer group">
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Ananya Rao</span>
-            <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Revenue Ops</span>
-          </div>
-          <div className="w-9 h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs shadow-2xs">
-            AR
-          </div>
-          <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+        {/* User Profile & Logout Dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer group text-left"
+          >
+            <div className="flex flex-col items-end">
+              <span className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                {user?.name || 'Demo Merchant'}
+              </span>
+              <span className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                {user?.role || 'MERCHANT_ADMIN'}
+              </span>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs shadow-2xs">
+              {getInitials(user?.name)}
+            </div>
+            <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
+          </button>
+
+          {/* Dropdown Menu */}
+          {showProfileMenu && (
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-fade-in">
+              <div className="px-4 py-2.5 border-b border-slate-100">
+                <p className="text-xs font-bold text-slate-900">{user?.name || 'Demo Merchant'}</p>
+                <p className="text-xs text-slate-500 font-medium truncate">{user?.email || 'demo@recoverx.ai'}</p>
+              </div>
+
+              <div className="py-1">
+                <button
+                  onClick={() => setShowProfileMenu(false)}
+                  className="w-full px-4 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-slate-400" /> Merchant Settings
+                </button>
+              </div>
+
+              <div className="pt-1 border-t border-slate-100">
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    logout();
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-2.5 cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 text-rose-500" /> Sign Out
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -13,6 +13,28 @@ const MerchantSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      sparse: true,
+      default: 'demo@recoverx.ai'
+    },
+    password_hash: {
+      type: String
+    },
+    role: {
+      type: String,
+      enum: ['MERCHANT_ADMIN', 'REVOPS_USER'],
+      default: 'MERCHANT_ADMIN'
+    },
+    is_active: {
+      type: Boolean,
+      default: true
+    },
+    last_login_at: {
+      type: Date
+    },
     razorpay_account_id: {
       type: String,
       default: 'acc_demo_recoverx_2026'

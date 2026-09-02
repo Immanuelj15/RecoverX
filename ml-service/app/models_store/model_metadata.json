@@ -2,7 +2,7 @@
   "model_name": "Logistic Regression",
   "model_version": "v1.0.0",
   "dataset_version": "recoverx-recovery-v1",
-  "training_timestamp": "2026-09-02T09:27:38.194073",
+  "training_timestamp": "2026-09-02T14:50:07.461365",
   "train_rows": 7000,
   "val_rows": 1500,
   "test_rows": 1500,
