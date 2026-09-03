@@ -10,7 +10,16 @@ const leakageEventSchema = new mongoose.Schema({
   },
   channel: {
     type: String,
-    enum: ['PAYMENT_DEGRADATION', 'CHECKOUT_ABANDONED', 'FAILED_SUBSCRIPTION', 'OVERDUE_INVOICE'],
+    enum: [
+      'PAYMENT_DEGRADATION',
+      'CHECKOUT_ABANDONED',
+      'CHECKOUT_DROPOFF',
+      'FAILED_SUBSCRIPTION',
+      'OVERDUE_INVOICE',
+      'B2B_RECEIVABLES',
+      'MANDATE_RETRY',
+      'PROMISE_TO_PAY'
+    ],
     required: true
   },
   customerName: {
