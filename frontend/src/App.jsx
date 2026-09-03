@@ -46,7 +46,7 @@ function MainDashboard() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 ml-[256px] flex flex-col min-h-screen relative overflow-hidden">
-        <TopBar activeTab={activeTab} activeItem={null} />
+        <TopBar activeTab={activeTab} setActiveTab={setActiveTab} recoveryState={recoveryState} activeItem={null} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {renderView()}
         </main>
