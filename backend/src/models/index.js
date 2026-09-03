@@ -13,8 +13,10 @@ const WebhookEvent = require('./WebhookEvent');
 const Transaction = require('./Transaction');
 const PolicyConfig = require('./PolicyConfig');
 
+const VoiceCallLog = require('./VoiceCallLog');
+
 module.exports = {
-  // 11 Core Fintech Models
+  // Core Fintech Models
   Merchant,
   Customer,
   Payment,
@@ -26,6 +28,7 @@ module.exports = {
   RecoveryOutcome,
   AuditLog,
   WebhookEvent,
+  VoiceCallLog,
 
   // Legacy Models for test backwards compatibility
   Transaction,

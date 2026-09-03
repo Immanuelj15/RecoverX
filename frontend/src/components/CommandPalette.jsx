@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, LayoutDashboard, CreditCard, Bot, BarChart3, FileText, Cpu, Settings, ArrowRight } from 'lucide-react';
+import { Search, X, LayoutDashboard, CreditCard, Bot, BarChart3, FileText, Cpu, Settings, ArrowRight, PhoneCall } from 'lucide-react';
 
 export default function CommandPalette({ isOpen, onClose, onNavigate, transactions = [] }) {
   const [query, setQuery] = useState('');
@@ -26,11 +26,12 @@ export default function CommandPalette({ isOpen, onClose, onNavigate, transactio
 
   const routes = [
     { id: 'overview', label: 'Overview Dashboard', icon: LayoutDashboard, category: 'Navigation' },
-    { id: 'payments', label: 'Payments & Recovery Cases', icon: CreditCard, category: 'Navigation' },
-    { id: 'ai-decisions', label: 'AI Decision Center', icon: Bot, category: 'Navigation' },
+    { id: 'cases', label: 'Recovery Queue & Cases', icon: CreditCard, category: 'Navigation' },
+    { id: 'batch', label: 'Workflows & Batch Simulator', icon: Bot, category: 'Navigation' },
+    { id: 'voice', label: 'Hinglish Voice Recovery Calls', icon: PhoneCall, category: 'Navigation' },
+    { id: 'promises', label: 'Promises to Pay (PTP)', icon: FileText, category: 'Navigation' },
     { id: 'analytics', label: 'Revenue Analytics', icon: BarChart3, category: 'Navigation' },
-    { id: 'audit-trail', label: 'Compliance Audit Trail', icon: FileText, category: 'Navigation' },
-    { id: 'model-insights', label: 'XGBoost Model Insights', icon: Cpu, category: 'Navigation' },
+    { id: 'audit', label: 'Compliance Audit Trail', icon: FileText, category: 'Navigation' },
     { id: 'settings', label: 'Guardrail Policy Settings', icon: Settings, category: 'Navigation' }
   ];
 

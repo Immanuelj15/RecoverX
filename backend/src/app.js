@@ -17,6 +17,7 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const policyRoutes = require('./routes/policyRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const voiceRoutes = require('./routes/voiceRoutes');
 
 // Security Headers via Helmet
 app.use(helmet({
@@ -86,6 +87,7 @@ const mountRoutes = (prefix) => {
   app.use(`${prefix}/transactions`, transactionRoutes);
   app.use(`${prefix}/policies`, policyRoutes);
   app.use(`${prefix}/audit-logs`, auditRoutes);
+  app.use(`${prefix}/voice`, voiceRoutes);
 };
 
 mountRoutes('/api');

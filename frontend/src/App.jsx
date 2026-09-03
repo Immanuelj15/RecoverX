@@ -8,6 +8,7 @@ import AuditTrailView from './views/AuditTrailView';
 import PromisesView from './views/PromisesView';
 import PoliciesView from './views/PoliciesView';
 import BatchSimulatorView from './views/BatchSimulatorView';
+import VoiceLogsView from './views/VoiceLogsView';
 import LoginView from './views/LoginView';
 import useRevenueRecovery from './hooks/useRevenueRecovery';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -33,6 +34,8 @@ function MainDashboard() {
         return <AuditTrailView {...recoveryState} />;
       case 'promises':
         return <PromisesView {...recoveryState} />;
+      case 'voice':
+        return <VoiceLogsView />;
       case 'settings':
         return <PoliciesView />;
       case 'batch':

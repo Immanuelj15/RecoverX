@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Briefcase, BarChart3, List, Settings, Plug, ShieldCheck, Play, Repeat, Search, Layers, ShieldAlert, BookTemplate, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Briefcase, BarChart3, List, Settings, Plug, ShieldCheck, Play, Repeat, Search, Layers, ShieldAlert, BookTemplate, ChevronDown, PhoneCall } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -13,6 +13,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'overview', name: 'Overview', icon: LayoutDashboard },
     { id: 'cases', name: 'Recovery Queue', icon: List, badge: 42 },
     { id: 'batch', name: 'Workflows', icon: Layers },
+    { id: 'voice', name: 'Voice Calls', icon: PhoneCall, badge: 3 },
     { id: 'promises', name: 'Promises to Pay', icon: Repeat },
     { id: 'analytics', name: 'Analytics', icon: BarChart3 },
   ];
