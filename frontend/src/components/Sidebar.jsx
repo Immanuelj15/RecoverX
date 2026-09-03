@@ -33,7 +33,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <Repeat className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-slate-900 font-extrabold text-lg leading-tight tracking-tight">RECOVERFLOW</span>
+            <span className="text-slate-900 font-extrabold text-lg leading-tight tracking-tight">RECOVERX</span>
             <span className="text-blue-600 text-xs font-bold tracking-wider uppercase">AI Recovery Ops</span>
           </div>
         </div>

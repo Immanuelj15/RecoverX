@@ -192,12 +192,6 @@ export default function TopBar({ activeItem, activeTab, setActiveTab, recoverySt
             )}
           </div>
           
-          {/* Simulation Mode Badge */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700">
-            <span className="w-2 h-2 rounded-full bg-blue-600 live-dot"></span>
-            <span className="text-xs font-bold uppercase tracking-wider">Simulation Mode</span>
-          </div>
-
           {/* Interactive Notification Bell */}
           <div className="relative" ref={notifMenuRef}>
             <button
@@ -283,20 +277,13 @@ export default function TopBar({ activeItem, activeTab, setActiveTab, recoverySt
           <div className="relative" ref={profileMenuRef}>
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-3 pl-5 border-l border-slate-200 cursor-pointer group text-left"
+              className="flex items-center gap-1.5 pl-4 border-l border-slate-200 cursor-pointer group"
+              title={user?.name || 'Demo Merchant'}
             >
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                  {user?.name || 'Demo Merchant'}
-                </span>
-                <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">
-                  {user?.role || 'MERCHANT_ADMIN'}
-                </span>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/20">
+              <div className="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/20 transition-all">
                 {getInitials(user?.name)}
               </div>
-              <ChevronDown className={`w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
             </button>
 
             {/* Dropdown Menu */}
