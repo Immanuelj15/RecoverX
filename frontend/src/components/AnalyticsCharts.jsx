@@ -93,7 +93,17 @@ export default function AnalyticsCharts({ chartsData, isLoading }) {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                 <XAxis dataKey="date" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `₹${val/1000}k`} />
+                <YAxis
+                  stroke="#64748B"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => {
+                    if (val === 0) return '₹0';
+                    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
+                    return `₹${Math.round(val / 1000)}k`;
+                  }}
+                />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '12px', color: '#0F172A', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
                   itemStyle={{ color: '#0F172A', fontWeight: 'bold' }}
