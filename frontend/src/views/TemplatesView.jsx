@@ -5,6 +5,8 @@ export default function TemplatesView() {
   const [activeChannel, setActiveChannel] = useState('ALL');
   const [copiedId, setCopiedId] = useState(null);
   const [previewModes, setPreviewModes] = useState({});
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
 
   const sampleValues = {
     customer_name: 'Ananya Sharma',
@@ -14,7 +16,7 @@ export default function TemplatesView() {
     invoice_num: 'INV-2026-884'
   };
 
-  const initialTemplates = [
+  const [templates, setTemplates] = useState([
     {
       id: 'tpl_1',
       title: 'Smart UPI Retry Nudge',
@@ -60,16 +62,58 @@ export default function TemplatesView() {
       badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
       vars: ['customer_name', 'amount']
     }
-  ];
+  ]);
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
 
   const handleCopy = (id, text) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
+    showToast('Template content copied to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   const togglePreviewMode = (id) => {
     setPreviewModes(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleOpenEdit = (tpl) => {
+    setEditingTemplate({ ...tpl });
+  };
+
+  const handleCreateNew = () => {
+    setEditingTemplate({
+      id: `tpl_${Date.now()}`,
+      title: 'New Recovery Template',
+      channel: 'WHATSAPP',
+      flow: 'Custom Flow',
+      content: 'Hi {{customer_name}}, your order for ₹{{amount}} is pending: {{payment_link}}',
+      badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+      vars: ['customer_name', 'amount', 'payment_link']
+    });
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editingTemplate) return;
+
+    // Detect variables inside content
+    const matches = editingTemplate.content.match(/\{\{([a-zA-Z0-9_]+)\}\}/g) || [];
+    const vars = Array.from(new Set(matches.map(m => m.slice(2, -2))));
+
+    setTemplates(prev => {
+      const exists = prev.some(t => t.id === editingTemplate.id);
+      if (exists) {
+        return prev.map(t => t.id === editingTemplate.id ? { ...editingTemplate, vars } : t);
+      }
+      return [...prev, { ...editingTemplate, vars }];
+    });
+
+    setEditingTemplate(null);
+    showToast('Template updated successfully');
   };
 
   const renderContent = (content, isPreview) => {
@@ -96,11 +140,11 @@ export default function TemplatesView() {
   };
 
   const filteredTemplates = activeChannel === 'ALL'
-    ? initialTemplates
-    : initialTemplates.filter(t => t.channel === activeChannel);
+    ? templates
+    : templates.filter(t => t.channel === activeChannel);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in relative">
       
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
@@ -116,7 +160,10 @@ export default function TemplatesView() {
           </p>
         </div>
 
-        <button className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer">
+        <button
+          onClick={handleCreateNew}
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 cursor-pointer"
+        >
           <Plus className="w-4 h-4" /> Create Custom Template
         </button>
       </div>
@@ -187,7 +234,10 @@ export default function TemplatesView() {
                     </span>
                   ))}
                 </div>
-                <button className="text-blue-600 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                <button
+                  onClick={() => handleOpenEdit(tpl)}
+                  className="text-blue-600 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
                   Edit <Edit2 className="w-3 h-3" />
                 </button>
               </div>
@@ -196,6 +246,93 @@ export default function TemplatesView() {
         })}
       </div>
 
+      {/* Edit Template Modal */}
+      {editingTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-fade-in">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <Edit2 className="w-4 h-4 text-blue-600" /> Edit Recovery Template
+              </h3>
+              <button onClick={() => setEditingTemplate(null)} className="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-semibold">
+              <div>
+                <label className="block text-slate-600 mb-1">Template Title</label>
+                <input
+                  type="text"
+                  value={editingTemplate.title}
+                  onChange={e => setEditingTemplate({ ...editingTemplate, title: e.target.value })}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-slate-600 mb-1">Channel</label>
+                  <select
+                    value={editingTemplate.channel}
+                    onChange={e => setEditingTemplate({ ...editingTemplate, channel: e.target.value })}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="WHATSAPP">WHATSAPP</option>
+                    <option value="SMS">SMS</option>
+                    <option value="EMAIL">EMAIL</option>
+                    <option value="VOICE">VOICE</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 mb-1">Pipeline Flow</label>
+                  <input
+                    type="text"
+                    value={editingTemplate.flow}
+                    onChange={e => setEditingTemplate({ ...editingTemplate, flow: e.target.value })}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-slate-600">Template Content (Use `{{variable}}` for dynamic tags)</label>
+                </div>
+                <textarea
+                  value={editingTemplate.content}
+                  onChange={e => setEditingTemplate({ ...editingTemplate, content: e.target.value })}
+                  rows={4}
+                  className="w-full p-2.5 border border-slate-200 rounded-xl text-slate-900 bg-slate-50 font-sans leading-relaxed"
+                  required
+                />
+              </div>
+
+              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-[11px] text-blue-800">
+                <strong>Supported Variables:</strong> <code className="bg-white px-1.5 py-0.5 rounded border">{"{{customer_name}}"}</code>, <code className="bg-white px-1.5 py-0.5 rounded border">{"{{amount}}"}</code>, <code className="bg-white px-1.5 py-0.5 rounded border">{"{{payment_link}}"}</code>, <code className="bg-white px-1.5 py-0.5 rounded border">{"{{invoice_num}}"}</code>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <button type="button" onClick={() => setEditingTemplate(null)} className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md cursor-pointer">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 animate-bounce">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
     </div>
   );
 }
+
