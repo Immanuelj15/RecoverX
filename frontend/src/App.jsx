@@ -27,7 +27,7 @@ function MainDashboard() {
       case 'overview':
         return <OverviewView {...recoveryState} setActiveTab={setActiveTab} />;
       case 'cases':
-        return <RecoveryCasesView {...recoveryState} />;
+        return <RecoveryCasesView {...recoveryState} setActiveTab={setActiveTab} />;
       case 'analytics':
         return <AnalyticsView {...recoveryState} />;
       case 'audit':
@@ -37,6 +37,8 @@ function MainDashboard() {
       case 'voice':
         return <VoiceLogsView />;
       case 'settings':
+      case 'templates':
+      case 'integrations':
         return <PoliciesView />;
       case 'batch':
         return <BatchSimulatorView {...recoveryState} />;

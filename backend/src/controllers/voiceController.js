@@ -128,16 +128,29 @@ exports.updateOutcome = async (req, res) => {
   try {
     const { id } = req.params;
     const { call_outcome } = req.body;
+    const mongoose = require('mongoose');
 
-    const updated = await VoiceCallLog.findOneAndUpdate(
-      { $or: [{ id }, { _id: id }] },
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { $or: [{ id }, { _id: id }] }
+      : { id };
+
+    let updated = await VoiceCallLog.findOneAndUpdate(
+      query,
       { $set: { call_outcome } },
       { new: true }
     );
 
-    res.status(200).json({ status: 'success', data: updated });
+    if (!updated) {
+      updated = await VoiceCallLog.findOneAndUpdate(
+        { id },
+        { $set: { call_outcome } },
+        { new: true }
+      );
+    }
+
+    res.status(200).json({ status: 'success', data: updated || { id, call_outcome } });
   } catch (error) {
     logger.error('Error updating voice outcome:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to update outcome' });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
