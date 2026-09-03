@@ -4,6 +4,15 @@ import { BookTemplate, MessageSquare, Mail, PhoneCall, Sparkles, Check, Copy, Ed
 export default function TemplatesView() {
   const [activeChannel, setActiveChannel] = useState('ALL');
   const [copiedId, setCopiedId] = useState(null);
+  const [previewModes, setPreviewModes] = useState({});
+
+  const sampleValues = {
+    customer_name: 'Ananya Sharma',
+    amount: '15,000',
+    payment_link: 'https://rzp.io/l/rec_9921',
+    grace_expiry: '10 Sep 2026',
+    invoice_num: 'INV-2026-884'
+  };
 
   const initialTemplates = [
     {
@@ -59,6 +68,33 @@ export default function TemplatesView() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const togglePreviewMode = (id) => {
+    setPreviewModes(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const renderContent = (content, isPreview) => {
+    const parts = content.split(/(\{\{[a-zA-Z0-9_]+\}\})/g);
+    
+    return parts.map((part, idx) => {
+      if (part.startsWith('{{') && part.endsWith('}}')) {
+        const varName = part.slice(2, -2);
+        if (isPreview) {
+          return (
+            <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
+              {sampleValues[varName] || varName}
+            </span>
+          );
+        }
+        return (
+          <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-blue-100 text-blue-800 font-extrabold text-xs border border-blue-200 shadow-2xs inline-flex items-center gap-0.5">
+            <span className="text-blue-500 font-mono">{`{`}</span>{varName}<span className="text-blue-500 font-mono">{`}`}</span>
+          </span>
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
+  };
+
   const filteredTemplates = activeChannel === 'ALL'
     ? initialTemplates
     : initialTemplates.filter(t => t.channel === activeChannel);
@@ -104,44 +140,60 @@ export default function TemplatesView() {
 
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredTemplates.map(tpl => (
-          <div key={tpl.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4 hover:border-blue-300 transition-all">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold uppercase border ${tpl.badgeColor}`}>
-                  {tpl.channel} • {tpl.flow}
-                </span>
-                <button
-                  onClick={() => handleCopy(tpl.id, tpl.content)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-                  title="Copy template content"
-                >
-                  {copiedId === tpl.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+        {filteredTemplates.map(tpl => {
+          const isPreview = previewModes[tpl.id];
+          return (
+            <div key={tpl.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs flex flex-col justify-between space-y-4 hover:border-blue-300 transition-all">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold uppercase border ${tpl.badgeColor}`}>
+                    {tpl.channel} • {tpl.flow}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => togglePreviewMode(tpl.id)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-extrabold transition-colors cursor-pointer ${
+                        isPreview
+                          ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {isPreview ? 'Sample Preview' : 'Template Tag View'}
+                    </button>
+                    <button
+                      onClick={() => handleCopy(tpl.id, tpl.content)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                      title="Copy template content"
+                    >
+                      {copiedId === tpl.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">{tpl.title}</h3>
+
+                {/* Styled Template Content Box */}
+                <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 text-sm font-sans text-slate-800 leading-relaxed">
+                  "{renderContent(tpl.content, isPreview)}"
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-slate-400 font-bold">Variables:</span>
+                  {tpl.vars.map(v => (
+                    <span key={v} className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 font-extrabold text-[11px]">
+                      {`{${v}}`}
+                    </span>
+                  ))}
+                </div>
+                <button className="text-blue-600 hover:underline font-bold flex items-center gap-1 cursor-pointer">
+                  Edit <Edit2 className="w-3 h-3" />
                 </button>
               </div>
-
-              <h3 className="text-base font-extrabold text-slate-900 mb-2">{tpl.title}</h3>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-mono text-slate-800 leading-relaxed">
-                "{tpl.content}"
-              </div>
             </div>
-
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-              <div className="flex items-center gap-1.5">
-                <span>Variables:</span>
-                {tpl.vars.map(v => (
-                  <span key={v} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[10px] font-bold">
-                    {`{{${v}}}`}
-                  </span>
-                ))}
-              </div>
-              <button className="text-blue-600 hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                Edit <Edit2 className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
     </div>
