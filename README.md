@@ -72,6 +72,42 @@ flowchart TB
     end
 ```
 
+### 4.1 Component Collaboration Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Merchant as Merchant / Admin
+    participant Frontend as React Dashboard
+    participant API as Node.js Backend API
+    participant DB as MongoDB Database
+    participant ML as XGBoost ML Service (Port 8000)
+    participant Groq as Groq LLM API
+    participant Policy as Deterministic Policy Engine
+    participant Channel as Recovery Action Executor
+
+    Merchant->>Frontend: Click "Trigger AI Recovery"
+    Frontend->>API: POST /api/v1/recovery/:payment_id/trigger (JWT)
+    API->>DB: Fetch Payment & Customer Profile
+    DB-->>API: Payment Document
+    
+    API->>ML: POST /predict-recovery (Features & History)
+    ML-->>API: Recovery Probability (p=0.84) & SHAP Factors
+    
+    API->>Groq: Request Recommendation & Natural Language Reasoning
+    Groq-->>API: Suggested Action ("SMART_RETRY") & Reason
+    
+    API->>Policy: Evaluate 5 Guardrails (Caps, Floor, Amount, Unrecoverable)
+    Policy-->>API: Policy Decision (Approved: true, Action: "SMART_RETRY")
+    
+    API->>Channel: Execute Bounded Channel Action
+    Channel-->>API: Execution Result (Success: true, Recovered: ₹15,000)
+    
+    API->>DB: Save State Transition, Revenue Metrics & Audit Log
+    API-->>Frontend: 200 OK Response Payload
+    Frontend-->>Merchant: Update Dashboard KPIs & Audit Stream Live
+```
+
 ---
 
 ## 5. Technology Stack
