@@ -135,16 +135,16 @@ export default function TopBar({ activeItem, activeTab, setActiveTab, recoverySt
         </div>
 
         {/* Middle: Global Search */}
-        <div className="flex-1 max-w-xl mx-8 relative hidden md:block">
+        <div className="flex-1 max-w-md mx-6 relative hidden md:block">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="w-full pl-10 pr-16 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50/70 text-slate-400 text-sm font-medium transition-all text-left flex items-center justify-between hover:bg-white hover:border-blue-400 focus:outline-none shadow-2xs"
+            className="w-full h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50/80 text-slate-400 text-xs lg:text-sm font-medium transition-all flex items-center justify-between hover:bg-white hover:border-blue-400 focus:outline-none shadow-2xs cursor-pointer group"
           >
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-slate-400" />
-              <span>Search customer, invoice, payment or case ID...</span>
+            <div className="flex items-center gap-2 min-w-0 pr-2">
+              <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 shrink-0" />
+              <span className="truncate whitespace-nowrap text-slate-400 group-hover:text-slate-600">Search cases, customers, payment IDs...</span>
             </div>
-            <span className="text-slate-400 text-xs font-semibold px-2 py-0.5 border border-slate-200 rounded-md bg-white">⌘ K</span>
+            <kbd className="shrink-0 text-slate-400 text-[11px] font-bold px-1.5 py-0.5 border border-slate-200 rounded-md bg-white shadow-2xs font-mono">⌘K</kbd>
           </button>
         </div>
 
