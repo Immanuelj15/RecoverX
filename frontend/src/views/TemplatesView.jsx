@@ -100,16 +100,16 @@ export default function TemplatesView() {
     e.preventDefault();
     if (!editingTemplate) return;
 
-    // Detect variables inside content
-    const matches = editingTemplate.content.match(/\{\{([a-zA-Z0-9_]+)\}\}/g) || [];
+    const safeContent = editingTemplate.content || '';
+    const matches = safeContent.match(/\{\{([a-zA-Z0-9_]+)\}\}/g) || [];
     const vars = Array.from(new Set(matches.map(m => m.slice(2, -2))));
 
     setTemplates(prev => {
       const exists = prev.some(t => t.id === editingTemplate.id);
       if (exists) {
-        return prev.map(t => t.id === editingTemplate.id ? { ...editingTemplate, vars } : t);
+        return prev.map(t => t.id === editingTemplate.id ? { ...editingTemplate, content: safeContent, vars } : t);
       }
-      return [...prev, { ...editingTemplate, vars }];
+      return [...prev, { ...editingTemplate, content: safeContent, vars }];
     });
 
     setEditingTemplate(null);
@@ -117,26 +117,32 @@ export default function TemplatesView() {
   };
 
   const renderContent = (content, isPreview) => {
-    const parts = content.split(/(\{\{[a-zA-Z0-9_]+\}\})/g);
-    
-    return parts.map((part, idx) => {
-      if (part.startsWith('{{') && part.endsWith('}}')) {
-        const varName = part.slice(2, -2);
-        if (isPreview) {
+    if (!content || typeof content !== 'string') return '';
+    try {
+      const parts = content.split(/(\{\{[a-zA-Z0-9_]+\}\})/g);
+      
+      return parts.map((part, idx) => {
+        if (part && part.startsWith('{{') && part.endsWith('}}')) {
+          const varName = part.slice(2, -2);
+          if (isPreview) {
+            return (
+              <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
+                {sampleValues[varName] || varName}
+              </span>
+            );
+          }
           return (
-            <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-emerald-100 text-emerald-800 font-extrabold text-xs border border-emerald-300">
-              {sampleValues[varName] || varName}
+            <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-blue-100 text-blue-800 font-extrabold text-xs border border-blue-200 shadow-2xs inline-flex items-center gap-0.5">
+              <span className="text-blue-500 font-mono">{`{`}</span>{varName}<span className="text-blue-500 font-mono">{`}`}</span>
             </span>
           );
         }
-        return (
-          <span key={idx} className="px-2 py-0.5 mx-0.5 rounded-md bg-blue-100 text-blue-800 font-extrabold text-xs border border-blue-200 shadow-2xs inline-flex items-center gap-0.5">
-            <span className="text-blue-500 font-mono">{`{`}</span>{varName}<span className="text-blue-500 font-mono">{`}`}</span>
-          </span>
-        );
-      }
-      return <span key={idx}>{part}</span>;
-    });
+        return <span key={idx}>{part}</span>;
+      });
+    } catch (err) {
+      console.error('Error rendering template content:', err);
+      return content;
+    }
   };
 
   const filteredTemplates = activeChannel === 'ALL'
