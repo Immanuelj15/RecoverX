@@ -7,6 +7,8 @@ import AnalyticsView from './views/AnalyticsView';
 import AuditTrailView from './views/AuditTrailView';
 import PromisesView from './views/PromisesView';
 import PoliciesView from './views/PoliciesView';
+import TemplatesView from './views/TemplatesView';
+import SettingsView from './views/SettingsView';
 import BatchSimulatorView from './views/BatchSimulatorView';
 import VoiceLogsView from './views/VoiceLogsView';
 import LoginView from './views/LoginView';
@@ -37,9 +39,11 @@ function MainDashboard() {
       case 'voice':
         return <VoiceLogsView />;
       case 'settings':
-      case 'templates':
-      case 'integrations':
         return <PoliciesView />;
+      case 'templates':
+        return <TemplatesView />;
+      case 'integrations':
+        return <SettingsView />;
       case 'batch':
         return <BatchSimulatorView {...recoveryState} />;
       default:
