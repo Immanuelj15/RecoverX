@@ -1,7 +1,6 @@
 import React from 'react';
 import KPICards from '../components/KPICards';
 import AnalyticsCharts from '../components/AnalyticsCharts';
-import SystemStatus from '../components/SystemStatus';
 import { PlayCircle, Eye, ShieldCheck, Zap, PhoneCall, Layers, Repeat, ArrowUpRight, Activity } from 'lucide-react';
 
 export default function OverviewView({ metrics, isLoading, error, simulateBatch, setActiveTab, chartsData }) {
@@ -179,8 +178,6 @@ export default function OverviewView({ metrics, isLoading, error, simulateBatch,
               })}
             </div>
           </div>
-
-          <SystemStatus />
 
         </div>
 
