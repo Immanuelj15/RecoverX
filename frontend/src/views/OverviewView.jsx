@@ -59,34 +59,37 @@ export default function OverviewView({ metrics, isLoading, error, simulateBatch,
     <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
       
       {/* Hero / Command Center Banner */}
-      <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">AI Revenue Recovery Command Center</h1>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-600 live-dot"></span> 5 Recovery Pipelines Active
+      <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="space-y-1.5 max-w-3xl">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-none">
+              AI Revenue Recovery Command Center
+            </h1>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold flex items-center gap-1.5 shrink-0 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 live-dot"></span>
+              5 Recovery Pipelines Active
             </span>
           </div>
-          <p className="text-sm text-slate-500 font-semibold">
+          <p className="text-xs sm:text-sm text-slate-500 font-semibold leading-relaxed">
             Catching, diagnosing, and bringing back at-risk revenue through automated multi-channel interventions and auditable guardrails.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap pt-2 xl:pt-0 border-t xl:border-t-0 border-slate-100">
           <button 
             onClick={() => setActiveTab && setActiveTab('cases')}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-blue-600 hover:bg-slate-50 transition-colors text-xs font-extrabold flex items-center gap-2 bg-white cursor-pointer shadow-2xs"
+            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-blue-600 hover:bg-slate-50 hover:border-blue-300 transition-all text-xs font-extrabold flex items-center gap-2 bg-white cursor-pointer shadow-2xs whitespace-nowrap"
           >
-            <Eye className="w-4 h-4 text-slate-400" />
-            View Recovery Queue
+            <Eye className="w-4 h-4 text-slate-400 shrink-0" />
+            <span>View Recovery Queue</span>
           </button>
           <button 
             onClick={handleSimulateBatch} 
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all text-xs font-extrabold flex items-center gap-2 shadow-md shadow-blue-500/20 disabled:opacity-50 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all text-xs font-extrabold flex items-center gap-2 shadow-md shadow-blue-500/20 disabled:opacity-50 cursor-pointer whitespace-nowrap"
           >
-            <PlayCircle className="w-4 h-4" />
-            Run Recovery Batch Workflows
+            <PlayCircle className="w-4 h-4 shrink-0" />
+            <span>Run Recovery Batch Workflows</span>
           </button>
         </div>
       </section>
