@@ -22,7 +22,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     { id: 'audit', name: 'Audit Trail', icon: Search, badge: 11 },
     { id: 'settings', name: 'Policies', icon: ShieldCheck, badge: 6 },
     { id: 'templates', name: 'Templates', icon: BookTemplate },
-    { id: 'integrations', name: 'Settings', icon: Settings },
   ];
 
   return (
