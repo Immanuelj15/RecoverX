@@ -1,85 +1,131 @@
-# RecoverX — Master System Architecture Document
+# RecoverX — System Architecture & Workflow Specifications
 
-> **Razorpay Buildathon 2026 Submission** | Track 03: AI Revenue Recovery
-
----
-
-## 📌 Executive Architecture Summary
-
-**RecoverX** is an enterprise-grade AI revenue recovery control plane designed for Razorpay merchants. It transforms payment failure handling from static retry loops into an intelligent, multi-layered decision engine backed by deterministic financial guardrails.
+This document outlines the system architecture, component topology, AI decision pipeline, policy guardrails, and data flow for **RecoverX — AI Revenue Recovery Agent**.
 
 ---
 
-## 🏛 System Component Breakdown
+## 1. System Architecture Diagram
 
 ```mermaid
-graph TD
-    A[Razorpay Webhook Event] -->|HMAC SHA256 Verification| B[Idempotency & Webhook Receiver]
-    B -->|Acquire Lock| C[State Machine Engine]
-    C -->|State: ANALYZING| D[Layer 1: XGBoost ML Model]
-    D -->|Probability & Top Factors| C
-    C -->|State: RECOMMENDED| E[Layer 2: Groq LLM Agent]
-    E -->|gpt-oss-20b JSON Strategy| C
-    C -->|State: POLICY_CHECK| F[Deterministic Policy Engine]
-    F -->|Financial Guardrails Check| G{Policy Decision}
-    G -->|APPROVED| H[Bounded Recovery Executor]
-    G -->|REJECTED / ESCALATED| I[Human Review / Stop]
-    H -->|Execute Retry / Nudge| J[Razorpay API / Customer Nudge]
-    H -->|State: SUCCESS / FAILED| K[(MongoDB Multi-Tenant DB)]
-    K -->|Audit Logs & AIDecisions| L[React Glassmorphism Dashboard]
+flowchart TB
+
+    subgraph External ["External Payment Ingestion & LLM"]
+        A[Razorpay / Payment Gateway]
+        G_LLM[Groq LLM Reasoning API]
+    end
+
+    subgraph Webhook_Layer ["Webhook & Security Layer"]
+        B[Webhook Ingestion Handler]
+        C[HMAC SHA256 Signature Verification]
+        D[Idempotency & Duplicate Checker]
+    end
+
+    subgraph Backend_Core ["Node.js Express Backend Service"]
+        E[Recovery Control Engine]
+        F[(MongoDB Database)]
+        M[Deterministic Policy Engine]
+        O[Recovery Action Executor]
+        T[Revenue Measurement Engine]
+        U[Immutable Audit Logger]
+    end
+
+    subgraph ML_Service ["Python FastAPI ML Service"]
+        G[Feature Engineering Pipeline]
+        H[XGBoost Recovery Predictor]
+        I[SHAP Feature Explainer]
+    end
+
+    subgraph UI_Layer ["React + Vite Merchant Command Center"]
+        V[Overview Dashboard]
+        W[Recovery Queue & Case Workspace]
+        X[Voice Calls & Promises to Pay]
+        Y[Audit Trail & Guardrails Manager]
+    end
+
+    %% Webhook Ingestion Flow
+    A -->|payment.failed webhook| B
+    B --> C
+    C -->|Verified Payload| D
+    D -->|New Unique Event| E
+    D -->|Duplicate Event| STOP_DUP[Ignore Duplicate]
+
+    %% Persistence & Feature Extraction
+    E --> F
+    E -->|Prepare Features| G
+    G --> H
+    H -->|Probability Score 0-1| I
+    I -->|Probability + SHAP Factors| E
+
+    %% AI Reasoning & Policy Evaluation
+    E -->|Context + ML Insights| G_LLM
+    G_LLM -->|Recommended Action| M
+    E -->|ML Direct Fallback| M
+    M -->|Evaluate 5 Guardrails| N{Policy Decision}
+
+    %% Policy Decisions
+    N -->|Approved| O
+    N -->|Escalated >= ₹50k| P[Human Approval Queue]
+    N -->|Stopped / Cap Reached| Q[Stop Recovery]
+
+    %% Execution & Outcome
+    O -->|Smart Retry / WhatsApp Nudge / Hinglish Call| R[Recovery Execution Channel]
+    R --> S[Recovery Outcome Verification]
+    S --> T
+    T --> U
+    U --> F
+
+    %% UI Consumption
+    F --> V
+    F --> W
+    F --> X
+    F --> Y
 ```
 
 ---
 
-## 🤖 Dual AI Layer Design
+## 2. Recovery Decision Mindmap
 
-### Layer 1: XGBoost Recovery Predictor
-* **Purpose**: Quantitative probability prediction of recovery likelihood $P(\text{recovery}) \in [0.0, 1.0]$.
-* **Input Features**: `amount_paise`, `payment_method`, `failure_reason`, `previous_successes`, `previous_failures`, `retry_count`, `customer_ltv_paise`, `subscription_status`.
-* **Zero Target Leakage Guarantee**: Explicitly drops all outcome/label columns (`recovered`, `amount_recovered`) from input feature space.
-* **Risk Banding**:
-  * `HIGH`: $P \ge 0.80$
-  * `MEDIUM`: $0.50 \le P < 0.80$
-  * `LOW`: $P < 0.50$
-
-### Layer 2: Groq LLM Reasoning Agent
-* **Purpose**: Context-aware qualitative strategy recommendation and customer communication generation.
-* **Model**: `openai/gpt-oss-20b` hosted on Groq API (`https://api.groq.com/openai/v1`).
-* **Zero OpenAI Dependency**: Communicates exclusively via Groq API provider isolation (`GroqProvider`) with zero OpenAI SDK or credentials.
-* **Structured Output Schema**: Strict JSON output schema validated against permitted action enums (`SMART_RETRY`, `DELAYED_RETRY`, `PAYMENT_RECOVERY_NUDGE`, `HUMAN_ESCALATION`, `STOP`).
+```mermaid
+mindmap
+  root((RecoverX AI Agent))
+    Ingestion
+      Razorpay Webhook
+      CSV Ingestion
+      Idempotency Verification
+    Intelligence
+      XGBoost ML Model
+        Payment Method Weight
+        Historical Retry Success
+        Payday Window Timing
+      SHAP Explainer
+        Top Positive Impact Factors
+        Top Negative Impact Factors
+      Groq LLM Reasoning
+        Contextual Insights
+        Natural Language Nudges
+    Guardrails
+      Action Allowlist
+      Max 3 Retry Cap
+      30% Probability Floor
+      ₹50,000 Human Escalation Threshold
+      Unrecoverable Code Blocking
+    Execution Channels
+      Smart UPI Instant Retry
+      1-Click Cart WhatsApp Nudge
+      Subscription Dunning Email
+      Hinglish AI Voice Recovery Call
+    Governance
+      Immutable Audit Trail
+      Verified Revenue Measurement
+```
 
 ---
 
-## 🛡 Deterministic Policy Engine Guardrails
+## 3. Core Architectural Principles
 
-Even if AI recommends an action, the **Policy Engine** evaluates strict non-bypassable financial rules:
-1. `MAX_RETRIES`: Blocks retries if transaction retry count $\ge$ merchant policy limit (default 3 retries).
-2. `HIGH_VALUE_TRANSACTION`: Mandatory human escalation (`HUMAN_ESCALATION`) if transaction amount $\ge$ threshold (default ₹50,000 / 5,000,000 paise).
-3. `UNRECOVERABLE_FAILURE`: Forces immediate `STOP` for hard unrecoverable failure reasons (`card_expired`, `invalid_account`, `account_closed`, `fraud_suspected`).
-4. `LOW_PROBABILITY_THRESHOLD`: Aborts automated retries (`STOP`) if recovery probability $P(\text{recovery}) < 0.30$.
-
----
-
-## 💰 Integer Paise Money Math Specification
-
-To eliminate floating-point rounding errors in financial transactions:
-- All monetary amounts in MongoDB schemas, ML features, policy guardrails, and APIs are stored and processed as integer paise (`1 INR = 100 paise`).
-- Example: ₹8,499.00 is stored as `849900` paise.
-- Display formatting helper converts paise to INR on UI borders (`₹(paise / 100).toFixed(2)`).
-
----
-
-## 🗄 MongoDB Multi-Tenant Database Architecture
-
-11 Core Mongoose Schemas enforcing multi-tenant isolation via compound indexes:
-1. `Merchant`: Razorpay merchant credentials and subscription tier.
-2. `Customer`: Customer profile, past payment statistics, and LTV.
-3. `Payment`: Failed payment details in integer paise.
-4. `RecoveryCase`: State machine case lifecycle.
-5. `MLPrediction`: Serialized ML model predictions and feature importance scores.
-6. `AIDecision`: Groq LLM reasoning logs, prompts, and tokens used.
-7. `PolicyDecision`: Evaluated guardrail rules and rejection reasons.
-8. `RecoveryAction`: Executed intervention details and idempotency keys.
-9. `RecoveryOutcome`: Verified recovery outcome and net recovered revenue in paise.
-10. `AuditLog`: Immutable audit trail of every state transition.
-11. `WebhookEvent`: Raw webhook payloads for idempotency deduplication.
+1. **XGBoost Predicts**: Quantitative ML predicts $0.0 \le p \le 1.0$ recovery probability.
+2. **Groq Reasons**: LLM contextualizes historical patterns and generates personalized nudges.
+3. **Policy Controls**: Deterministic policy engine enforces 5 non-bypassable guardrails.
+4. **Backend Executes**: Node.js backend safely dispatches bounded recovery actions.
+5. **Outcomes Measure**: Every recovered rupee is verified against initial revenue at risk.
+6. **Audit Explains**: Complete state transitions and correlation IDs logged immutably.
