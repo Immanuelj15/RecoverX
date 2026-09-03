@@ -304,7 +304,7 @@ export default function TemplatesView() {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-slate-600">Template Content (Use `{{variable}}` for dynamic tags)</label>
+                  <label className="text-slate-600">Template Content (Use {"{{variable}}"} for dynamic tags)</label>
                 </div>
                 <textarea
                   value={editingTemplate.content}
