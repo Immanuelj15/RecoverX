@@ -11,16 +11,16 @@ function cn(...inputs) {
 export default function Sidebar({ activeTab, setActiveTab }) {
   const mainLinks = [
     { id: 'overview', name: 'Overview', icon: LayoutDashboard },
-    { id: 'cases', name: 'Recovery Queue', icon: List, badge: 42 },
+    { id: 'cases', name: 'Recovery Queue', icon: List },
     { id: 'batch', name: 'Workflows', icon: Layers },
-    { id: 'voice', name: 'Voice Calls', icon: PhoneCall, badge: 3 },
+    { id: 'voice', name: 'Voice Calls', icon: PhoneCall },
     { id: 'promises', name: 'Promises to Pay', icon: Repeat },
     { id: 'analytics', name: 'Analytics', icon: BarChart3 },
   ];
 
   const controlLinks = [
-    { id: 'audit', name: 'Audit Trail', icon: Search, badge: 11 },
-    { id: 'settings', name: 'Policies', icon: ShieldCheck, badge: 6 },
+    { id: 'audit', name: 'Audit Trail', icon: Search },
+    { id: 'settings', name: 'Policies', icon: ShieldCheck },
     { id: 'templates', name: 'Templates', icon: BookTemplate },
   ];
 
