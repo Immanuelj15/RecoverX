@@ -40,52 +40,59 @@ export default function CaseDetailWorkspace({
   return (
     <div className="flex flex-col h-full animate-fade-in pb-12">
       {/* Breadcrumb & Header */}
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="flex items-center text-[13px] text-brand-textSecondary font-semibold">
+      <div className="mb-8 flex flex-col gap-5">
+        <div className="flex items-center text-sm text-slate-500 font-semibold">
           <button 
             onClick={onBack}
-            className="flex items-center gap-1 hover:text-brand-primary transition-colors"
+            className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-bold transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Recovery Queue
+            <ArrowLeft className="w-4 h-4" /> Recovery Queue
           </button>
-          <ChevronRight className="w-3.5 h-3.5 mx-2 text-brand-textMuted" />
-          <span className="text-brand-textPrimary">{activeItem.id.split('-')[0]}</span>
+          <ChevronRight className="w-4 h-4 mx-2 text-slate-300" />
+          <span className="text-slate-900 font-bold">{activeItem.id.split('-')[0]}</span>
         </div>
 
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-brand-softBlue flex items-center justify-center text-brand-primary font-extrabold text-xl border border-brand-strongBorder">
-              {activeItem.customerName.charAt(0)}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-blue-600 border border-blue-500 flex items-center justify-center text-white font-black text-2xl shadow-md shadow-blue-500/20 flex-shrink-0">
+              {activeItem.customerName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-[26px] font-extrabold text-brand-textPrimary tracking-tight">{activeItem.customerName}</h2>
-              <div className="flex items-center gap-3 mt-1.5 text-sm">
-                <span className="text-brand-textSecondary font-mono font-medium">{activeItem.id.split('-')[0]}</span>
-                <span className="px-2 py-0.5 rounded-md bg-brand-appBg border border-brand-border text-brand-textSecondary text-[11px] font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">{activeItem.customerName}</h1>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5 mt-2 text-sm">
+                <span className="text-slate-500 font-mono font-bold bg-slate-100 px-2.5 py-1 rounded-md text-xs">{activeItem.id.split('-')[0]}</span>
+                <span className="px-3 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-extrabold uppercase tracking-wider">
                   {activeItem.channel.replace(/_/g, ' ').toLowerCase()}
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-status-warningBg border border-status-warningBorder text-status-warningText text-[11px] font-bold uppercase tracking-wider">
+                <span className="px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-extrabold uppercase tracking-wider">
                   High Priority
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-brand-softBlue border border-brand-strongBorder text-brand-primary text-[11px] font-bold uppercase tracking-wider">
-                  Eligible
+                <span className="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold uppercase tracking-wider flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Eligible for Recovery
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex gap-10 text-right">
-            <div>
-              <div className="text-[13px] text-brand-textSecondary font-semibold mb-1">Amount at Risk</div>
-              <div className="text-[26px] leading-tight font-extrabold text-brand-textPrimary tabular-nums">₹{activeItem.riskAmount.toLocaleString('en-IN')}</div>
+          <div className="flex items-center gap-8 bg-slate-50 p-4 rounded-xl border border-slate-200/80 w-full lg:w-auto justify-around">
+            <div className="text-left">
+              <div className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-1">Amount at Risk</div>
+              <div className="text-2xl lg:text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">₹{activeItem.riskAmount.toLocaleString('en-IN')}</div>
             </div>
-            <div>
-              <div className="text-[13px] text-brand-textSecondary font-semibold mb-1">Recovery Likelihood</div>
-              <div className="text-[26px] leading-tight font-extrabold text-brand-primary tabular-nums">74%</div>
+            <div className="h-10 w-px bg-slate-200"></div>
+            <div className="text-left">
+              <div className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-1">Recovery Likelihood</div>
+              <div className="text-2xl lg:text-3xl font-extrabold text-blue-600 tabular-nums tracking-tight">74%</div>
             </div>
-            <div className="flex flex-col items-end justify-center">
-              <span className="text-[13px] text-brand-textSecondary font-semibold mb-1">Owner</span>
-              <span className="text-sm font-bold text-brand-textPrimary">Priya N.</span>
+            <div className="h-10 w-px bg-slate-200"></div>
+            <div className="text-left">
+              <div className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-1">Assigned Owner</div>
+              <div className="text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+                <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-xs flex items-center justify-center font-black">PN</div>
+                Priya N.
+              </div>
             </div>
           </div>
         </div>

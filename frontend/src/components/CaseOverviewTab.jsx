@@ -8,109 +8,129 @@ export default function CaseOverviewTab({ activeItem }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
       
       {/* 1. Customer profile card */}
-      <div className="fintech-card p-5">
-        <h3 className="text-sm font-bold tracking-widest uppercase text-brand-textSecondary mb-4 flex items-center gap-2">
-          <User className="w-4 h-4 text-brand-primary" /> Customer Profile
-        </h3>
-        <div className="space-y-3 text-[13px] font-medium">
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Name</span>
-            <span className="font-bold text-brand-textPrimary">{activeItem.customerName}</span>
+      <div className="fintech-card fintech-card-hover p-6 bg-white border-slate-200">
+        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+          <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <User className="w-4 h-4" />
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Email</span>
-            <span className="text-brand-textPrimary">contact@example.com</span>
+          <h3 className="text-xs font-extrabold tracking-wider uppercase text-slate-600">
+            Customer Profile
+          </h3>
+        </div>
+        <div className="space-y-3.5 text-sm font-medium">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Customer Name</span>
+            <span className="font-extrabold text-slate-900 text-base">{activeItem.customerName}</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Account Age</span>
-            <span className="text-brand-textPrimary">14 months</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Work Email</span>
+            <span className="text-slate-900 font-bold">{activeItem.customerEmail || `${activeItem.customerName.toLowerCase().replace(/[^a-z0-9]/g, '')}@company.com`}</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Preferred Channel</span>
-            <span className="text-brand-textPrimary">Email</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Account Tenure</span>
+            <span className="text-slate-900 font-bold">14 months</span>
           </div>
-          <div className="flex justify-between pb-1">
-            <span className="text-brand-textSecondary">Recent Support</span>
-            <span className="text-brand-textSecondary italic">No active tickets</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Preferred Channel</span>
+            <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold text-xs">Email Communication</span>
+          </div>
+          <div className="flex justify-between items-center pt-1">
+            <span className="text-slate-500 font-semibold">Recent Support Tickets</span>
+            <span className="text-slate-500 font-semibold text-xs bg-slate-100 px-2 py-1 rounded">No active tickets</span>
           </div>
         </div>
       </div>
 
       {/* 2. Recovery summary card */}
-      <div className="fintech-card p-5">
-        <h3 className="text-sm font-bold tracking-widest uppercase text-brand-textSecondary mb-4 flex items-center gap-2">
-          <Activity className="w-4 h-4 text-brand-primary" /> Recovery Summary
-        </h3>
-        <div className="space-y-3 text-[13px] font-medium">
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Amount at Risk</span>
-            <span className="font-bold text-brand-textPrimary tabular-nums">₹{activeItem.riskAmount.toLocaleString('en-IN')}</span>
+      <div className="fintech-card fintech-card-hover p-6 bg-white border-slate-200">
+        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+          <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <Activity className="w-4 h-4" />
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Root Cause</span>
-            <span className="text-brand-textPrimary">{activeItem.declineReasonCode || 'Unknown'}</span>
+          <h3 className="text-xs font-extrabold tracking-wider uppercase text-slate-600">
+            Recovery Summary
+          </h3>
+        </div>
+        <div className="space-y-3.5 text-sm font-medium">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Amount at Risk</span>
+            <span className="font-extrabold text-slate-900 text-base tabular-nums">₹{activeItem.riskAmount.toLocaleString('en-IN')}</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Recovery Likelihood</span>
-            <span className="text-brand-primary font-bold tabular-nums">74%</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Root Cause Code</span>
+            <span className="text-slate-900 font-bold px-2 py-0.5 rounded bg-slate-100 text-xs font-mono">{activeItem.declineReasonCode || 'insufficient_balance'}</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Churn Risk</span>
-            <span className="text-status-dangerText font-bold">High (82%)</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Recovery Likelihood</span>
+            <span className="text-blue-600 font-extrabold text-base tabular-nums">74%</span>
           </div>
-          <div className="flex justify-between pb-1">
-            <span className="text-brand-textSecondary">Current Strategy</span>
-            <span className="text-brand-primary font-bold capitalize">{activeItem.channel.replace(/_/g, ' ')}</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Churn Risk Score</span>
+            <span className="text-rose-600 font-bold px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-xs">High (82%)</span>
+          </div>
+          <div className="flex justify-between items-center pt-1">
+            <span className="text-slate-500 font-semibold">Current Strategy</span>
+            <span className="text-blue-700 font-extrabold uppercase text-xs tracking-wider">{activeItem.channel.replace(/_/g, ' ')}</span>
           </div>
         </div>
       </div>
 
       {/* 3. Invoice/Payment card */}
-      <div className="fintech-card p-5">
-        <h3 className="text-sm font-bold tracking-widest uppercase text-brand-textSecondary mb-4 flex items-center gap-2">
-          <AlertOctagon className="w-4 h-4 text-brand-primary" /> Payment Details
-        </h3>
-        <div className="space-y-3 text-[13px] font-medium">
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Last Attempt</span>
-            <span className="text-brand-textPrimary">Sep 01, 2026 09:14</span>
+      <div className="fintech-card fintech-card-hover p-6 bg-white border-slate-200">
+        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+          <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+            <AlertOctagon className="w-4 h-4" />
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Failure Category</span>
-            <span className="text-status-warningText font-bold">Hard Decline</span>
+          <h3 className="text-xs font-extrabold tracking-wider uppercase text-slate-600">
+            Payment Details
+          </h3>
+        </div>
+        <div className="space-y-3.5 text-sm font-medium">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Last Attempt</span>
+            <span className="text-slate-900 font-bold">Sep 01, 2026 09:14</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Retry Eligibility</span>
-            <span className="text-brand-textPrimary">Not recommended yet</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Failure Category</span>
+            <span className="text-amber-700 font-extrabold px-2.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-xs uppercase">Hard Decline</span>
           </div>
-          <div className="flex justify-between pb-1">
-            <span className="text-brand-textSecondary">Prior Successes</span>
-            <span className="text-status-successText font-bold">11 successful payments</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Retry Eligibility</span>
+            <span className="text-slate-700 font-bold">Not recommended yet</span>
+          </div>
+          <div className="flex justify-between items-center pt-1">
+            <span className="text-slate-500 font-semibold">Prior Successes</span>
+            <span className="text-emerald-700 font-extrabold flex items-center gap-1 text-xs px-2.5 py-0.5 rounded bg-emerald-50 border border-emerald-200">11 successful payments</span>
           </div>
         </div>
       </div>
 
       {/* 4. Consent and policy card */}
-      <div className="fintech-card p-5">
-        <h3 className="text-sm font-bold tracking-widest uppercase text-brand-textSecondary mb-4 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-brand-primary" /> Policy & Consent
-        </h3>
-        <div className="space-y-3 text-[13px] font-medium">
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Email Consent</span>
-            <span className="text-brand-primary flex items-center gap-1 font-bold">Granted</span>
+      <div className="fintech-card fintech-card-hover p-6 bg-white border-slate-200">
+        <div className="flex items-center gap-2 mb-5 pb-3 border-b border-slate-100">
+          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+            <ShieldCheck className="w-4 h-4" />
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">SMS Consent</span>
-            <span className="text-status-dangerText flex items-center gap-1 font-bold">Not granted</span>
+          <h3 className="text-xs font-extrabold tracking-wider uppercase text-slate-600">
+            Policy & Consent
+          </h3>
+        </div>
+        <div className="space-y-3.5 text-sm font-medium">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Email Consent</span>
+            <span className="text-emerald-700 font-bold px-2.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-xs uppercase">Granted</span>
           </div>
-          <div className="flex justify-between border-b border-brand-border pb-2">
-            <span className="text-brand-textSecondary">Touches Used</span>
-            <span className="text-brand-textPrimary tabular-nums">1 / 3 Max</span>
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">SMS Consent</span>
+            <span className="text-rose-700 font-bold px-2.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-xs uppercase">Not Granted</span>
           </div>
-          <div className="mt-4 p-3 bg-brand-appBg rounded border border-brand-border text-[13px] text-brand-textSecondary leading-relaxed">
-            <span className="text-brand-textPrimary font-bold">Policy Enforcement: </span> 
-            SMS recovery is unavailable because a verified consent record was not found.
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+            <span className="text-slate-500 font-semibold">Touches Used</span>
+            <span className="text-slate-900 font-bold tabular-nums">1 / 3 Max</span>
+          </div>
+          <div className="mt-4 p-3.5 bg-blue-50/60 rounded-xl border border-blue-200 text-xs text-slate-700 leading-relaxed font-medium">
+            <span className="text-blue-700 font-extrabold">Policy Enforcement: </span> 
+            SMS recovery is blocked because a verified consent record was not found.
           </div>
         </div>
       </div>
