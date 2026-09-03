@@ -175,12 +175,44 @@ Default Demo Credentials:
 
 ---
 
-## 9. API Reference & Documentation
+## 9. Verified API Endpoints
 
-Detailed API endpoint documentation and frontend-backend data contracts are available in:
+| Method | Endpoint | Purpose | Auth Required | External Service / Layer | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/login` | Merchant JWT Authentication | Public | Node.js Auth / bcrypt | `VERIFIED` |
+| `GET` | `/api/v1/auth/me` | Current Merchant Context | `Bearer <JWT>` | Node.js Auth | `VERIFIED` |
+| `POST` | `/api/v1/webhooks/razorpay` | Razorpay Webhook Ingestion | HMAC SHA256 | Razorpay / Crypto | `VERIFIED` |
+| `GET` | `/api/v1/transactions` | Paginated Recovery Queue | `Bearer <JWT>` | MongoDB / Mongoose | `VERIFIED` |
+| `GET` | `/api/v1/transactions/:id` | Single Case Detail & SHAP | `Bearer <JWT>` | MongoDB / ML Service | `VERIFIED` |
+| `POST` | `/api/v1/recovery/:id/trigger` | Trigger Full AI Pipeline | `Bearer <JWT>` | ML / Groq / Policy | `VERIFIED` |
+| `GET` | `/api/v1/analytics/summary` | Aggregate Revenue KPIs | `Bearer <JWT>` | MongoDB Aggregation | `VERIFIED` |
+| `GET` / `PUT` | `/api/v1/policies` | Recovery Policies & Caps | `Bearer <JWT>` | Policy Engine Store | `VERIFIED` |
+| `GET` | `/api/v1/audit-logs` | Immutable Audit Logs | `Bearer <JWT>` | Audit Repository | `VERIFIED` |
+
+---
+
+## 10. Demo Account & Sandboxed Environment
+
+*(DEMO ONLY — Sandboxed Development Environment)*
+
+- **Demo Merchant Name**: RecoverX Demo Merchant
+- **Demo Email**: `demo@recoverx.ai`
+- **Default Sandboxed Seed Password**: `demo-password` (Seeded locally via `npm run seed`)
+
+---
+
+## 11. Complete System Documentation Links
+
+Detailed architectural specifications, data contracts, decision trees, and mindmaps are available in:
 - [API Reference (`docs/API.md`)](file:///d:/Recoverx/docs/API.md)
+- [API Verification Matrix (`docs/api-verification.md`)](file:///d:/Recoverx/docs/api-verification.md)
 - [API Contract Verification (`docs/API-CONTRACT.md`)](file:///d:/Recoverx/docs/API-CONTRACT.md)
-- [Architecture & System Flow (`docs/architecture.md`)](file:///d:/Recoverx/docs/architecture.md)
+- [API Architecture & Sequence Flow (`docs/api-flow.md`)](file:///d:/Recoverx/docs/api-flow.md)
+- [Machine Learning Architecture (`docs/ml-architecture.md`)](file:///d:/Recoverx/docs/ml-architecture.md)
+- [Recovery Decision Flowchart (`docs/recovery-decision-flow.md`)](file:///d:/Recoverx/docs/recovery-decision-flow.md)
+- [System Architecture Flow (`docs/architecture.md`)](file:///d:/Recoverx/docs/architecture.md)
+- [Complete System Mindmap (`docs/mindmap.md`)](file:///d:/Recoverx/docs/mindmap.md)
+- [Test Suite Execution Report (`docs/test-report.md`)](file:///d:/Recoverx/docs/test-report.md)
 
 ---
 
