@@ -1,4 +1,4 @@
-# RecoverX — AI Revenue Recovery Agent
+# RecoverX — Autonomous Payment Recovery Engine
 
 > **Razorpay Buildathon 2026 Submission** | **Track 03 — AI Revenue Recovery**
 
