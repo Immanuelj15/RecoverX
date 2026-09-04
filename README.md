@@ -8,25 +8,96 @@ RecoverX is an AI-powered revenue recovery control plane for merchants. It detec
 
 ## 1. Problem Statement
 
-Every year, digital merchants lose up to **20-40% of potential revenue** to payment failures, bank timeouts, card declines, and interrupted checkout flows. Standard recovery methods rely on generic, static retries that trigger customer fatigue, increase processor decline fees, and fail to adapt to customer payday windows or preferred payment methods.
+Every year, digital merchants lose up to **20–40% of potential revenue** to payment failures, bank timeouts, card declines, and interrupted checkout flows:
+
+- **Static Retry Fatigue**: Traditional recovery scripts issue fixed-interval retries regardless of customer context, exhausting retry attempts on unrecoverable errors (e.g. `card_expired`, `invalid_account`).
+- **Excess Decline Fees**: Blind retries trigger payment processor penalty fees and risk flagging merchant accounts for suspicious activity.
+- **Sub-optimal Channel Matching**: Generic email dunning fails to engage mobile-first customers who prefer UPI or instant messaging.
+- **Lack of Governance**: Unbounded AI models executing live payments introduce financial risk and unpredictability into merchant operations.
 
 ---
 
-## 2. The RecoverX Solution
+## 2. What I Built & Project Workflows ("What I Did")
 
-RecoverX replaces static retry scripts with an intelligent, multi-channel recovery engine:
+To solve payment failure revenue leakage, I designed, implemented, and verified an end-to-end **Autonomous Revenue Recovery Control Plane** composed of 3 microservices and a cloud database:
 
-- **Detect**: Webhook ingestion catches payment failures in real time with HMAC SHA256 verification and idempotency locks.
-- **Predict**: XGBoost model predicts recovery probability ($0.0 \le p \le 1.0$) and generates SHAP factor explanations.
-- **Reason**: Groq LLM contextually analyzes failure patterns and drafts personalized interventions.
-- **Guard**: Deterministic Policy Engine enforces non-bypassable guardrails (retry caps, probability floors, high-value human escalations).
-- **Act**: Executes bounded multi-channel recovery (Smart UPI Retry, 1-Click WhatsApp Nudge, Dunning Email, Hinglish AI Voice Call).
-- **Measure**: Tracks net recovered revenue in integer paise to eliminate floating-point rounding errors.
-- **Audit**: Persists full state transitions and correlation IDs to an immutable audit log.
+```
+[ Razorpay Webhooks ] ──► [ HMAC & Idempotency Layer ]
+                                 │
+                                 ▼
+                     [ Node.js Backend Engine ] ◄──► [ MongoDB Atlas ]
+                       │                   │
+                       ▼                   ▼
+              [ Python FastAPI ]    [ Groq LLM Agent ]
+              (XGBoost + SHAP)     (Personalized Nudges)
+                       │                   │
+                       └─────────┬─────────┘
+                                 ▼
+                   [ Policy Guardrails Engine ]
+                                 │
+                     ┌───────────┴───────────┐
+                     ▼                       ▼
+           [ Bounded Executor ]     [ Human Approval Queue ]
+           (UPI/WhatsApp/Voice)       (High-Value >= ₹50k)
+                     │
+                     ▼
+           [ Outcome Verification ] ──► [ Immutable Audit Log ]
+```
+
+### End-to-End Implementation Workflow:
+1. **Ingestion & Security**: Built a secure Express webhook handler that validates Razorpay signatures using HMAC SHA256 and locks duplicates using atomic idempotency keys.
+2. **Predictive Intelligence**: Developed a Python FastAPI microservice serving a trained **XGBoost Classifier** that outputs exact recovery probability ($0.0 \le p \le 1.0$) and **SHAP feature force metrics**.
+3. **LLM Contextual Reasoning**: Integrated the **Groq API** (`openai/gpt-oss-20b`) to analyze customer payment history, generate personalized recovery nudges, and select optimal channels.
+4. **Deterministic Governance**: Engineered a **Policy Guardrail Engine** enforcing 5 non-bypassable safety rules (retry caps, probability floor, high-value human escalations, unrecoverable code blocks).
+5. **Multi-Channel Recovery Action**: Created modular channel adapters executing **Smart UPI Retries**, **1-Click WhatsApp Nudges**, **Dunning Emails**, and **Hinglish AI Voice Calls**.
+6. **Financial Precision & Audit**: Implemented integer paise currency math (`₹1.00 = 100 paise`) to eliminate floating-point rounding errors and backed every state change with an immutable audit log.
+7. **Merchant Command Center**: Constructed a responsive React 18 + Vite + Tailwind CSS dashboard visualizing live recovery streams, SHAP explanations, policy rules, and revenue metrics.
 
 ---
 
-## 3. Core Architectural Principle
+## 3. Comprehensive Feature Breakdown
+
+Here is a detailed breakdown of all core features engineered into RecoverX:
+
+### ⚡ 1. Real-Time Webhook Ingestion & Idempotency Locking
+- **HMAC SHA256 Signature Verification**: Authenticates incoming Razorpay webhook payloads before processing to prevent request spoofing.
+- **Atomic Idempotency Guard**: Hashes `merchant_id:payment_id:event_type` to guarantee that duplicate webhooks are ignored gracefully (`200 OK`, `status: "ignored_duplicate"`).
+
+### 🤖 2. XGBoost Recovery Predictor & SHAP Explainability
+- **FastAPI ML Microservice**: Exposes high-throughput `/predict-recovery` endpoint.
+- **Probabilistic Scoring**: Computes recovery probability based on historical payment success rates, failure reasons, retry counts, and customer LTV.
+- **SHAP Feature Force Drivers**: Returns relative feature contributions (e.g. `previous_successes: +0.34`, `failure_reason_timeout: +0.26`) displayed directly in the dashboard.
+
+### 🧠 3. Groq LLM Contextual Reasoning Agent
+- **LLM Reasoning**: Uses Groq hosted model (`openai/gpt-oss-20b`) to parse qualitative context (decline description, subscription tier, customer segment) and draft localized interventions.
+- **Strict JSON Schema Validation**: Enforces JSON response contracts so the LLM output is deterministically parsed by the backend.
+- **Rule-Based Fallback**: Automatically switches to rule-based fallback heuristics if Groq API key is missing or rate-limited.
+
+### 🛡️ 4. Deterministic Policy Guardrails Engine
+- **Non-Bypassable Governance**: AI recommendations must pass through the Policy Engine before any action is executed.
+- **Max Retry Cap**: Halts recovery if `retry_count >= 3` to prevent customer fatigue.
+- **Probability Floor**: Suspends automated retries if $p < 0.30$ to prevent processor decline fees.
+- **High-Value Escalation**: Redirects transactions $\ge ₹50,000$ to the Human Approval Queue.
+- **Hard Block Unrecoverable Codes**: Immediately stops retries on `card_expired`, `invalid_account`, or `fraud_suspected`.
+
+### 📱 5. Multi-Channel Recovery Action Executor
+- **Smart UPI Retry**: Re-initiates payment request during optimal payday/workday time windows.
+- **1-Click WhatsApp Nudge**: Sends pre-filled payment links directly to customer mobile devices.
+- **Hinglish AI Voice Recovery Call**: Programmable code-mixed Hindi/English voice script generator with interactive Web Speech audio synthesis.
+- **Dunning Email**: Sends structured payment retry links for enterprise customers.
+
+### 💰 6. Financial Precision Accounting (Integer Paise)
+- **Zero Floating-Point Error**: All monetary values (`revenue_at_risk_paise`, `amount_recovered_paise`, `customer_ltv_paise`) are calculated in integer paise.
+- **Verified Outcome Measurement**: Net recovered revenue is only credited when confirmed by gateway verification events.
+
+### 📊 7. React + Vite Merchant Command Center
+- **Live KPI Overview**: Real-time stats for Total At-Risk Revenue, Net Recovered Revenue, Recovery Rate, and Active Cases.
+- **Interactive Recovery Queue**: Paginated transaction table with detailed modal views for SHAP drivers, Groq reasoning, policy logs, and manual intervention triggers.
+- **Model Insights & AI Audit Center**: Dedicated tabs for inspecting XGBoost model accuracy metrics, Groq latency, policy block rates, and voice call audio logs.
+
+---
+
+## 4. Core Architectural Principle
 
 > **"XGBoost predicts. Groq reasons. Policy controls. Backend executes. Recovery outcomes measure. Audit logs explain."**
 
@@ -34,7 +105,7 @@ AI models NEVER directly execute financial transactions or bypass policy limits.
 
 ---
 
-## 4. System Architecture Diagram
+## 5. System Architecture Diagram
 
 ```mermaid
 flowchart TB
@@ -72,7 +143,7 @@ flowchart TB
     end
 ```
 
-### 4.1 Component Collaboration Sequence Diagram
+### 5.1 Component Collaboration Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -110,18 +181,18 @@ sequenceDiagram
 
 ---
 
-## 5. Technology Stack
+## 6. Technology Stack
 
 - **Backend**: Node.js, Express, Mongoose, Winston Logger, Jest, Supertest
 - **Machine Learning**: Python 3.11, FastAPI, XGBoost, Scikit-learn, SHAP, Pytest
-- **LLM Reasoning**: Groq API (`llama-3.3-70b-versatile`) with deterministic fallback heuristics
-- **Database**: MongoDB (Indexes on `payment_id`, `merchant_id`, `correlation_id`)
+- **LLM Reasoning**: Groq API (`openai/gpt-oss-20b`) with deterministic fallback heuristics
+- **Database**: MongoDB Atlas (Indexes on `payment_id`, `merchant_id`, `correlation_id`)
 - **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts
 - **Integrations**: Razorpay Test Mode API & Webhooks
 
 ---
 
-## 6. Policy Guardrails & Safety Controls
+## 7. Policy Guardrails & Safety Controls
 
 | Guardrail Rule | Threshold / Constraint | Enforced Behavior |
 | :--- | :--- | :--- |
@@ -133,7 +204,7 @@ sequenceDiagram
 
 ---
 
-## 7. Verified Test Suite Execution
+## 8. Verified Test Suite Execution
 
 ### Backend Jest Test Suite
 ```bash
@@ -160,7 +231,7 @@ npm run build
 
 ---
 
-## 8. Local Setup & Quickstart
+## 9. Local Setup & Quickstart
 
 ### Prerequisites
 - Node.js v18+
@@ -211,7 +282,7 @@ Default Demo Credentials:
 
 ---
 
-## 9. Verified API Endpoints
+## 10. Verified API Endpoints
 
 | Method | Endpoint | Purpose | Auth Required | External Service / Layer | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -227,7 +298,7 @@ Default Demo Credentials:
 
 ---
 
-## 10. Demo Account & Sandboxed Environment
+## 11. Demo Account & Sandboxed Environment
 
 *(DEMO ONLY — Sandboxed Development Environment)*
 
@@ -237,10 +308,11 @@ Default Demo Credentials:
 
 ---
 
-## 11. Complete System Documentation Links
+## 12. Complete System Documentation Links
 
 Detailed architectural specifications, data contracts, decision trees, and mindmaps are available in:
 - [API Reference (`docs/API.md`)](file:///d:/Recoverx/docs/API.md)
+- [Deployment Guide (`docs/deployment.md`)](file:///d:/Recoverx/docs/deployment.md)
 - [API Verification Matrix (`docs/api-verification.md`)](file:///d:/Recoverx/docs/api-verification.md)
 - [API Contract Verification (`docs/API-CONTRACT.md`)](file:///d:/Recoverx/docs/API-CONTRACT.md)
 - [API Architecture & Sequence Flow (`docs/api-flow.md`)](file:///d:/Recoverx/docs/api-flow.md)
@@ -252,7 +324,7 @@ Detailed architectural specifications, data contracts, decision trees, and mindm
 
 ---
 
-## 10. Failure Scenarios & Robustness
+## 13. Failure Scenarios & Robustness
 
 - **ML Service Offline**: Backend seamlessly falls back to deterministic probability heuristics without crashing.
 - **Groq API Key Missing/Rate-Limited**: System logs warning and applies rule-based action recommendation.
@@ -261,6 +333,6 @@ Detailed architectural specifications, data contracts, decision trees, and mindm
 
 ---
 
-## 11. Demo Disclaimer
+## 14. Demo Disclaimer
 
 All evaluation data and payment workflows demonstrated in RecoverX use synthetic transaction records and Razorpay Test Mode API keys. No live credit cards or actual customer funds are processed.
