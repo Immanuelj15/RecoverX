@@ -17,10 +17,12 @@ export default function VoiceLogsView() {
 
   const [generatedScript, setGeneratedScript] = useState('');
 
+  const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
   const fetchVoiceLogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/v1/voice/logs');
+      const res = await fetch(`${API_BASE}/v1/voice/logs`);
       const json = await res.json();
       if (json.status === 'success') {
         setLogs(json.data);
@@ -60,7 +62,7 @@ export default function VoiceLogsView() {
 
   const handleGenerateScript = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/voice/generate-script', {
+      const res = await fetch(`${API_BASE}/v1/voice/generate-script`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -78,7 +80,7 @@ export default function VoiceLogsView() {
     e.preventDefault();
     try {
       setTriggering(true);
-      const res = await fetch('http://localhost:5000/api/v1/voice/trigger-call', {
+      const res = await fetch(`${API_BASE}/v1/voice/trigger-call`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -100,7 +102,7 @@ export default function VoiceLogsView() {
 
   const updateOutcome = async (logId, outcome) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/voice/logs/${logId}/outcome`, {
+      const res = await fetch(`${API_BASE}/v1/voice/logs/${logId}/outcome`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ call_outcome: outcome })

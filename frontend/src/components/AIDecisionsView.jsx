@@ -5,7 +5,8 @@ export default function AIDecisionsView({ transactions = [] }) {
   const [telemetry, setTelemetry] = useState(null);
 
   useEffect(() => {
-    fetch('/api/v1/analytics/ai-decisions')
+    const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+    fetch(`${API_BASE}/v1/analytics/ai-decisions`)
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
         if (json && json.status === 'success') {

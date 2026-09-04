@@ -5,7 +5,8 @@ export default function ModelInsightsView() {
   const [modelInfo, setModelInfo] = useState(null);
 
   useEffect(() => {
-    fetch('/api/v1/analytics/model-info')
+    const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+    fetch(`${API_BASE}/v1/analytics/model-info`)
       .then((res) => (res.ok ? res.json() : null))
       .then((json) => {
         if (json && json.status === 'success' && json.data) {

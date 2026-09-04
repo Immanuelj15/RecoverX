@@ -24,7 +24,8 @@ export default function AuditTimelineView() {
     });
 
     try {
-      const res = await fetch(`/api/v1/audit-logs?${query.toString()}`);
+      const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+      const res = await fetch(`${API_BASE}/v1/audit-logs?${query.toString()}`);
       if (res.ok) {
         const json = await res.json();
         setAuditLogs(json.data || []);

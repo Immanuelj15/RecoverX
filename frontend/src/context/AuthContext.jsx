@@ -31,10 +31,12 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
+  const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+
   const login = async (email, password) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/v1/auth/login', {
+      const response = await fetch(`${API_BASE}/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -59,7 +61,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       if (token) {
-        await fetch('/api/v1/auth/logout', {
+        await fetch(`${API_BASE}/v1/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
