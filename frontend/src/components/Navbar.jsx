@@ -32,12 +32,6 @@ export default function Navbar({ onRefresh, isRefreshing, searchQuery, setSearch
           <span>AI Engine Operational</span>
         </div>
 
-        {/* Razorpay Test Mode Pill Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EEF4FF] border border-[#C7D7FE] text-xs font-medium text-[#2D6CDF]">
-          <Shield className="w-3.5 h-3.5 text-[#2D6CDF]" />
-          <span>Razorpay Test Mode Connected</span>
-        </div>
-
         {/* Refresh Sync Button */}
         <button
           onClick={onRefresh}

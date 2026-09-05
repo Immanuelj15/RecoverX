@@ -31,16 +31,16 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[256px] bg-[#0B1220] border-r border-[#1E2B3D] flex flex-col z-50 shadow-2xl">
+    <aside className="fixed left-0 top-0 bottom-0 w-[256px] bg-white border-r border-slate-200 flex flex-col z-50 shadow-sm">
       {/* Branding Header */}
-      <div className="h-[72px] flex items-center px-6 border-b border-[#1E2B3D] bg-[#070B12]">
+      <div className="h-[72px] flex items-center px-6 border-b border-slate-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#2D7FF9] border border-[#2D7FF9] flex items-center justify-center shadow-lg shadow-[#2D7FF9]/20">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 border border-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20">
             <Repeat className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-white font-black text-lg leading-tight tracking-tight">RECOVERX</span>
-            <span className="text-[#2D7FF9] text-[10px] font-extrabold tracking-widest uppercase">AI Revenue Ops</span>
+            <span className="text-slate-900 font-black text-lg leading-tight tracking-tight">RECOVERX</span>
+            <span className="text-blue-600 text-[10px] font-extrabold tracking-widest uppercase">AI Revenue Ops</span>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         
         {/* Main Section */}
         <div>
-          <div className="px-3 text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-3">Core Control Plane</div>
+          <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Core Control Plane</div>
           <div className="space-y-1.5">
             {mainLinks.map((link) => {
               const Icon = link.icon;
@@ -64,25 +64,25 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                   className={cn(
                     "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all relative overflow-hidden cursor-pointer",
                     isActive 
-                      ? "bg-[#141F2E] text-white border border-[#2D7FF9]/60 shadow-lg shadow-[#2D7FF9]/10" 
-                      : "text-[#94A3B8] hover:text-white hover:bg-[#101927]"
+                      ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm" 
+                      : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/60"
                   )}
                 >
                   {isActive && (
                     <motion.div 
                       layoutId="activeTabIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2D7FF9] rounded-r-md"
+                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600 rounded-r-md"
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
                   )}
                   <div className="flex items-center gap-3 relative z-10">
-                    <Icon className={cn("w-4 h-4", isActive ? "text-[#2D7FF9]" : "text-[#64748B]")} />
+                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400")} />
                     <span>{link.name}</span>
                   </div>
                   {link.badge && (
                     <span className={cn(
                       "text-[10px] font-extrabold px-2 py-0.5 rounded-full tabular-nums relative z-10",
-                      isActive ? "bg-[#F59E0B] text-black" : "bg-[#101927] text-[#F59E0B] border border-[#F59E0B]/30"
+                      isActive ? "bg-amber-100 text-amber-800 border border-amber-200" : "bg-amber-50 text-amber-600 border border-amber-200"
                     )}>
                       {link.badge}
                     </span>
@@ -95,7 +95,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
         {/* Governance & Audits Section */}
         <div>
-          <div className="px-3 text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-3">Governance & Audits</div>
+          <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Governance & Audits</div>
           <div className="space-y-1.5">
             {controlLinks.map((link) => {
               const Icon = link.icon;
@@ -109,19 +109,19 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                   className={cn(
                     "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all relative overflow-hidden cursor-pointer",
                     isActive 
-                      ? "bg-[#141F2E] text-white border border-[#2D7FF9]/60 shadow-lg shadow-[#2D7FF9]/10" 
-                      : "text-[#94A3B8] hover:text-white hover:bg-[#101927]"
+                      ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm" 
+                      : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/60"
                   )}
                 >
                   {isActive && (
                     <motion.div 
                       layoutId="activeTabIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2D7FF9] rounded-r-md"
+                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600 rounded-r-md"
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
                   )}
                   <div className="flex items-center gap-3 relative z-10">
-                    <Icon className={cn("w-4 h-4", isActive ? "text-[#2D7FF9]" : "text-[#64748B]")} />
+                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400")} />
                     <span>{link.name}</span>
                   </div>
                 </motion.button>
@@ -132,7 +132,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
         {/* System Simulation Section */}
         <div>
-          <div className="px-3 text-[10px] font-bold text-[#64748B] uppercase tracking-wider mb-3">System & Tools</div>
+          <div className="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">System & Tools</div>
           <div className="space-y-1.5">
             {systemLinks.map((link) => {
               const Icon = link.icon;
@@ -146,19 +146,19 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                   className={cn(
                     "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-all relative overflow-hidden cursor-pointer",
                     isActive 
-                      ? "bg-[#141F2E] text-white border border-[#2D7FF9]/60 shadow-lg shadow-[#2D7FF9]/10" 
-                      : "text-[#94A3B8] hover:text-white hover:bg-[#101927]"
+                      ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm" 
+                      : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/60"
                   )}
                 >
                   {isActive && (
                     <motion.div 
                       layoutId="activeTabIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#2D7FF9] rounded-r-md"
+                      className="absolute left-0 top-0 bottom-0 w-[3px] bg-blue-600 rounded-r-md"
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
                   )}
                   <div className="flex items-center gap-3 relative z-10">
-                    <Icon className={cn("w-4 h-4", isActive ? "text-[#2D7FF9]" : "text-[#64748B]")} />
+                    <Icon className={cn("w-4 h-4", isActive ? "text-blue-600" : "text-slate-400")} />
                     <span>{link.name}</span>
                   </div>
                 </motion.button>
@@ -170,12 +170,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
 
       {/* Footer Store Info */}
-      <div className="p-4 border-t border-[#1E2B3D] bg-[#070B12]">
+      <div className="p-4 border-t border-slate-200 bg-slate-50">
         <div className="flex flex-col gap-1 px-2 cursor-pointer group">
-          <span className="text-xs font-black text-white group-hover:text-[#2D7FF9] transition-colors">RecoverX Demo Store</span>
+          <span className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-colors">RecoverX Demo Store</span>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-semibold text-[#94A3B8]">Razorpay Sandboxed Store</span>
-            <span className="w-2 h-2 rounded-full bg-[#10B981]"></span>
+            <span className="text-[10px] font-semibold text-slate-500">Razorpay Sandboxed Store</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           </div>
         </div>
       </div>
