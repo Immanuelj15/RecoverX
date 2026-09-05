@@ -2,13 +2,23 @@
 
 > **Razorpay Buildathon 2026 Submission** | **Track 03 — AI Revenue Recovery**
 
-RecoverX is an AI-powered revenue recovery control plane for merchants. It detects revenue at risk from payment failures and abandoned checkouts, predicts recoverability via XGBoost ML, reasons about interventions using Groq LLM, enforces deterministic policy guardrails, executes bounded multi-channel recovery actions, and measures verified recovered revenue.
+RecoverX is an AI-powered revenue recovery control plane for digital merchants. It detects revenue at risk from payment failures and abandoned checkouts, predicts recoverability via XGBoost ML, reasons about qualitative interventions using Groq LLM, enforces deterministic policy guardrails, executes bounded multi-channel recovery actions (Smart Retries, WhatsApp 1-Click Links, Hinglish AI Voice Calls), and measures verified net recovered revenue.
+
+---
+
+## 🎨 Design System & UI Architecture
+
+RecoverX features a clean, high-contrast **White and Blue** modern fintech interface designed for clarity, high data density, and operational speed:
+
+- **Primary Colors**: Clean White (`#FFFFFF`, `bg-white`, `bg-slate-50`), Crisp Blue (`#2563EB` / `#2D7FF9`), Dark Slate Text (`#0F172A` / `#1E293B`).
+- **Typography & Aesthetics**: Modern sans-serif layout with monospaced financial data metrics, status badges, and smooth Framer Motion micro-animations.
+- **Always-Populated Demo State**: Default fallback data feeds for Human Escalation Queue and Live Groq Decision Stream ensure zero empty states even before batch simulation runs.
 
 ---
 
 ## 1. Problem Statement
 
-Every year, digital merchants lose up to **20–40% of potential revenue** to payment failures, bank timeouts, card declines, and interrupted checkout flows:
+Every year, digital merchants lose **20–40% of potential revenue** to payment failures, bank timeouts, card declines, and interrupted checkout flows:
 
 - **Static Retry Fatigue**: Traditional recovery scripts issue fixed-interval retries regardless of customer context, exhausting retry attempts on unrecoverable errors (e.g. `card_expired`, `invalid_account`).
 - **Excess Decline Fees**: Blind retries trigger payment processor penalty fees and risk flagging merchant accounts for suspicious activity.
@@ -93,7 +103,8 @@ Here is a detailed breakdown of all core features engineered into RecoverX:
 ### 📊 7. React + Vite Merchant Command Center
 - **Live KPI Overview**: Real-time stats for Total At-Risk Revenue, Net Recovered Revenue, Recovery Rate, and Active Cases.
 - **Interactive Recovery Queue**: Paginated transaction table with detailed modal views for SHAP drivers, Groq reasoning, policy logs, and manual intervention triggers.
-- **Model Insights & AI Audit Center**: Dedicated tabs for inspecting XGBoost model accuracy metrics, Groq latency, policy block rates, and voice call audio logs.
+- **Human Escalation Center**: Interactive queue for reviewing and approving high-value transactions ($\ge ₹50,000$).
+- **AI Decision Center**: Live stream table inspecting Groq latency, confidence scores, and natural language reasoning rationales.
 
 ---
 
@@ -187,7 +198,7 @@ sequenceDiagram
 - **Machine Learning**: Python 3.11, FastAPI, XGBoost, Scikit-learn, SHAP, Pytest
 - **LLM Reasoning**: Groq API (`openai/gpt-oss-20b`) with deterministic fallback heuristics
 - **Database**: MongoDB Atlas (Indexes on `payment_id`, `merchant_id`, `correlation_id`)
-- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts
+- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Recharts, Framer Motion
 - **Integrations**: Razorpay Test Mode API & Webhooks
 
 ---
@@ -227,7 +238,7 @@ pytest
 cd frontend
 npm run build
 ```
-- **Result**: **Compiled 100% cleanly in 16.84s** (`dist/assets/index-7X8HgUam.js`).
+- **Result**: **Compiled 100% cleanly** (`dist/assets/index-D6R_XLnV.css`, `dist/assets/index-YiTyA2oA.js`).
 
 ---
 
