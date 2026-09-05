@@ -56,37 +56,37 @@ export default function OverviewView({ metrics, isLoading, error, setActiveTab, 
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in text-[#F8FAFC]">
+    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in text-slate-900">
       
       {/* Executive Command Center Banner */}
-      <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-[#101927] p-6 sm:p-7 rounded-2xl border border-[#1E2B3D] shadow-xl">
+      <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 bg-white p-6 sm:p-7 rounded-2xl border border-slate-200 shadow-sm">
         <div className="space-y-2 max-w-3xl">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-none">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-none">
               AI Revenue Recovery Command Center
             </h1>
-            <span className="px-3 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] text-xs font-extrabold flex items-center gap-1.5 shrink-0 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-extrabold flex items-center gap-1.5 shrink-0 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               5 Recovery Channels Active
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-[#94A3B8] font-semibold leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
             Intercepting payment failures, analyzing recovery probability, enforcing deterministic financial policy guardrails, and capturing verified recovered revenue.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap pt-2 xl:pt-0 border-t xl:border-t-0 border-[#1E2B3D]">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap pt-2 xl:pt-0 border-t xl:border-t-0 border-slate-200">
           <button 
             onClick={() => setActiveTab && setActiveTab('cases')}
-            className="px-4 py-2.5 rounded-xl border border-[#1E2B3D] bg-[#0B1220] text-[#94A3B8] hover:text-white hover:border-[#2D7FF9] transition-all text-xs font-extrabold flex items-center gap-2 cursor-pointer shadow-sm whitespace-nowrap"
+            className="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-900 hover:border-blue-500 hover:bg-white transition-all text-xs font-extrabold flex items-center gap-2 cursor-pointer shadow-sm whitespace-nowrap"
           >
-            <Eye className="w-4 h-4 text-[#64748B] shrink-0" />
+            <Eye className="w-4 h-4 text-slate-500 shrink-0" />
             <span>Recovery Queue</span>
           </button>
           <button 
             onClick={handleSimulateBatch} 
             disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl bg-[#2D7FF9] hover:bg-[#2D7FF9]/80 text-white transition-all text-xs font-extrabold flex items-center gap-2 shadow-lg shadow-[#2D7FF9]/20 disabled:opacity-50 cursor-pointer whitespace-nowrap"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all text-xs font-extrabold flex items-center gap-2 shadow-md shadow-blue-500/20 disabled:opacity-50 cursor-pointer whitespace-nowrap"
           >
             <PlayCircle className="w-4 h-4 shrink-0" />
             <span>Run Recovery Simulation</span>
@@ -94,24 +94,24 @@ export default function OverviewView({ metrics, isLoading, error, setActiveTab, 
         </div>
       </section>
 
-      {/* Executive AI-Generated Summary Banner (Section 8) */}
-      <section className="bg-gradient-to-r from-[#101927] via-[#141F2E] to-[#101927] border border-[#2D7FF9]/40 rounded-2xl p-5 shadow-xl flex items-start gap-4">
-        <div className="p-3 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[#8B5CF6] shrink-0 mt-0.5">
+      {/* Executive AI-Generated Summary Banner */}
+      <section className="bg-blue-50/60 border border-blue-200 rounded-2xl p-5 shadow-sm flex items-start gap-4">
+        <div className="p-3 rounded-xl bg-purple-100 border border-purple-200 text-purple-700 shrink-0 mt-0.5">
           <Bot className="w-5 h-5" />
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-extrabold text-[#8B5CF6] uppercase tracking-wider">Executive Intelligence Briefing</span>
-            <span className="text-[10px] text-[#64748B] font-mono">Backend Data Verified</span>
+            <span className="text-xs font-extrabold text-purple-700 uppercase tracking-wider">Executive Intelligence Briefing</span>
+            <span className="text-[10px] text-slate-500 font-mono">Backend Data Verified</span>
           </div>
-          <p className="text-xs sm:text-sm font-semibold text-[#F8FAFC] leading-relaxed">
-            RecoverX identified <span className="font-mono text-[#F59E0B] font-bold">₹18.4L</span> in revenue at risk across <span className="font-mono text-white">500 failed payments</span>. <span className="font-mono text-[#10B981] font-bold">71% of cases</span> are predicted recoverable by XGBoost ML (<span className="font-mono text-[#2D7FF9] font-bold">₹13.0L E[R]</span>). <span className="font-mono text-[#10B981] font-bold">₹3.5L</span> has already been verified recovered. <span className="font-mono text-[#F59E0B] font-bold">6 high-value cases</span> require human review.
+          <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+            RecoverX identified <span className="font-mono text-amber-700 font-bold">₹18.4L</span> in revenue at risk across <span className="font-mono text-slate-900 font-bold">500 failed payments</span>. <span className="font-mono text-emerald-700 font-bold">71% of cases</span> are predicted recoverable by XGBoost ML (<span className="font-mono text-blue-700 font-bold">₹13.0L E[R]</span>). <span className="font-mono text-emerald-700 font-bold">₹3.5L</span> has already been verified recovered. <span className="font-mono text-amber-700 font-bold">6 high-value cases</span> require human review.
           </p>
         </div>
       </section>
 
       {error && (
-        <div className="p-4 bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] rounded-xl text-xs font-bold">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold">
           {error}
         </div>
       )}
@@ -130,19 +130,19 @@ export default function OverviewView({ metrics, isLoading, error, setActiveTab, 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Channel Performance Breakdown */}
-        <div className="lg:col-span-7 bg-[#101927] p-6 rounded-2xl border border-[#1E2B3D] shadow-xl space-y-5">
-          <div className="flex items-center justify-between border-b border-[#1E2B3D] pb-4">
+        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[#2D7FF9]" /> Recovery Performance by Channel Flow
+              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-600" /> Recovery Performance by Channel Flow
               </h3>
-              <p className="text-xs text-[#94A3B8] font-medium mt-0.5">
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
                 Breakdown of net recovered revenue across integrated recovery execution channels.
               </p>
             </div>
             <button 
               onClick={() => setActiveTab && setActiveTab('analytics')}
-              className="text-xs font-bold text-[#2D7FF9] hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
             >
               Detailed Analytics <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
@@ -150,15 +150,15 @@ export default function OverviewView({ metrics, isLoading, error, setActiveTab, 
 
           <div className="space-y-4">
             {channelPerformance.map((ch, idx) => (
-              <div key={idx} className="space-y-1.5 p-3 rounded-xl hover:bg-[#0B1220] transition-colors">
+              <div key={idx} className="space-y-1.5 p-3 rounded-xl hover:bg-slate-50 transition-colors">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-white">{ch.name}</span>
+                  <span className="text-slate-900">{ch.name}</span>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#64748B] font-medium">{ch.count}</span>
-                    <span className="text-[#10B981] font-mono font-extrabold">{ch.recovered}</span>
+                    <span className="text-slate-500 font-medium">{ch.count}</span>
+                    <span className="text-emerald-600 font-mono font-extrabold">{ch.recovered}</span>
                   </div>
                 </div>
-                <div className="h-2 w-full bg-[#0B1220] border border-[#1E2B3D] rounded-full overflow-hidden flex">
+                <div className="h-2 w-full bg-slate-100 border border-slate-200 rounded-full overflow-hidden flex">
                   <div className={`h-full ${ch.color} rounded-full`} style={{ width: ch.rate }}></div>
                 </div>
               </div>
@@ -168,28 +168,28 @@ export default function OverviewView({ metrics, isLoading, error, setActiveTab, 
 
         {/* Live Agent Activity Feed */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#101927] p-6 rounded-2xl border border-[#1E2B3D] shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#1E2B3D] pb-3">
-              <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#2D7FF9]" /> Real-Time Recovery Activity
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-blue-600" /> Real-Time Recovery Activity
               </h3>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[#2D7FF9]/10 text-[#2D7FF9] border border-[#2D7FF9]/30">Live Stream</span>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">Live Stream</span>
             </div>
 
             <div className="space-y-3">
               {sampleActivity.map((act) => {
                 const Icon = act.icon;
                 return (
-                  <div key={act.id} className="p-3 bg-[#0B1220] rounded-xl border border-[#1E2B3D] flex items-start gap-3 text-xs font-medium">
-                    <div className="p-2 rounded-lg bg-[#101927] border border-[#1E2B3D] text-[#2D7FF9] mt-0.5">
+                  <div key={act.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3 text-xs font-medium">
+                    <div className="p-2 rounded-lg bg-white border border-slate-200 text-blue-600 mt-0.5 shadow-sm">
                       <Icon className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-white truncate">{act.title}</span>
-                        <span className="text-[10px] text-[#64748B] font-mono">{act.time}</span>
+                        <span className="font-bold text-slate-900 truncate">{act.title}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{act.time}</span>
                       </div>
-                      <p className="text-[#94A3B8] mt-0.5 text-[11px] leading-relaxed">{act.desc}</p>
+                      <p className="text-slate-600 mt-0.5 text-[11px] leading-relaxed">{act.desc}</p>
                     </div>
                   </div>
                 );

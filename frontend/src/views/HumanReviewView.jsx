@@ -32,31 +32,31 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in text-[#F8FAFC]">
+    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-fade-in text-slate-900">
       
       {/* Header Banner */}
-      <div className="bg-[#101927] border border-[#1E2B3D] rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="p-1.5 rounded-lg bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30">
+            <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200">
               <ShieldAlert className="w-5 h-5" />
             </span>
-            <span className="text-xs font-bold text-[#F59E0B] uppercase tracking-wider">Human Escalation Queue</span>
+            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Human Escalation Queue</span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Human-in-the-Loop Approval Queue</h1>
-          <p className="text-xs text-[#94A3B8] font-medium mt-1 max-w-2xl">
-            Policy Guardrail Rule #4 requires explicit merchant sign-off for high-value transactions (<span className="font-mono text-[#F59E0B] font-bold">≥ ₹50,000</span>), low confidence predictions, or risk exceptions.
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Human-in-the-Loop Approval Queue</h1>
+          <p className="text-xs text-slate-600 font-medium mt-1 max-w-2xl">
+            Policy Guardrail Rule #4 requires explicit merchant sign-off for high-value transactions (<span className="font-mono text-amber-700 font-bold">≥ ₹50,000</span>), low confidence predictions, or risk exceptions.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="bg-[#0B1220] border border-[#1E2B3D] px-4 py-3 rounded-xl text-center">
-            <span className="text-[11px] text-[#94A3B8] block font-semibold">Escalated Count</span>
-            <span className="text-xl font-mono font-bold text-[#F59E0B]">{escalationCases.length} Cases</span>
+          <div className="bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-center">
+            <span className="text-[11px] text-slate-500 block font-semibold">Escalated Count</span>
+            <span className="text-xl font-mono font-bold text-amber-600">{escalationCases.length} Cases</span>
           </div>
-          <div className="bg-[#0B1220] border border-[#1E2B3D] px-4 py-3 rounded-xl text-center">
-            <span className="text-[11px] text-[#94A3B8] block font-semibold">Total Value at Risk</span>
-            <span className="text-xl font-mono font-bold text-[#2D7FF9]">
+          <div className="bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-center">
+            <span className="text-[11px] text-slate-500 block font-semibold">Total Value at Risk</span>
+            <span className="text-xl font-mono font-bold text-blue-600">
               ₹{(escalationCases.reduce((acc, c) => acc + (c.amount_inr || 0), 0)).toLocaleString('en-IN')}
             </span>
           </div>
@@ -65,24 +65,24 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
 
       {/* Success Notification Banner */}
       {actionSuccessMsg && (
-        <div className="bg-[#10B981]/10 border border-[#10B981]/30 text-[#10B981] p-4 rounded-xl text-xs font-bold flex items-center justify-between animate-fade-in">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl text-xs font-bold flex items-center justify-between animate-fade-in">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>{actionSuccessMsg}</span>
           </div>
-          <button onClick={() => setActionSuccessMsg(null)} className="text-[#94A3B8] hover:text-white">✕</button>
+          <button onClick={() => setActionSuccessMsg(null)} className="text-slate-400 hover:text-slate-700">✕</button>
         </div>
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center justify-between border-b border-[#1E2B3D] pb-4">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setFilterType('ALL')}
             className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               filterType === 'ALL'
-                ? 'bg-[#2D7FF9] text-white shadow-lg shadow-[#2D7FF9]/20'
-                : 'bg-[#101927] text-[#94A3B8] border border-[#1E2B3D] hover:text-white'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             All Escalations ({escalationCases.length})
@@ -91,8 +91,8 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
             onClick={() => setFilterType('HIGH_VALUE')}
             className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               filterType === 'HIGH_VALUE'
-                ? 'bg-[#F59E0B] text-black shadow-lg shadow-[#F59E0B]/20'
-                : 'bg-[#101927] text-[#94A3B8] border border-[#1E2B3D] hover:text-white'
+                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             High Value (≥ ₹50,000)
@@ -101,15 +101,15 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
             onClick={() => setFilterType('LOW_CONFIDENCE')}
             className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               filterType === 'LOW_CONFIDENCE'
-                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20'
-                : 'bg-[#101927] text-[#94A3B8] border border-[#1E2B3D] hover:text-white'
+                ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
+                : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             Low Confidence (&lt; 40%)
           </button>
         </div>
 
-        <span className="text-xs text-[#64748B] font-mono">Policy Guardrail Enforced</span>
+        <span className="text-xs text-slate-500 font-mono">Policy Guardrail Enforced</span>
       </div>
 
       {/* Escalation Cases Grid */}
@@ -123,47 +123,47 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
           return (
             <div
               key={item.payment_id || idx}
-              className="bg-[#101927] border border-[#1E2B3D] hover:border-[#2D7FF9]/60 rounded-2xl p-6 shadow-xl space-y-4 transition-all"
+              className="bg-white border border-slate-200 hover:border-blue-500/60 rounded-2xl p-6 shadow-sm space-y-4 transition-all"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/30 flex items-center justify-center text-[#F59E0B]">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
                     <ShieldAlert className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-extrabold text-white font-mono">{item.payment_id}</h3>
-                    <span className="text-xs text-[#94A3B8]">Customer: {item.customer_id || 'cust_demo'}</span>
+                    <h3 className="text-base font-extrabold text-slate-900 font-mono">{item.payment_id}</h3>
+                    <span className="text-xs text-slate-500">Customer: {item.customer_id || 'cust_demo'}</span>
                   </div>
                 </div>
 
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 uppercase">
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-700 border border-amber-200 uppercase">
                   MANUAL REVIEW
                 </span>
               </div>
 
               {/* Financial & ML Indicators */}
-              <div className="grid grid-cols-3 gap-3 bg-[#0B1220] p-4 rounded-xl border border-[#1E2B3D]">
+              <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div>
-                  <span className="text-[10px] text-[#64748B] uppercase font-bold block">Payment Amount</span>
-                  <span className="text-base font-extrabold text-white font-mono">₹{amountInr.toLocaleString('en-IN')}</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Payment Amount</span>
+                  <span className="text-base font-extrabold text-slate-900 font-mono">₹{amountInr.toLocaleString('en-IN')}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#64748B] uppercase font-bold block">ML Probability</span>
-                  <span className="text-base font-extrabold text-[#10B981] font-mono">{Math.round(prob * 100)}%</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">ML Probability</span>
+                  <span className="text-base font-extrabold text-emerald-600 font-mono">{Math.round(prob * 100)}%</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#64748B] uppercase font-bold block">Expected Recovery</span>
-                  <span className="text-base font-extrabold text-[#2D7FF9] font-mono">₹{expectedRecovery.toLocaleString('en-IN')}</span>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Expected Recovery</span>
+                  <span className="text-base font-extrabold text-blue-600 font-mono">₹{expectedRecovery.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {/* Escalation Reason */}
-              <div className="p-3.5 bg-[#070B12] rounded-xl border border-[#1E2B3D] text-xs space-y-1">
-                <div className="flex items-center gap-1.5 text-[#F59E0B] font-bold">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+              <div className="p-3.5 bg-amber-50/50 rounded-xl border border-amber-200/60 text-xs space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-800 font-bold">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                   <span>Guardrail Reason:</span>
                 </div>
-                <p className="text-[#94A3B8] leading-relaxed">
+                <p className="text-amber-900/80 leading-relaxed">
                   {amountInr >= 50000
                     ? `Transaction amount ₹${amountInr.toLocaleString('en-IN')} exceeds auto-execution limit (₹50,000).`
                     : `Failure code '${reason}' flagged for operations verification.`}
@@ -174,15 +174,15 @@ export default function HumanReviewView({ transactions = [], onRefresh }) {
               <div className="flex items-center gap-3 pt-2">
                 <button
                   onClick={() => handleAction(item.payment_id, 'APPROVED')}
-                  className="flex-1 py-2.5 bg-[#10B981] hover:bg-[#10B981]/80 text-black font-extrabold text-xs rounded-xl shadow-lg shadow-[#10B981]/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Approve Execution
                 </button>
                 <button
                   onClick={() => handleAction(item.payment_id, 'REJECTED')}
-                  className="flex-1 py-2.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/30 text-[#EF4444] font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <XCircle className="w-4 h-4" /> Reject & Stop
+                  <XCircle className="w-4 h-4 text-rose-600" /> Reject & Stop
                 </button>
               </div>
             </div>

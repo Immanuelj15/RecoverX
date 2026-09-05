@@ -75,14 +75,14 @@ export default function KPICards({ metrics = {} }) {
         return (
           <div
             key={index}
-            className={`p-5 rounded-2xl border transition-all text-left flex flex-col justify-between ${
+            className={`p-5 rounded-2xl border transition-all text-left flex flex-col justify-between bg-white ${
               card.isHero
-                ? 'bg-[#101927] border-[#10B981]/50 shadow-xl shadow-[#10B981]/10'
-                : 'bg-[#101927] border-[#1E2B3D] hover:border-[#2D7FF9]/50 shadow-lg'
+                ? 'border-emerald-300 shadow-md shadow-emerald-500/10'
+                : 'border-slate-200 hover:border-blue-500/50 shadow-sm'
             }`}
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#94A3B8]">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
                 {card.title}
               </span>
               <div className={`p-2 rounded-xl ${card.iconBg} ${card.iconColor}`}>
@@ -91,17 +91,17 @@ export default function KPICards({ metrics = {} }) {
             </div>
 
             <div className="space-y-1">
-              <div className="text-2xl lg:text-3xl font-black font-mono text-white tracking-tight">
+              <div className="text-2xl lg:text-3xl font-black font-mono text-slate-900 tracking-tight">
                 {card.value}
               </div>
-              <div className="text-[11px] font-bold text-[#10B981] flex items-center gap-1">
+              <div className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
                 <span>{card.trend}</span>
               </div>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-[#1E2B3D] flex items-center justify-between text-[10px] text-[#64748B] font-semibold">
+            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-semibold">
               <span>{card.subtitle}</span>
-              <span className="px-2 py-0.5 rounded bg-[#0B1220] border border-[#1E2B3D] font-mono text-[#94A3B8]">
+              <span className="px-2 py-0.5 rounded bg-slate-50 border border-slate-200 font-mono text-slate-700">
                 {card.badge}
               </span>
             </div>
