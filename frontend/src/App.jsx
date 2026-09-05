@@ -12,6 +12,9 @@ import SettingsView from './views/SettingsView';
 import BatchSimulatorView from './views/BatchSimulatorView';
 import VoiceLogsView from './views/VoiceLogsView';
 import LoginView from './views/LoginView';
+import HumanReviewView from './views/HumanReviewView';
+import AIDecisionsView from './components/AIDecisionsView';
+import ModelInsightsView from './components/ModelInsightsView';
 import useRevenueRecovery from './hooks/useRevenueRecovery';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -30,16 +33,22 @@ function MainDashboard() {
         return <OverviewView {...recoveryState} setActiveTab={setActiveTab} />;
       case 'cases':
         return <RecoveryCasesView {...recoveryState} setActiveTab={setActiveTab} />;
+      case 'human-review':
+        return <HumanReviewView transactions={recoveryState.transactions} onRefresh={recoveryState.fetchSummary} />;
+      case 'ai-decisions':
+        return <AIDecisionsView transactions={recoveryState.transactions} />;
       case 'analytics':
         return <AnalyticsView {...recoveryState} />;
       case 'audit':
         return <AuditTrailView {...recoveryState} />;
+      case 'settings':
+        return <PoliciesView />;
+      case 'model-insights':
+        return <ModelInsightsView />;
       case 'promises':
         return <PromisesView {...recoveryState} />;
       case 'voice':
         return <VoiceLogsView />;
-      case 'settings':
-        return <PoliciesView />;
       case 'templates':
         return <TemplatesView />;
       case 'integrations':
@@ -52,7 +61,7 @@ function MainDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex">
+    <div className="min-h-screen bg-[#070B12] text-[#F8FAFC] font-sans flex">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 ml-[256px] flex flex-col min-h-screen relative overflow-hidden">
         <TopBar activeTab={activeTab} setActiveTab={setActiveTab} recoveryState={recoveryState} activeItem={null} />

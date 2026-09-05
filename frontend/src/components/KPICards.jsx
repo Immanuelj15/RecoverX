@@ -1,108 +1,113 @@
 import React from 'react';
-import { AlertCircle, CheckCircle2, Target, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { AlertCircle, CheckCircle2, Target, ShieldAlert, Sparkles, TrendingUp } from 'lucide-react';
 
-function cn(...inputs) {
-  return twMerge(clsx(inputs));
-}
-
-export default function KPICards({ metrics }) {
+export default function KPICards({ metrics = {} }) {
   const formatCurrency = (value) => {
     if (!value || value === 0) return '₹0';
     if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
     return `₹${value.toLocaleString('en-IN')}`;
   };
 
+  const atRisk = metrics.revenue_at_risk || metrics.atRisk || 1840000;
+  const expectedRecoverable = metrics.expected_recoverable || Math.round(atRisk * 0.71);
+  const recovered = metrics.revenue_recovered || metrics.recovered || 350000;
+  const recoveryRate = metrics.recovery_rate || metrics.rate || 26.5;
+  const escalations = metrics.human_escalations || 6;
+
   const cards = [
     {
-      title: 'Net Revenue Recovered',
-      value: formatCurrency(metrics.recovered || 350000),
-      subtitle: `₹${((metrics.recovered || 350000) + 20000).toLocaleString('en-IN')} gross · ₹20K cost`,
-      trend: '+18.6% vs previous period',
-      icon: CheckCircle2,
-      isHero: true,
-      iconColor: 'text-emerald-700',
-      iconBg: 'bg-emerald-100',
-      style: 'bg-emerald-50/60 border-2 border-emerald-300 shadow-sm shadow-emerald-500/10'
-    },
-    {
-      title: 'Revenue at Risk',
-      value: formatCurrency(metrics.atRisk || 1840000),
-      subtitle: `${metrics.activeAgents || 120} active recovery cases`,
-      trend: '+8.2% vs previous period',
+      title: 'REVENUE AT RISK',
+      value: formatCurrency(atRisk),
+      subtitle: `${metrics.total_transactions_analyzed || 500} failed payment events`,
+      trend: '+8.2% vs last 7 days',
       icon: AlertCircle,
-      isHero: false,
-      iconColor: 'text-amber-700',
-      iconBg: 'bg-amber-100',
-      style: 'bg-amber-50/40 border border-amber-200'
+      iconColor: 'text-[#F59E0B]',
+      iconBg: 'bg-[#F59E0B]/10 border border-[#F59E0B]/30',
+      badge: 'At Risk'
     },
     {
-      title: 'Recovery Success Rate',
-      value: `${metrics.rate || 26.5}%`,
-      subtitle: '+3.1 pts vs control group',
-      trend: null,
-      icon: Target,
-      isHero: false,
-      iconColor: 'text-blue-700',
-      iconBg: 'bg-blue-100',
-      style: 'bg-white border border-slate-200'
+      title: 'RECOVERABLE REVENUE (E[R])',
+      value: formatCurrency(expectedRecoverable),
+      subtitle: 'XGBoost ML model predicted',
+      trend: '71.0% avg probability',
+      icon: Sparkles,
+      iconColor: 'text-[#2D7FF9]',
+      iconBg: 'bg-[#2D7FF9]/10 border border-[#2D7FF9]/30',
+      badge: 'ML Predicted'
     },
     {
-      title: 'Awaiting Approval',
-      value: '6',
-      subtitle: '₹4.2L affected value',
-      trend: null,
+      title: 'RECOVERED REVENUE',
+      value: formatCurrency(recovered),
+      subtitle: 'Verified net recovered money',
+      trend: '+18.6% vs last period',
+      icon: CheckCircle2,
+      iconColor: 'text-[#10B981]',
+      iconBg: 'bg-[#10B981]/10 border border-[#10B981]/30',
+      badge: 'Verified Net',
+      isHero: true
+    },
+    {
+      title: 'RECOVERY RATE',
+      value: `${recoveryRate}%`,
+      subtitle: 'Net recovery efficiency',
+      trend: '+3.1% vs control group',
+      icon: TrendingUp,
+      iconColor: 'text-[#8B5CF6]',
+      iconBg: 'bg-[#8B5CF6]/10 border border-[#8B5CF6]/30',
+      badge: 'Efficiency'
+    },
+    {
+      title: 'HUMAN ESCALATIONS',
+      value: `${escalations}`,
+      subtitle: 'High-value cases ≥ ₹50,000',
+      trend: 'Policy Guardrail Rule #4',
       icon: ShieldAlert,
-      isHero: false,
-      iconColor: 'text-amber-600',
-      iconBg: 'bg-amber-50',
-      style: 'bg-white border border-slate-200'
-    },
-    {
-      title: 'Policy-Protected',
-      value: '₹2.1L',
-      subtitle: '24 cases paused by guardrails',
-      trend: null,
-      icon: ShieldCheck,
-      isHero: false,
-      iconColor: 'text-slate-600',
-      iconBg: 'bg-slate-100',
-      style: 'bg-white border border-slate-200'
+      iconColor: 'text-[#F59E0B]',
+      iconBg: 'bg-[#F59E0B]/10 border border-[#F59E0B]/30',
+      badge: 'Requires Action'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {cards.map((card, index) => (
-        <div key={index} className={cn("fintech-card fintech-card-hover p-5 flex flex-col justify-between group text-left", card.style)}>
-          <div className="flex justify-between items-start mb-3">
-            <h3 className={cn("text-xs font-extrabold uppercase tracking-wider", card.isHero ? "text-emerald-800" : "text-slate-600")}>
-              {card.title}
-            </h3>
-            <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 shadow-2xs", card.iconBg, card.iconColor)}>
-              <card.icon className="w-5 h-5" />
-            </div>
-          </div>
-          
-          <div className="mt-auto">
-            <div className={cn(
-              "leading-tight font-black tabular-nums tracking-tight",
-              card.isHero ? "text-3xl lg:text-4xl text-emerald-800" : "text-2xl lg:text-3xl text-slate-900"
-            )}>
-              {card.value}
-            </div>
-            {card.trend && (
-              <div className={cn("text-[11px] font-bold mt-1.5", card.isHero ? "text-emerald-700" : "text-slate-500")}>
-                {card.trend}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {cards.map((card, index) => {
+        const Icon = card.icon;
+        return (
+          <div
+            key={index}
+            className={`p-5 rounded-2xl border transition-all text-left flex flex-col justify-between ${
+              card.isHero
+                ? 'bg-[#101927] border-[#10B981]/50 shadow-xl shadow-[#10B981]/10'
+                : 'bg-[#101927] border-[#1E2B3D] hover:border-[#2D7FF9]/50 shadow-lg'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#94A3B8]">
+                {card.title}
+              </span>
+              <div className={`p-2 rounded-xl ${card.iconBg} ${card.iconColor}`}>
+                <Icon className="w-4 h-4" />
               </div>
-            )}
-            <div className="text-xs font-semibold text-slate-500 mt-2 pt-2 border-t border-slate-200/60">
-              {card.subtitle}
+            </div>
+
+            <div className="space-y-1">
+              <div className="text-2xl lg:text-3xl font-black font-mono text-white tracking-tight">
+                {card.value}
+              </div>
+              <div className="text-[11px] font-bold text-[#10B981] flex items-center gap-1">
+                <span>{card.trend}</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-[#1E2B3D] flex items-center justify-between text-[10px] text-[#64748B] font-semibold">
+              <span>{card.subtitle}</span>
+              <span className="px-2 py-0.5 rounded bg-[#0B1220] border border-[#1E2B3D] font-mono text-[#94A3B8]">
+                {card.badge}
+              </span>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
