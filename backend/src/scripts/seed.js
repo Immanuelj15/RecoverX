@@ -16,7 +16,8 @@ const {
   AuditLog,
   WebhookEvent,
   Transaction,
-  PolicyConfig
+  PolicyConfig,
+  PromiseToPay
 } = require('../models');
 const { inrToPaise } = require('../utils/money');
 const logger = require('../utils/logger');
@@ -41,7 +42,8 @@ async function seedDatabase() {
     RecoveryOutcome.deleteMany({ merchant_id: merchant._id }),
     AuditLog.deleteMany({ merchant_id: merchant._id }),
     WebhookEvent.deleteMany({ merchant_id: merchant._id }),
-    Transaction.deleteMany({})
+    Transaction.deleteMany({}),
+    PromiseToPay.deleteMany({})
   ]);
 
   // 2. Seed 100 Customers
@@ -65,6 +67,43 @@ async function seedDatabase() {
   }
   const createdCustomers = await Customer.insertMany(customerDocs);
   logger.info(`Seeded ${createdCustomers.length} Customers.`);
+
+  // Seed PromiseToPay commitments
+  const ptpSeedDocs = [
+    {
+      leakageEventId: 'pay_wf_001_9841',
+      customerName: 'Ananya Tech Solutions',
+      customerEmail: 'finance@ananyatech.in',
+      promisedAmount: 15000,
+      promisedDate: new Date(Date.now() + 86400000 * 2),
+      status: 'PENDING'
+    },
+    {
+      leakageEventId: 'pay_wf_002_9842',
+      customerName: 'Acme Corp Ltd',
+      customerEmail: 'billing@acmecorp.com',
+      promisedAmount: 42500,
+      promisedDate: new Date(Date.now() - 86400000),
+      status: 'FULFILLED'
+    },
+    {
+      leakageEventId: 'pay_wf_003_9843',
+      customerName: 'Zeta Retail Systems',
+      customerEmail: 'accounts@zetaretail.com',
+      promisedAmount: 27500,
+      promisedDate: new Date(Date.now() + 86400000 * 4),
+      status: 'PENDING'
+    },
+    {
+      leakageEventId: 'pay_wf_004_9844',
+      customerName: 'TechNova Global',
+      customerEmail: 'payments@technova.com',
+      promisedAmount: 12000,
+      promisedDate: new Date(Date.now() - 86400000 * 3),
+      status: 'MISSED'
+    }
+  ];
+  await PromiseToPay.insertMany(ptpSeedDocs);
 
   // 3. Seed 500 Payments & Associated Workflow Entities
   const paymentMethods = ['upi', 'card', 'netbanking', 'wallet'];
